@@ -1,0 +1,26 @@
+--- src/Python-2.7.8/Misc/python-config.in~	2014-06-30 11:05:40.000000000 +0900
++++ src/Python-2.7.8/Misc/python-config.in	2014-08-18 05:03:07.223486921 +0900
+@@ -1,4 +1,4 @@
+-#!@EXENAME@
++#!/usr/bin/python2.7-32
+ 
+ import sys
+ import os
+@@ -31,14 +31,13 @@
+ 
+ for opt in opt_flags:
+     if opt == '--prefix':
+-        print sysconfig.PREFIX
++        print '/usr'
+ 
+     elif opt == '--exec-prefix':
+-        print sysconfig.EXEC_PREFIX
++        print '/usr/lib32'
+ 
+     elif opt in ('--includes', '--cflags'):
+-        flags = ['-I' + sysconfig.get_python_inc(),
+-                 '-I' + sysconfig.get_python_inc(plat_specific=True)]
++        flags = ['-I/usr/lib32/python2.7/include/python2.7']
+         if opt == '--cflags':
+             flags.extend(getvar('CFLAGS').split())
+         print ' '.join(flags)
