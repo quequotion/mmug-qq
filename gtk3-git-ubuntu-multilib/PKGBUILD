@@ -1,0 +1,167 @@
+# Maintainer: Que Quotion <quequotion@mailinator.com>
+# Contributor: Andrew Crerar <asc9003 [at] rit [dot] edu>
+# Contributor: RKA KriK <rka_krik@mail.ru>
+# Contributor: Boohbah <boohbah at gmail.com>
+# Contributor: Charles Bos <charlesbos1 AT gmail>
+# Contributor: Xiao-Long Chen <chenxiaolong@cxl.epac.to>
+# Contributor: hbdee <hbdee.arch@gmail.com>
+
+pkgbase=gtk3-git-ubuntu-multilib
+pkgname=('gtk3-git-ubuntu' 'lib32-gtk3-git-ubuntu')
+pkgver=3.13.6.116.gb1ac4f9
+pkgrel=1
+pkgdesc="GObject-based multi-platform GUI toolkit (git version with Ubuntu patches from bzr)"
+arch=('i686' 'x86_64')
+url="http://www.gtk.org/"
+license=('LGPL')
+backup=('etc/gtk-3.0/settings.ini')
+options=('!libtool')
+source=('bzr+lp:~ubuntu-desktop/gtk/ubuntugtk3'
+        'git://git.gnome.org/gtk+'
+        'repatch-0001-Add-a-setting-for-dialog-headers.patch'
+        'repatch-018_gdkenumtypes.c_location.patch'
+        'repatch-071_fix-installation-of-HTML-images.patch'
+        'repatch-073_treeview_almost_fixed.patch'
+        'repatch-gtkaboutdialog-support-showing-buttons-in-action-are.patch'
+        'repatch-gtkdialog-don-t-use-csd-when-use-header-bar-is-FALSE.patch'
+        'repatch-message-dialog-restore-traditional-look-on-unity.patch'
+        'repatch-unset-titlebar.patch'
+        'repatch-x-canonical-accel.patch'
+        'settings.ini')
+sha512sums=('SKIP'
+            'SKIP'
+            '3e654e70ebf826168cf925429dfb59bcebb3fc66220b3a503d4399eb48f12f751bbf0ac1e38abad7d72a694be71eba0028685d0dd86d7afb235f2188d247687b'
+            'efa46de1a803ca854c5b0d8a6847e7f3cb19a77e7bcd0d76a2b7e154eb39b2052559e9f38e63405043d492d82aaeb1bec161f13fff55c55a3322159f24e4c52f'
+            'c3dec88bc1fe45b279539087fc6d8509ecc46e5c61afbd2e4e7c91326929604f085c1f24e986059fbb905906fbbb1c04eaccbebe67ab8e67509f4d5bd386e71f'
+            'ccf4f8344726e76d846c60bbf26ae10ca07d1ed35ae52cd2a318872363397424382f815b68891dc90abac8304c035caaa8e20e3fc8ac3f02ebaa41201a6955d2'
+            '642a4967816904a057140bd5b61e0ca8485125a04bfce013784e4c7a523b3ba7be9e872a1e067427912bbc3691c3251b82cc673f8752f196e6f6a962edad16b9'
+            '72632e7f22c15e28a7ae65026d09bca37aa49763e60134b7e4de5816bcc44ef6cd58ba7e71a2df80fd04b7699aa4a9c68a2c8bc57477cccbf2aad70b52869401'
+            'f1d2e52471bbc6ec6b84a4542d3461a25eb7c2a3389b4e2d9731cd4559de0d1fa13a891973b9d25456c797c464bbc0570e8140fe94d51b34a4a0ac54e8b1ede3'
+            '876d1ae632956a4c72132e57fd25048a3b8b5babdde9355361de3db0431104077938c94bbee97a0c6bccdf9fe46a0bc794b2f69df39f05d26da6dd02fa85e1ec'
+            '6d41b04f142efcbad14b3dfddd21557475b17ac69b63daa028c592ca499ae2578c499183cbf9f71db310d54b9b5128d4aa30bea91144d96f6ed99a593b7cfd62'
+            '3ee323c287ad4354d5521f584d06149bbe6bb3c6ed4f409e7544c9ac59892a89d7b52e4b7807e6ed7e3a3e064372dc61422153153f67acb97cc371fe1d8200f2')
+
+pkgver() {
+  cd "gtk+"
+  git describe --always | sed 's/-/./g'
+}
+
+prepare() {
+
+  cd "$srcdir/ubuntugtk3/debian/patches/"
+
+  while read i; do
+    if [[ "${i}" =~ ^# || -z "${i}" || "${i}" == *git* ]]; then
+      continue # Skip comments, newlines, and git patches
+    #Apply available repatches
+    elif [ -f "../../../repatch-${i}" ]; then
+        msg "Updating ${i} ..." 
+        patch -Ns < "../../../repatch-${i}"
+    fi
+  done < series
+
+
+  cd "$srcdir/gtk+"
+
+  #Apply Ubuntu patches
+  while read i; do
+    if [[ "${i}" =~ ^# || -z "${i}" || "${i}" == *git* ]]; then
+      continue # Skip comments, newlines, and git patches
+    else
+      msg "Applying ${i} ..."
+      patch -Nsp1 < "${srcdir}/ubuntugtk3/debian/patches/${i}"
+    fi
+  done < "${srcdir}/ubuntugtk3/debian/patches/series"
+
+}
+
+build() {
+
+  cd "gtk+"
+
+  #Build native libraries
+  [[ -d build-x86_64 ]] || mkdir build-x86_64
+  pushd build-x86_64
+
+  ../autogen.sh --prefix=/usr \
+                --sysconfdir=/etc \
+                --prefix=/usr \
+                --sysconfdir=/etc \
+                --localstatedir=/var \
+                --enable-gtk2-dependency \
+                --disable-schemas-compile \
+                --enable-x11-backend \
+                --enable-broadway-backend \
+                --enable-wayland-backend
+
+  #https://bugzilla.gnome.org/show_bug.cgi?id=655517
+  sed -i -e 's/ -shared / -Wl,-O1,--as-needed\0/g' libtool
+
+  make
+
+  popd
+
+  #Build 32bit libraries
+  [[ -d build-i686 ]] || mkdir build-i686
+  pushd build-i686
+
+  export CC='gcc -m32'
+  export CXX='g++ -m32'
+  export LDFLAGS='-m32'
+  export PKG_CONFIG_PATH='/usr/lib32/pkgconfig'
+  
+  GTK_IM_MODULE_FILE="gtk.immodules-32" ../autogen.sh --prefix=/usr \
+                --sysconfdir=/etc \
+                --prefix=/usr \
+                --sysconfdir=/etc \
+                --localstatedir=/var \
+                --enable-gtk2-dependency \
+                --disable-schemas-compile \
+                --enable-x11-backend \
+                --enable-broadway-backend \
+                --enable-wayland-backend \
+                --libdir=/usr/lib32 --libexecdir=/usr/lib32
+      
+  #https://bugzilla.gnome.org/show_bug.cgi?id=655517
+  sed -i -e 's/ -shared / -Wl,-O1,--as-needed\0/g' libtool
+
+  make
+
+  popd
+
+}
+
+package_gtk3-git-ubuntu() {
+  depends=('atk' 'cairo' 'gtk-update-icon-cache' 'libcups' 'libxcursor' \
+           'libxinerama' 'libxrandr' 'libxi' 'libxcomposite' 'libxdamage' 'pango' \
+           'shared-mime-info' 'colord' 'at-spi2-atk' 'wayland-git' 'libxkbcommon' \
+           'glib2-git' 'gobject-introspection-git')
+  makedepends=('gobject-introspection' 'bzr')
+  provides=("gtk3=${pkgver}" "gtk3-ubuntu=${pkgver}" "gtk3-git=${pkgver}")
+  conflicts=('gtk3')
+  install=gtk3-git.install
+  cd "gtk+/build-x86_64"
+  make DESTDIR="${pkgdir}" install
+  install -Dm644 "${srcdir}/settings.ini" "${pkgdir}/etc/gtk-3.0/settings.ini"
+}
+
+
+package_lib32-gtk3-git-ubuntu() {
+  pkgdesc+=" (32bit)"
+  depends=('lib32-atk' 'lib32-cairo' 'lib32-libcups' 'lib32-libxcursor' \
+           'lib32-libxinerama' 'lib32-libxrandr' 'lib32-libxi' 'lib32-libxcomposite' 'lib32-libxdamage' 'lib32-pango' \
+           'lib32-colord' 'lib32-at-spi2-atk' 'lib32-wayland-git' 'lib32-libxkbcommon' \
+           'lib32-glib2' 'lib32-gdk-pixbuf2' 'lib32-fontconfig' 'gtk3' 'lib32-rest' 'lib32-json-glib' )
+  makedepends=('gobject-introspection' 'bzr' 'gcc-multilib')
+  provides=("lib32-gtk3=${pkgver}" "lib32-gtk3-ubuntu=${pkgver}" "lib32-gtk3-git=${pkgver}")
+  conflicts=('lib32-gtk3')
+  install=lib32-gtk3.install
+  cd "gtk+/build-i686"
+  make DESTDIR="${pkgdir}" install
+
+  rm -rf "${pkgdir}"/{etc,usr/{share,include}} # needs bin/
+
+  mv "${pkgdir}"/usr/bin/gtk-query-immodules-3.0{,-32}
+  find "$pkgdir/usr/bin" -type f -not -name gtk-query-immodules-3.0-32 -delete
+}
+
