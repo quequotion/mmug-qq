@@ -1,0 +1,160 @@
+# Maintainer: quequotion <quequotion@bugmenot.com>
+# Contributor: Xiao-Long Chen <chenxiaolong@cxl.epac.to>
+
+pkgbase=overlay-scrollbar-bzr-multilib
+pkgname=('overlay-scrollbar-bzr'
+         'liboverlay-scrollbar-bzr' 'lib32-liboverlay-scrollbar-bzr'
+         'liboverlay-scrollbar3-bzr' 'lib32-liboverlay-scrollbar3-bzr')
+pkgver=r385
+pkgrel=1
+epoch=1
+pkgdesc="Ayatana Scrollbars, pointer-triggered overlay scrollbars to save screen real-estate."
+arch=('i686' 'x86_64')
+url="https://launchpad.net/ayatana-scrollbar"
+license=('LGPL')
+groups=('unity')
+makedepends=('gtk2-ubuntu' 'gtk3')
+options=('!emptydirs')
+extrafiles=('overlay-scrollbar.install')
+source=('bzr+lp:overlay-scrollbar')
+sha512sums=('SKIP')
+
+pkgver() {
+  cd overlay-scrollbar
+
+  printf "r%s" "$(bzr revno)"
+}
+
+build() {
+  cd "${srcdir}/overlay-scrollbar"
+
+  #Build 64bit libraries
+  [[ -d build-x86_64 ]] || mkdir build-x86_64
+  pushd build-x86_64
+
+  autoreconf -vfi ../
+
+  [[ -d build-gtk2 ]] || mkdir build-gtk2
+  pushd build-gtk2
+  ../../configure --prefix=/usr --sysconfdir=/etc --with-gtk=2 --disable-static
+  make
+  popd
+
+  [[ -d build-gtk3 ]] || mkdir build-gtk3
+  pushd build-gtk3
+  ../../configure --prefix=/usr --sysconfdir=/etc --with-gtk=3 --disable-static
+  make
+  popd
+
+  popd
+
+  #Build 32bit libraries
+  [[ -d build-i686 ]] || mkdir build-i686
+  pushd build-i686
+
+  export CC='gcc -m32'
+  export CXX='g++ -m32'
+  export LDFLAGS='-m32'
+  export PKG_CONFIG_PATH='/usr/lib32/pkgconfig'
+
+  autoreconf -vfi ../
+
+  [[ -d build-gtk2 ]] || mkdir build-gtk2
+  pushd build-gtk2
+  ../../configure --prefix=/usr --sysconfdir=/etc --with-gtk=2 --disable-static --libdir=/usr/lib32
+  make
+  popd
+
+  [[ -d build-gtk3 ]] || mkdir build-gtk3
+  pushd build-gtk3
+  ../../configure --prefix=/usr --sysconfdir=/etc --with-gtk=3 --disable-static --libdir=/usr/lib32
+  make
+  popd
+
+  popd
+
+}
+
+package_overlay-scrollbar-bzr() {
+  pkgdesc+="Configuration and metapackage (multilib)"
+  depends=('dconf' 'liboverlay-scrollbar' 'liboverlay-scrollbar3'
+           'lib32-dconf' 'lib32-liboverlay-scrollbar' 'lib32-liboverlay-scrollbar3')
+  provides=('overlay-scrollbar' 'overlay-scrollbar-bzr'
+            'lib32-overlay-scrollbar' 'lib32-overlay-scrollbar-bzr')
+  conflicts=('overlay-scrollbar' 'overlay-scrollbar-bzr'
+             'lib32-overlay-scrollbar' 'lib32-overlay-scrollbar-bzr')
+  install=overlay-scrollbar.install
+
+  cd "${srcdir}/overlay-scrollbar/build-x86_64/build-gtk3/"
+  make DESTDIR="${pkgdir}/" install
+
+  rm -rvf "${pkgdir}/usr/lib/"
+
+  # Put X11 startup script in correct directory
+  install -dm755 "${pkgdir}/etc/X11/xinit/xinitrc.d/"
+  mv "${pkgdir}/etc/X11/Xsession.d/81overlay-scrollbar" \
+    "${pkgdir}/etc/X11/xinit/xinitrc.d/"
+  chmod 755 "${pkgdir}/etc/X11/xinit/xinitrc.d/81overlay-scrollbar"
+}
+
+package_liboverlay-scrollbar3-bzr() {
+  pkgdesc+="gtk3"
+  pkgdesc="Scrollbar overlayed widget - GTK 3 library"
+  depends=('cairo' 'gtk3')
+  provides=('liboverlay-scrollbar3' 'liboverlay-scrollbar3-bzr')
+  conflicts=('liboverlay-scrollbar3' 'liboverlay-scrollbar3-bzr')
+
+  cd "${srcdir}/overlay-scrollbar/build-x86_64/build-gtk3/"
+  make DESTDIR="${pkgdir}/" install
+
+  rm -rvf "${pkgdir}/etc/"
+  rm -rvf "${pkgdir}/usr/share/glib-2.0/"
+}
+
+package_liboverlay-scrollbar-bzr() {
+  pkgdesc+="gtk2"
+  pkgdesc="Scrollbar overlayed widget - GTK 2 library"
+  depends=('gtk2-ubuntu')
+  provides=('liboverlay-scrollbar' 'liboverlay-scrollbar-bzr')
+  conflicts=('liboverlay-scrollbar' 'liboverlay-scrollbar-bzr')
+
+  cd "${srcdir}/overlay-scrollbar/build-x86_64/build-gtk2/"
+  make DESTDIR="${pkgdir}/" install
+
+  rm -rvf "${pkgdir}/etc/"
+  rm -rvf "${pkgdir}/usr/share/glib-2.0/"
+}
+
+package_lib32-liboverlay-scrollbar3-bzr() {
+  pkgdesc+="gtk3 (32bit)"
+  pkgdesc="Scrollbar overlayed widget - GTK 3 library"
+  depends=('lib32-cairo' 'lib32-gtk3')
+  provides=('lib32-liboverlay-scrollbar3' 'lib32-liboverlay-scrollbar3-bzr')
+  conflicts=('lib32-liboverlay-scrollbar3' 'lib32-liboverlay-scrollbar3-bzr')
+
+  cd "${srcdir}/overlay-scrollbar/build-i686/build-gtk3/"
+  make DESTDIR="${pkgdir}/" install
+
+  rm -rvf "${pkgdir}/etc/"
+  rm -rvf "${pkgdir}/usr/share/glib-2.0/"
+
+  rm -rf "${pkgdir}"/{etc,usr/{share,include,bin}}
+}
+
+package_lib32-liboverlay-scrollbar-bzr() {
+  pkgdesc+="gtk2 (32bit)"
+  pkgdesc="Scrollbar overlayed widget - GTK 2 library"
+  depends=('lib32-gtk2-ubuntu')
+  provides=('lib32-liboverlay-scrollbar' 'lib32-liboverlay-scrollbar-bzr')
+  conflicts=('lib32-liboverlay-scrollbar' 'lib32-liboverlay-scrollbar-bzr')
+
+  cd "${srcdir}/overlay-scrollbar/build-i686/build-gtk2/"
+  make DESTDIR="${pkgdir}/" install
+
+  rm -rvf "${pkgdir}/etc/"
+  rm -rvf "${pkgdir}/usr/share/glib-2.0/"
+
+  rm -rf "${pkgdir}"/{etc,usr/{share,include,bin}}
+}
+
+
