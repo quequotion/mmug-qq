@@ -1,0 +1,109 @@
+# Maintainer: Que Quotion <quequotion@bugmenot.com>
+# Maintainer: Limao Luo <luolimao+AUR@gmail.com>
+# Contributor: Yichao Yu <yyc1992@gmail.com>
+# Contributor: kfgz <kfgz@interia.pl>
+
+pkgbase=glib2-git-multilib
+pkgname=('glib2-git' 'lib32-glib2-git')
+pkgver=2.41.3.2.g96af008
+pkgrel=1
+pkgdesc="Common C routines used by GTK+ 2.4 and other libs"
+arch=(i686 x86_64)
+url=http://git.gnome.org/browse/glib/tree/README.in
+license=(GPL2)
+options=('!emptydirs' '!libtool' '!docs')
+source=(glib2-git::git://git.gnome.org/glib
+    glib2.sh
+    glib2.csh)
+sha512sums=('SKIP'
+    'dca2bc74d2013fcb24145ac794eef457aa3213c039e40a1a26ca5017694930768e7c80e334e17a56834549dff6549c781ddd91fae6c7bbb26fdd6a083ad8217a'
+    'c3899eb7fa5482ce8a35fe02db90fd0f928d50aa7e4365a9529ef35a2dcd1ed86d5a24f6bc5c635ef5b2d95a0ebfebc2bb6bc90404c99f6fb7484ed2fa032c06')
+
+pkgver() {
+    cd glib2-git/
+
+    git describe | sed 's/-/./g'
+}
+
+prepare() {
+    cd glib2-git/
+
+    touch gtk-doc.make
+
+    sed -i '1i\EXTRA_DIST=""\nCLEANFILES=""\n' docs/reference/{gio{,/gdbus-object-manager-example},gobject,glib}/Makefile.am
+}
+
+build() {
+  cd glib2-git/
+
+  touch README
+
+  #Build 64bit libraries
+  [[ -d build-x86_64 ]] || mkdir build-x86_64
+  pushd build-x86_64
+
+  PYTHON=/usr/bin/python2 ../autogen.sh \
+      --prefix=/usr \
+      --sysconfdir=/etc \
+      --libdir=/usr/lib \
+      --with-pcre=system \
+      --disable-fam
+  make
+
+  popd
+
+  #Build 32bit libraries
+  [[ -d build-i686 ]] || mkdir build-i686
+  pushd build-i686
+
+  export CC='gcc -m32'
+  export CXX='g++ -m32'
+  export LDFLAGS='-m32'
+  export PKG_CONFIG_PATH='/usr/lib32/pkgconfig'
+
+  PYTHON=/usr/bin/python2.7-32 ../autogen.sh \
+      --prefix=/usr \
+      --sysconfdir=/etc \
+      --libdir=/usr/lib32 --libexecdir=/usr/lib32 \
+      --with-pcre=system \
+      --enable-static --enable-shared --disable-fam
+
+  make
+
+  popd
+}
+
+package_glib2-git() {
+  depends=(elfutils python2)
+  makedepends=(gtk-doc git)
+  provides=(glib2=$pkgver)
+  conflicts=(glib2)
+  make -C glib2-git/build-x86_64 DESTDIR="$pkgdir" install
+  for i in glib2.{,c}sh; do
+    install -Dm755 $i "$pkgdir"/etc/profile.d/$i
+  done
+  find "$pkgdir"/usr/share/bash-completion/completions/ -type f -exec chmod -x '{}' \;
+  sed -i 's:^#!/usr/bin/env python$:&2:g' "$pkgdir"/usr/bin/gdbus-codegen
+}
+
+package_lib32-glib2-git() {
+  pkgdesc+=" (32bit)"
+  depends=('lib32-pcre' 'lib32-zlib' 'lib32-libdbus' lib32-libffi glib2)
+  makedepends=('gcc-multilib' python2)
+  provides=(lib32-glib2=$pkgver)
+  conflicts=(lib32-glib2)
+  make -C glib2-git/build-i686 DESTDIR="${pkgdir}" install
+  for i in glib2.{,c}sh; do
+    install -Dm755 $i "$pkgdir"/etc/profile.d/$i
+  done
+  find "$pkgdir"/usr/share/bash-completion/completions/ -type f -exec chmod -x '{}' \;
+  sed -i 's:^#!/usr/bin/env python$:&2:g' "$pkgdir"/usr/bin/gdbus-codegen
+
+  rm -rf "${pkgdir}"/{etc,usr/{share,include}} # needs bin/
+
+  cd "${pkgdir}"/usr/bin
+  mv gio-querymodules gio-querymodules-32
+  rm -f gdbus glib* gobject-query gsettings gtester*
+  rm -rf "$pkgdir"/usr/lib32/gdbus-2.0
+  find "$pkgdir/usr/bin" -type f -not -name gio-querymodules-32 -delete
+}
