@@ -1,0 +1,44 @@
+# $Id$
+# Maintainer: AndyRTR <andyrtr@archlinux.org>
+# Contributor: SpepS <dreamspepser at yahoo dot it>
+
+pkgname=lib32-mtdev
+pkgver=1.1.5
+pkgrel=1
+pkgdesc="A stand-alone library which transforms all variants of kernel MT events to the slotted type B protocol (32bit)"
+arch=('i686' 'x86_64')
+url="http://bitmath.org/code/mtdev/"
+license=('custom:MIT')
+depends=('lib32-glibc')
+source=("${url}"mtdev-"${pkgver}".tar.bz2)
+md5sums=('52c9610b6002f71d1642dc1a1cca5ec1')
+
+build() {
+  cd "$srcdir/mtdev-$pkgver"
+
+  export CC='gcc -m32'
+  export CXX='g++ -m32'
+  export LDFLAGS='-m32'
+  export PKG_CONFIG_PATH='/usr/lib32/pkgconfig'
+
+  ./configure --prefix=/usr --libdir=/usr/lib32 --libexecdir=/usr/lib32 --disable-static
+
+  make
+}
+
+check() {
+  cd "$srcdir/mtdev-$pkgver"
+  make -k check
+}
+
+package() {
+  cd "$srcdir/mtdev-$pkgver"
+
+  make DESTDIR="$pkgdir/" install
+  rm -rf "${pkgdir}"/{etc,usr/{share,include,bin}}
+
+  # license
+  install -Dm644 COPYING \
+    "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+}
+

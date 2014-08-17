@@ -1,0 +1,37 @@
+# $Id$
+# Maintainer: Felix Yan <felixonmars@gmail.com>
+
+pkgname=lib32-mpdecimal
+pkgver=2.4.0
+pkgrel=1
+pkgdesc="Package for correctly-rounded arbitrary precision decimal floating point arithmetic (32bit)"
+arch=('i686' 'x86_64')
+url="http://www.bytereef.org/mpdecimal/index.html"
+license=('custom')
+depends=('lib32-glibc')
+source=(http://www.bytereef.org/software/mpdecimal/releases/mpdecimal-${pkgver}.tar.gz)
+sha512sums=('9528274c77f874ea75652f08e64bb76ecdaa6c2111900809bc3ce58b4740d8b313bf41283cfb41b525a7d2df7d86cb7d9415b0abb2ce58a209df9d54e2ab0f75')
+
+build() {
+  cd mpdecimal-${pkgver}
+
+  export CC='gcc -m32'
+  export CXX='g++ -m32'
+  export LDFLAGS='-m32'
+  export PKG_CONFIG_PATH='/usr/lib32/pkgconfig'
+
+  ./configure --prefix=/usr --libdir=/usr/lib32 --libexecdir=/usr/lib32
+
+  make
+}
+
+package() {
+  cd mpdecimal-${pkgver}
+
+  make DESTDIR="${pkgdir}" install
+  rm -rf "${pkgdir}"/{etc,usr/{share,include,bin}}
+
+  install -Dm644 LICENSE.txt "${pkgdir}/usr/share/licenses/$pkgname/LICENSE.txt"
+}
+
+

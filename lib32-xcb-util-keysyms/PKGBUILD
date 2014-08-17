@@ -1,0 +1,46 @@
+# $Id$
+# Maintainer: Jan de Groot <jgc@archlinux.org>
+# Maintainer: Andreas Radke <andyrtr@archlinux.org>
+
+pkgname=lib32-xcb-util-keysyms
+pkgver=0.3.9
+pkgrel=2
+pkgdesc="Utility libraries for XC Binding - Standard X key constants and conversion to/from keycodes (32bit)"
+arch=('i686' 'x86_64')
+url="http://xcb.freedesktop.org"
+license=('custom')
+depends=('lib32-libxcb>=1.7')
+makedepends=('xorg-util-macros')
+source=("http://xcb.freedesktop.org/dist/xcb-util-keysyms-${pkgver}.tar.bz2"
+        'LICENSE')
+sha256sums=('7be1acf053bd68a1910fc861b2cbcbad7637b5618590dd5484d43a96f7995c6e'
+            'f45b90bb528ec3cab11b98ba33f2e5bfe9db7852ebada532165f74d0a6e566fd')
+
+build() {
+  cd xcb-util-keysyms-${pkgver}
+
+  export CC='gcc -m32'
+  export CXX='g++ -m32'
+  export LDFLAGS='-m32'
+  export PKG_CONFIG_PATH='/usr/lib32/pkgconfig'
+
+  ./configure --prefix=/usr --libdir=/usr/lib32 --libexecdir=/usr/lib32 --disable-static
+  make
+}
+
+check() {
+  cd xcb-util-keysyms-${pkgver}
+  make check
+}
+
+package() { 
+  cd xcb-util-keysyms-${pkgver}
+
+  make DESTDIR="${pkgdir}" install
+
+  rm -rf "${pkgdir}"/{etc,usr/{share,include,bin}}
+
+  install -D -m644 "${srcdir}/LICENSE" \
+    "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
+}
+

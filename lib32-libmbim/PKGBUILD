@@ -1,0 +1,39 @@
+# $Id$
+# Maintainer: Jan Alexander Steffens (heftig) <jan.steffens@gmail.com>
+
+pkgname=lib32-libmbim
+pkgver=1.8.0
+pkgrel=1
+pkgdesc="MBIM modem protocol helper library (32bit)"
+arch=(i686 x86_64)
+url="http://www.freedesktop.org/wiki/Software/libmbim/"
+license=(GPL2)
+depends=(lib32-glib2 bash lib32-systemd)
+makedepends=(gtk-doc python)
+source=(http://www.freedesktop.org/software/libmbim/libmbim-$pkgver.tar.xz)
+sha256sums=('084b527ea88f7e1e31a6208840036aecede21fcd0668332523c81a2ebe2d9ea6')
+
+build() {
+  cd libmbim-$pkgver
+
+  export CC='gcc -m32'
+  export CXX='g++ -m32'
+  export LDFLAGS='-m32'
+  export PKG_CONFIG_PATH='/usr/lib32/pkgconfig'
+
+  ./configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var \
+    --disable-static --with-tests --libexecdir=/usr/lib32 --libdir=/usr/lib32
+  make
+}
+
+check() {
+  cd libmbim-$pkgver
+  make check
+}
+
+package() {
+  cd libmbim-$pkgver
+  make DESTDIR="$pkgdir" install
+  rm -rf "${pkgdir}"/{etc,usr/{share,include,bin}}
+}
+

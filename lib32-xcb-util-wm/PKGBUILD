@@ -1,0 +1,48 @@
+# $Id$
+# Maintainer: Jan de Groot <jgc@archlinux.org>
+# Maintainer: Andreas Radke <andyrtr@archlinux.org>
+
+pkgname=lib32-xcb-util-wm
+pkgver=0.4.1
+pkgrel=1
+pkgdesc="Utility libraries for XC Binding - client and window-manager helpers for ICCCM (32bit)"
+arch=('i686' 'x86_64')
+url="http://xcb.freedesktop.org"
+license=('custom')
+depends=('lib32-libxcb>=1.7')
+makedepends=('xorg-util-macros')
+source=("http://xcb.freedesktop.org/dist/xcb-util-wm-${pkgver}.tar.bz2"
+        'LICENSE')
+sha256sums=('28bf8179640eaa89276d2b0f1ce4285103d136be6c98262b6151aaee1d3c2a3f'
+            'f45b90bb528ec3cab11b98ba33f2e5bfe9db7852ebada532165f74d0a6e566fd')
+
+build() {
+  cd xcb-util-wm-${pkgver}
+
+  export CC='gcc -m32'
+  export CXX='g++ -m32'
+  export LDFLAGS='-m32'
+  export PKG_CONFIG_PATH='/usr/lib32/pkgconfig'
+
+  ./configure --prefix=/usr --libdir=/usr/lib32 --libexecdir=/usr/lib32 --disable-static
+
+  make
+}
+
+check() {
+  cd xcb-util-wm-${pkgver}
+
+  make check
+}
+
+package() { 
+  cd xcb-util-wm-${pkgver}
+
+  make DESTDIR="${pkgdir}" install
+
+  rm -rf "${pkgdir}"/{etc,usr/{share,include,bin}}
+
+  install -D -m644 "${srcdir}/LICENSE" \
+    "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
+}
+
