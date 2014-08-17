@@ -1,0 +1,91 @@
+# Maintainer: Que Quotion <quequotion@bugmenot.com>
+# Contributor: Jonas Heinrich <onny@project-insanity.org>
+# Maintainer: Jonas Heinrich <onny@project-insanity.org>
+
+pkgbase=webkitgtk-nightly-multilib
+pkgname=('webkitgtk-nightly' 'lib32-webkitgtk-nightly')
+pkgver=r172617
+pkgrel=1
+pkgdesc="GTK+ Web content engine library (nightly build)"
+arch=('i686' 'x86_64')
+url="http://webkitgtk.org/"
+license=('custom')
+optdepends=('gtk2: Netscape plugin support')
+options=('!libtool' '!emptydirs')
+source=("http://builds.nightly.webkit.org/files/trunk/src/WebKit-${pkgver}.tar.bz2")
+md5sums=('SKIP')
+
+build() {
+  cd "$srcdir"/WebKit-${pkgver}
+
+  #Build 64bit libraries
+  [[ -d build-x86_64 ]] || mkdir build-x86_64
+  pushd build-x86_64
+
+  cmake -DCMAKE_BUILD_TYPE=Release \
+        -DCMAKE_INSTALL_PREFIX=/usr \
+        -DLIBEXEC_INSTALL_DIR=/usr/lib \
+        -DPORT=GTK \
+        -DUSE_GTK2=OFF \
+        -DENABLE_WEBGL=ON \
+        ../
+
+  make
+
+  popd
+
+  #Build 32bit libraries
+  [[ -d build-i686 ]] || mkdir build-i686
+  pushd build-i686
+
+  export CC='gcc -m32'
+  export CXX='g++ -m32'
+  export LDFLAGS='-m32'
+  export PKG_CONFIG_PATH='/usr/lib32/pkgconfig'
+
+  cmake -DCMAKE_BUILD_TYPE=Release \
+        -DCMAKE_INSTALL_PREFIX=/usr \
+        -DLIBEXEC_INSTALL_DIR=/usr/lib32 \
+        -DPORT=GTK \
+        -DUSE_GTK2=OFF \
+        -DENABLE_WEBGL=ON \
+        ../
+  make
+
+  popd
+}
+
+package_webkitgtk-nightly() {
+  conflicts=('webkitgtk')
+  replaces=("webgitgtk-svn")
+  provides=("webkitgtk" "webkitgtk3")
+  depends=(libwebp libxt libxslt sqlite libsoup enchant libgl 
+	   geoclue gtk3 gst-plugins-base-libs libsecret harfbuzz-icu cmake)
+  makedepends=(git gtk3 gperf gobject-introspection python mesa 
+	       ruby gtk-doc)
+
+  cd "$srcdir"/WebKit-${pkgver}/build-x86_64
+  make -j1 DESTDIR="$pkgdir/" install 
+
+  install -Dm644 ../Source/WebKit/LICENSE \
+    "$pkgdir/usr/share/licenses/WebKit/LICENSE"
+}
+
+package_lib32-webkitgtk-nightly() {
+  pkgdesc+=" (32bit)"
+  conflicts=('lib32-webkitgtk')
+  replaces=("lib32-webgitgtk-svn")
+  provides=("lib32-webkitgtk" "lib32-webkitgtk3")
+  depends=(lib32-libwebp lib32-libxt lib32-libxslt lib32-sqlite lib32-libsoup lib32-enchant lib32-libgl 
+	   geoclue lib32-gtk3 lib32-gst-plugins-base-libs lib32-libsecret lib32-harfbuzz-icu cmake)
+  makedepends=(git lib32-gtk3 gperf gobject-introspection python lib32-mesa 
+	       ruby gtk-doc)
+  cd "$srcdir"/WebKit-${pkgver}/build-i686
+
+  make -j1 DESTDIR="$pkgdir/" install
+
+  rm -rf "${pkgdir}"/{etc,usr/{share,include,bin}}
+
+  install -Dm644 ../Source/WebKit/LICENSE \
+    "$pkgdir/usr/share/licenses/lib32-WebKit/LICENSE"
+}
