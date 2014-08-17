@@ -1,0 +1,81 @@
+# Maintainer: Que Quotion <quequotion@bugmenot.com>
+# Maintainer: Joel Teichroeb <joel@teichroeb.net>
+# Contributor: Scimmia
+
+pkgbase=wayland-git-multilib
+pkgname=('wayland-git' 'lib32-wayland-git')
+pkgver=1.5.90.1549.ced769a
+pkgrel=1
+pkgdesc='A computer display server protocol. (git version)'
+arch=(i686 x86_64)
+url='http://wayland.freedesktop.org'
+license=('MIT')
+source=(git://anongit.freedesktop.org/wayland/wayland)
+sha1sums=('SKIP')
+
+pkgver() {
+	cd wayland
+
+	for i in major_version minor_version micro_version; do
+		local _$i=$(grep -m 1 $i configure.ac | sed 's/m4//' | grep -o "[[:digit:]]*")
+	done
+
+	echo $_major_version.$_minor_version.$_micro_version.$(git rev-list --count HEAD).$(git rev-parse --short HEAD)
+}
+
+
+build() {
+  cd wayland
+
+  #Build 64bit libraries
+  [[ -d build-x86_64 ]] || mkdir build-x86_64
+  pushd build-x86_64
+
+  ../autogen.sh --prefix=/usr \
+                --disable-{documentation,static}
+  make
+
+  popd
+
+  #Build 32bit libraries
+  [[ -d build-i686 ]] || mkdir build-i686
+  pushd build-i686
+
+  export CC='gcc -m32'
+  export CXX='g++ -m32'
+  export LDFLAGS='-m32'
+  export PKG_CONFIG_PATH='/usr/lib32/pkgconfig'
+
+  ../autogen.sh --prefix=/usr \
+                --disable-{documentation,static} \
+                --libdir='/usr/lib32' 
+  make
+
+  popd
+}
+
+package_wayland-git() {
+  depends=('libffi')
+  makedepends=('git' 'expat')
+  conflicts=('wayland')
+  provides=("wayland=${pkgver}")
+  cd wayland/build-x86_64
+  make DESTDIR="${pkgdir}" install
+  install -Dm 644 ../COPYING "$pkgdir/usr/share/licenses/$pkgname/COPYING"
+}
+
+package_lib32-wayland-git() {
+  pkgdesc+=" (32bit)"
+  depends=('lib32-libffi' "${pkgname#*-}")
+  makedepends=('git' 'lib32-expat')
+  conflicts=('lib32-wayland')
+  provides=("lib32-wayland=${pkgver}")
+  cd wayland/build-i686
+
+  make DESTDIR="${pkgdir}" install
+
+  rm -rf "${pkgdir}"/{etc,usr/{share,include,bin}}
+
+  install -dm 755 "${pkgdir}"/usr/share/licenses
+  ln -s ${pkgname#*-} "${pkgdir}"/usr/share/licenses/${pkgname}
+}
