@@ -1,0 +1,119 @@
+# Maintainer: Joao Cordeiro <jlcordeiro at gmail dot com>
+# Contributor: <arsenm2@rpi.edu>
+
+pkgbase="gobject-introspection-git-multilib"
+pkgname=("gobject-introspection-git" "lib32-gobject-introspection-git")
+#pkgname=("gobject-introspection-git")
+#pkgname=("lib32-gobject-introspection-git")
+pkgver=1.41.4.21.g57d0362
+pkgrel=1
+pkgdesc="GObject Introspection (git version)"
+epoch=1
+arch=('x86_64' 'i686')
+license=('LGPL' 'GPL')
+url="http://live.gnome.org/GObjectIntrospection/"
+options=(!makeflags docs !libtool strip debug)
+source=("git://git.gnome.org/gobject-introspection")
+sha512sums=('SKIP')
+
+pkgver() {
+    cd gobject-introspection/
+
+    git describe --always | sed "s/[B-T]//g;s/_//;s/[E-T]//g;s/_//;s/_/./g;s/-/./g"
+}
+
+build() {
+  cd "$srcdir/gobject-introspection"
+
+  #Build 64bit libraries
+  [[ -d build-x86_64 ]] || mkdir build-x86_64
+  pushd build-x86_64
+
+  export PYTHON=/usr/bin/python2
+  ../autogen.sh --prefix=/usr --disable-static --enable-doctool
+
+  make
+
+  popd
+
+  #There appears to be no way to make lib32-gobject-introspection understand the concept of lib32-python2
+  #
+  #This was the best I could do; at somepoint it tries to use /usr/lib/python despite being told in every possible way not to.
+  #
+  #Traceback (most recent call last):
+  #File "./g-ir-scanner", line 53, in <module>
+  #  from giscanner.scannermain import scanner_main
+  #File "../giscanner/scannermain.py", line 26, in <module>
+  #  import shutil
+  #File "/usr/lib/python2.7/shutil.py", line 12, in <module>
+  #  import collections
+  #File "/usr/lib/python2.7/collections.py", line 8, in <module>
+  #  from _collections import deque, defaultdict
+  #ImportError: /usr/lib/python2.7/lib-dynload/_collections.so: wrong ELF class: ELFCLASS64
+  #
+  #I did however, find a crazy workaround:
+  #
+  #sudo mv /usr/lib/python2.7 /usr/lib/ignore-python2.7 #Get 64bit python out of the way
+  #sudo ln -s /usr/lib32/python2.7 /usr/lib/python2.7   #Pretend that 32bit python is 64bit python
+  #sudo pacman -S python2-mako                          #This nonarch package will be missing from 32bit python
+  #Swap commenting of the 32bit and 64bit sections of this PKGBUILD
+  #makepkg
+  #sudo rm /usr/lib/python2.7                           #Stop pretending
+  #sudo mv /usr/lib/ignore-python2.7 /usr/lib/python2.7 #Put 64bit python back and hope for the best.
+
+  #Build 32bit libraries
+  [[ -d build-i686 ]] || mkdir build-i686
+  pushd build-i686
+
+  export CC='gcc -m32'
+  export CXX='g++ -m32'
+  export LDFLAGS='-m32'
+  export PKG_CONFIG_PATH='/usr/lib32/pkgconfig'
+
+  export PYTHON=/usr/bin/python2.7-32
+  export PYTHON_LIBS=/usr/lib32/python2.7
+  export pyexecdir=/usr/lib32/python2.7/site-packages
+  export pythondir=/usr/lib32/python2.7/site-packages
+
+  ../autogen.sh --prefix=/usr --libdir=/usr/lib32 --libexecdir=/usr/lib32 --disable-static --enable-doctool \
+                --with-python=/usr/bin/python2.7-32
+
+  make
+
+  popd
+}
+
+package_gobject-introspection-git() {
+#package(){
+  depends=("glib2-git" 'python2' 'python2-mako')
+  makedepends=('git' 'pkgconfig' 'autoconf' 'gtk-doc' 'gnome-common-git'
+               'bison' 'cairo' 'mesa' 'flex')
+  provides=("gobject-introspection=${pkgver}")
+  conflicts=('gobject-introspection' 'gobject-introspection-svn')
+  replaces=('gobject-introspection-svn')
+
+  cd "$srcdir/gobject-introspection/build-x86_64"
+  make DESTDIR="$pkgdir" install
+
+  sed -i '1s|#!/usr/bin/env python$|&2|' \
+    "$pkgdir"/usr/lib/gobject-introspection/giscanner/*.py
+}
+
+package_lib32-gobject-introspection-git() {
+#package() {
+  pkgdesc+=" (32bit)"
+  depends=("lib32-glib2-git" 'lib32-python2' 'python2-mako')
+  makedepends=('git' 'pkgconfig' 'autoconf' 'gtk-doc' 'gnome-common-git'
+               'bison' 'lib32-cairo' 'lib32-mesa' 'lib32-flex')
+  provides=("lib32-gobject-introspection=${pkgver}")
+  conflicts=('lib32-gobject-introspection' 'lib32-gobject-introspection-svn')
+  replaces=('lib32-gobject-introspection-svn')
+
+  cd "$srcdir/gobject-introspection/build-i686"
+  make DESTDIR="$pkgdir" install
+
+  sed -i '1s|#!/usr/bin/env python$|&2|' \
+    "$pkgdir"/usr/lib32/gobject-introspection/giscanner/*.py
+
+  rm -rf "${pkgdir}"/{etc,usr/{share,include,bin}}
+}
