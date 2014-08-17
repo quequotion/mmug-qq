@@ -1,0 +1,70 @@
+# Maintainer: Florian Dejonckheere <florian@floriandejonckheere.be>
+
+pkgbase=libnotify-id-git-multilib
+pkgname=('libnotify-id-git' 'lib32-libnotify-id-git')
+pkgver=0.7.6_5_g2f2c564
+pkgrel=1
+pkgdesc="Gnome notification library (git version), including ID patch"
+arch=('i686' 'x86_64')
+license=('GPL2.1')
+url="http://library.gnome.org/devel/libnotify/"
+options=('!libtool')
+source=("git://git.gnome.org/libnotify"
+        'https://launchpadlibrarian.net/105791133/print-and-replace-id-v3.patch')
+sh512sums=('f75d23de7ee23e37ac36889ece359587')
+
+pkgver() {
+  cd "libnotify"
+
+  echo $( git describe --always | sed 's#-#_#g;s#v##' )
+}
+
+build() {
+  cd ${srcdir}
+
+  cd ${srcdir}/libnotify
+  patch -p1 < ../../print-and-replace-id-v3.patch
+
+  #Build 64bit libraries
+  [[ -d build-x86_64 ]] || mkdir build-x86_64
+  pushd build-x86_64
+
+  ../autogen.sh --prefix=/usr --disable-static --libdir=/usr/lib
+  make || return 1
+  
+  popd
+
+  #Build 32bit libraries
+  [[ -d build-i686 ]] || mkdir build-i686
+  pushd build-i686
+
+  export CC='gcc -m32'
+  export CXX='g++ -m32'
+  export LDFLAGS='-m32'
+  export PKG_CONFIG_PATH='/usr/lib32/pkgconfig'
+
+  ../autogen.sh --prefix=/usr --disable-static --libdir=/usr/lib32
+  make
+
+  popd
+
+}
+
+package_libnotify-id-git() {
+  depends=()
+  makedepends=('pkgconfig' 'git' 'gobject-introspection' 'gtk-doc' 'gnome-common-git')
+  conflicts=('libnotify' 'libnotify-git')
+  provides=("libnotify=${pkgver}")
+  make -C "${srcdir}/libnotify/build-x86_64" DESTDIR="${pkgdir}" install || return 1
+}
+
+package_lib32-libnotify-id-git() {
+  pkgdesc+=" (32bit)"
+  depends=()
+  makedepends=('pkgconfig' 'git' 'gobject-introspection' 'gtk-doc' 'gnome-common-git')
+  conflicts=('lib32-libnotify' 'lib32-libnotify-git')
+  provides=("lib32-libnotify=${pkgver}")
+  make -C "${srcdir}/libnotify/build-i686" DESTDIR="${pkgdir}" install || return 1
+
+  rm -rf "${pkgdir}"/{etc,usr/{share,include,bin}}
+}
