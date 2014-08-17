@@ -1,0 +1,86 @@
+# Original Package: Jan de Groot <jgc@archlinux.org>
+# Maintainer: Lubosz Sarnecki <lubosz@gmail.com>
+
+pkgbase=gst-plugins-base-git-multilib
+pkgname=('gst-plugins-base-git' 'lib32-gst-plugins-base-git')
+pkgver=1.5.0.1.13522.dcf8c3e
+pkgrel=1
+pkgdesc="GStreamer Multimedia Framework Base Plugins"
+arch=('i686' 'x86_64')
+license=('LGPL')
+options=(!libtool !emptydirs)
+url="http://gstreamer.freedesktop.org/"
+source='git://anongit.freedesktop.org/gstreamer/gst-plugins-base'
+sha256sums=('SKIP')
+
+_gitname='gst-plugins-base'
+
+pkgver() {
+  cd $_gitname
+  version=$(grep AC_INIT configure.ac | sed 's/AC_INIT(\[GStreamer Base Plug-ins\],\[//' | sed 's/\],\[http:\/\/bugzilla.gnome.org\/enter_bug.cgi?product=GStreamer\],\[gst-plugins-base\])//')
+  hash=$(git log --pretty=format:'%h' -n 1)
+  revision=$(git rev-list --count HEAD)
+  
+  echo $version.$revision.$hash
+}
+
+build() {
+  cd $_gitname
+
+  #Build 64bit libraries
+  [[ -d build-x86_64 ]] || mkdir build-x86_64
+  pushd build-x86_64
+
+  ../autogen.sh --prefix=/usr --sysconfdir=/etc --localstatedir=/var --libdir=/usr/lib --libexecdir=/usr/lib \
+                --disable-static --enable-experimental --disable-fatal-warnings
+  make
+
+  popd
+
+  #Build 32bit libraries
+
+  [[ -d build-i686 ]] || mkdir build-i686
+  pushd build-i686
+
+  export CC='gcc -m32'
+  export CXX='g++ -m32'
+  export LDFLAGS='-m32'
+  export PKG_CONFIG_PATH='/usr/lib32/pkgconfig'
+
+  ../autogen.sh --prefix=/usr --sysconfdir=/etc --localstatedir=/var --libdir=/usr/lib32 --libexecdir=/usr/lib32 \
+                --disable-static --enable-experimental --disable-fatal-warnings
+  export MALLOC_CHECK_=0
+  make
+
+  popd
+
+}
+
+package_gst-plugins-base-git() {
+  makedepends=('pkgconfig' 'gstreamer-git' 'orc' 'libxv' 'alsa-lib' 'cdparanoia' 'libvisual' 'libvorbis'
+               'libtheora' 'pango' 'gobject-introspection')
+  depends=('gstreamer-git' 'orc' 'libxv' 'alsa-lib' 'cdparanoia' 'libvisual' 'libvorbis' 'libtheora' 'pango')
+  conflicts=('gst-plugins-base' 'gst-plugins-base-libs')
+  provides=('gst-plugins-base='$pkgver 'gst-plugins-base-libs='$pkgver)
+ 
+  cd $_gitname/build-x86_64
+
+  make DESTDIR="${pkgdir}" install
+}
+
+package_lib32-gst-plugins-base-git() {
+  pkgdesc+=" (32bit)"
+  makedepends=('pkgconfig' 'lib32-gstreamer-git' 'lib32-orc' 'lib32-libxv' 'lib32-alsa-lib' 'lib32-cdparanoia' 
+               'lib32-libvisual' 'lib32-libvorbis' 'lib32-libtheora' 'lib32-pango' 'lib32-gobject-introspection')
+  depends=('lib32-gstreamer-git' 'lib32-orc' 'lib32-libxv' 'lib32-alsa-lib' 'lib32-cdparanoia' 'lib32-libvisual'
+           'lib32-libvorbis' 'lib32-libtheora' 'lib32-pango')
+  conflicts=('lib32-gst-plugins-base' 'lib32-gst-plugins-base-libs')
+  provides=('lib32-gst-plugins-base='$pkgver 'lib32-gst-plugins-base-libs='$pkgver)
+ 
+  cd $_gitname/build-i686
+
+  make DESTDIR="${pkgdir}" install
+
+  rm -rf "${pkgdir}"/{etc,usr/{share,include,bin}}
+}
+
