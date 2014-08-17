@@ -1,0 +1,149 @@
+# Maintainer: Que Quotion <quequotion@mailinator.com>
+# Contributor: Xiao-Long Chen <chenxiaolong@cxl.epac.to>
+# Contributor: hbdee <hbdee.arch@gmail.com>
+
+pkgbase=gtk2-git-ubuntu-multilib
+pkgname=('gtk2-git-ubuntu' 'lib32-gtk2-git-ubuntu')
+pkgver=2.24.24.10.gab3e3b1
+pkgrel=1
+pkgdesc="GTK+ is a multi-platform toolkit (v2) (git version with ubuntu patches from bzr)"
+arch=('i686' 'x86_64')
+options=('!libtool')
+backup=('etc/gtk-2.0/gtkrc')
+url="http://www.gtk.org/"
+license=('LGPL')
+source=('bzr+lp:~ubuntu-desktop/gtk/ubuntu'
+        'git://git.gnome.org/gtk+#branch=gtk-2-24'
+        'arch_xid-collision-debug.patch'
+        'fix-ubuntumenuproxy-build.patch'
+        'repatch-backport_gtkmountoperation_signal_fix.patch')
+	#'gtk-modules-32.patch')
+sha512sums=('SKIP'
+            'SKIP'
+            '89e3223c86731a76b12d39245f1ec4cf8b4860ab1d11d74a10e5deb0db302f20b4bb5d9034da1d8aeb96369dbdeddcdd2f28943270dc501476c694562b960159'
+            '4b27afecb82e3517c2584665f8d2a2911193254a00b82ff8064caf4016ab029c76e99af502bb9271a66209594b50b2729797defcc9512d341aa61aff4f64ec24'
+            '8f5755382d7094571e9eff4519b1da6e7b07195dd381d9f7db42d1311c3f1016539653dc58e19e9853787d87130f271ca5578538e69dc07d0b96502a38d6af98')
+            #'7e0c2a8a4ca36863fc575a945abaee2317655e02de5802692e7b4cb370a7c2f6a09e14bba0741186a09af8cbc950d31c9baea6a1bc175641f21ca5321ee7f781')
+
+pkgver() {
+  cd "gtk+"
+  git describe --always | sed 's/-/./g'
+}
+
+prepare() {
+
+  cd "$srcdir/ubuntu/debian/patches/"
+
+  while read i; do
+    if [[ "${i}" =~ ^# || -z "${i}" || "${i}" == *git* ]]; then
+      continue # Skip comments, newlines, and git patches
+    #Apply available repatches
+    elif [ -f "../../../repatch-${i}" ]; then
+        msg "Updating ${i} ..." 
+        patch -Ns < "../../../repatch-${i}"
+    fi
+  done < series
+
+  cd "$srcdir/gtk+"
+
+  #Apply Ubuntu patches
+  while read i; do
+    if [[ "${i}" =~ ^# || -z "${i}" || "${i}" == *git* ]]; then
+      continue # Skip comments, newlines, and git patches
+    else
+      msg "Applying ${i} ..."
+      patch -Nsp1 < "${srcdir}/ubuntu/debian/patches/${i}"
+    fi
+  done < "${srcdir}/ubuntu/debian/patches/series"
+
+  #Apply Arch patches
+  patch -p1 -i "${srcdir}/arch_xid-collision-debug.patch"
+  
+  # Build fix from György Balló
+  patch -p1 -i "${srcdir}/fix-ubuntumenuproxy-build.patch"
+
+}
+
+build() {
+
+  cd "gtk+"
+
+  #Build 64bit libraries
+  [[ -d build-x86_64 ]] || mkdir build-x86_64
+  pushd build-x86_64
+
+  CXX=/bin/false ../autogen.sh \
+    --prefix=/usr \
+    --sysconfdir=/etc \
+    --localstatedir=/var \
+    --with-xinput=yes \
+    --enable-test-print-backend
+
+  # https://bugzilla.gnome.org/show_bug.cgi?id=655517
+  sed -i -e 's/ -shared / -Wl,-O1,--as-needed\0/g' libtool
+
+  make
+
+  popd
+
+  #Build 32bit libraries
+  [[ -d build-i686 ]] || mkdir build-i686
+  pushd build-i686
+
+  export CC='gcc -m32'
+  export CXX='g++ -m32'
+  export LDFLAGS='-m32'
+  export PKG_CONFIG_PATH='/usr/lib32/pkgconfig'
+
+  ## Apply 32bit Patches
+  #patch -Np1 < ${srcdir}/gtk-modules-32.patch
+
+  GTK_IM_MODULE_FILE="gtk.immodules-32" CXX=/bin/false ../autogen.sh --prefix=/usr \
+                             --sysconfdir=/etc \
+                             --localstatedir=/var \
+                             --libdir=/usr/lib32 --libexecdir=/usr/lib32 \
+                             --with-xinput=yes
+  sed -i -e 's/ -shared / -Wl,-O1,--as-needed\0/g' libtool                                
+
+  make
+
+  popd
+
+}
+
+package_gtk2-git-ubuntu() {
+  depends=('atk' 'pango' 'libxcursor' 'libxinerama' 'libxrandr' 'libxi' 'libxcomposite' \
+           'libxdamage' 'shared-mime-info' 'libcups' 'gtk-update-icon-cache' 'python2')
+  makedepends=('pkg-config' 'gobject-introspection' 'gtk-doc')
+  provides=("gtk2=${pkgver}" "gtk2-ubuntu=${pkgver}" "gtk2-git=${pkgver}")
+  conflicts=('gtk2' 'gtk2-ubuntu')
+  replaces=('gtk2-docs')
+  install=arch_gtk2.install
+  cd "gtk+/build-x86_64"
+
+  make DESTDIR="${pkgdir}" install
+  sed -i "s#env python#env python2#" "${pkgdir}/usr/bin/gtk-builder-convert"
+  echo 'gtk-fallback-icon-theme = "gnome"' > "${pkgdir}/etc/gtk-2.0/gtkrc"
+  # Use the official gtk-update-icon-cache package
+  rm -v "${pkgdir}/usr/bin/gtk-update-icon-cache"
+}
+
+package_lib32-gtk2-git-ubuntu() {
+  pkgdesc+=" (32bit)"
+  depends=(lib32-{'atk>=1.30.0','pango>=1.28.0','cairo>=1.10.0','gdk-pixbuf2>=2.22.1'}
+           lib32-lib{'cups>=1.4.4',xcursor,'xrandr>=1.3','xi>=1.3',xinerama,xcomposite,xdamage}
+           'gtk2-git-ubuntu')
+  makedepends=('pkgconfig' 'gcc-multilib')
+  provides=("lib32-gtk2=${pkgver}" "lib32-gtk2-ubuntu=${pkgver}" "lib32-gtk2-git=${pkgver}")
+  conflicts=('lib32-gtk2' 'lib32-gtk2-ubuntu')
+  replaces=('lib32-gtk2')
+  install=gtk2.install
+  cd "gtk+/build-i686"
+
+  make DESTDIR="${pkgdir}" install
+
+  rm -rf "${pkgdir}"/{etc,usr/{share,include}} # needs bin/
+
+  mv "${pkgdir}"/usr/bin/gtk-query-immodules-2.0{,-32}
+  find "$pkgdir/usr/bin" -type f -not -name gtk-query-immodules-2.0-32 -delete
+}
