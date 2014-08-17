@@ -1,0 +1,148 @@
+# Maintainer: Limao Luo <luolimao+AUR@gmail.com>
+#
+# (Added from network-manager package)
+# Contributor: Jan Alexander Steffens (heftig) <jan.steffens@gmail.com>
+# Contributor: Jan de Groot <jgc@archlinxu.org>
+# Contributor: Wael Nasreddine <gandalf@siemens-mobiles.org>
+# Contributor: Tor Krill <tor@krill.nu>
+# Contributor: Will Rea <sillywilly@gmail.com>
+# Contributor: Valentine Sinitsyn <e_val@inbox.ru>
+
+pkgbase=networkmanager-git-multilib
+pkgname=('networkmanager-git' 'lib32-networkmanager-git')
+pkgver=0.9.10.beta1.428.g722712b
+pkgrel=1
+pkgdesc="Network Management daemon"
+arch=(i686 x86_64)
+url=http://www.gnome.org/projects/NetworkManager
+license=(GPL3)
+backup=(etc/NetworkManager/NetworkManager.conf)
+options=(!emptydirs !libtool)
+install=networkmanager-git.install
+source=(git://anongit.freedesktop.org/NetworkManager/NetworkManager.git
+    git://git.gnome.org/libgsystem
+    NetworkManager.conf
+    disable_set_hostname.patch
+    dnsmasq-path.patch
+    nm-polkit-permissive.patch)
+sha512sums=('SKIP'
+            'SKIP'
+            '1f4e6c09da5a8921ee7759861cfa5e808c64cd27e733cd62cfb35776db05a226a73443c071730035480c9ba4abe85fa7daeb14aeffbbdae20ed193d78341f451'
+            '8527e8dfe5b46fc44b85f93532e8a0431d6a7934c4f782aca90a451ac3a3576dd15aa28df040f1b114f65e9037bc9895eb908e92bd4e4c621e6a9c7178a3ec34'
+            'e919b63240b2dcf332de1c3e756042f7ea932af73775c217be4cdd50f844728265560d1892b970e322955b0e8837d2b080a2cd6fd8e011deb75fe5deb45f9552'
+            'c8668a85332065f5cd89650951a15725bae1f5a530b61fbc2fe57d51a8924b1f3e8765cd3784d89476db3d2d9c8992156c4986424670d91d8f960425abbacde5')
+
+pkgver() {
+    cd NetworkManager/
+    git describe --tags | sed 's/-/./g'
+}
+
+prepare() {
+    cd NetworkManager/
+    find ../ -name '*.patch' -exec patch -Np1 -i '{}' \;
+    rm -rf libgsystem/
+    ln -sf ../libgsystem
+}
+
+build() {
+  cd NetworkManager/
+
+  gtkdocize
+  autopoint --force
+
+  #Build 64bit libraries
+  [[ -d build-x86_64 ]] || mkdir build-x86_64
+  pushd build-x86_64
+
+  AUTOPOINT="intltoolize -f -c --automake" autoreconf -fi ../
+  ../configure \
+      --prefix=/usr \
+      --sysconfdir=/etc \
+      --localstatedir=/var \
+      --libexecdir=/usr/lib/networkmanager \
+      --with-crypto=nss \
+      --with-distro=arch \
+      --with-dhclient=/usr/sbin/dhclient \
+      --with-dhcpcd=/usr/sbin/dhcpcd \
+      --with-iptables=/usr/sbin/iptables \
+      --with-systemdsystemunitdir=/usr/lib/systemd/system \
+      --with-udev-dir=/usr/lib/udev \
+      --with-resolvconf=/usr/sbin/resolvconf \
+      --with-session-tracking=systemd \
+      --disable-static \
+      --enable-more-warnings=no \
+      --disable-wimax
+
+  make
+
+  popd
+
+  #Build 32bit libraries
+  [[ -d build-i686 ]] || mkdir build-i686
+  pushd build-i686
+
+  export CC='gcc -m32'
+  export CXX='g++ -m32'
+  export LDFLAGS='-m32'
+  export PKG_CONFIG_PATH='/usr/lib32/pkgconfig'
+
+  AUTOPOINT="intltoolize -f -c --automake" autoreconf -fi ../
+  ../configure \
+      --prefix=/usr \
+      --sysconfdir=/etc \
+      --localstatedir=/var \
+      --libdir=/usr/lib32/ \
+      --libexecdir=/usr/lib32/networkmanager \
+      --with-crypto=nss \
+      --with-distro=arch \
+      --with-dhclient=/usr/sbin/dhclient \
+      --with-dhcpcd=/usr/sbin/dhcpcd \
+      --with-iptables=/usr/sbin/iptables \
+      --with-systemdsystemunitdir=/usr/lib/systemd/system \
+      --with-udev-dir=/usr/lib/udev \
+      --with-resolvconf=/usr/sbin/resolvconf \
+      --with-session-tracking=systemd \
+      --disable-static \
+      --enable-more-warnings=no \
+      --disable-wimax \
+      #--enable-introspection=no # lib32-gobject-introspection
+
+  make
+
+  popd
+}
+
+package_networkmanager-git() {
+  depends=(dbus-glib dhclient libsoup polkit wpa_supplicant)
+  makedepends=(git gobject-introspection gtk-doc intltool libndp-git libnl libmm-glib)
+  optdepends=('modemmanager: for modem management service'
+  'dnsmasq: Connection sharing'
+  'bluez: Bluetooth support'
+  'openresolv: resolvconf support')
+  provides=(networkmanager=$pkgver)
+  conflicts=(networkmanager)
+  make -C NetworkManager DESTDIR="$pkgdir" install
+  install -m644 NetworkManager.conf "$pkgdir"/etc/NetworkManager/
+  rm -r "$pkgdir"/var/run
+  # Provide native service for arch-daemons generator
+  ln -s NetworkManager.service "$pkgdir"/usr/lib/systemd/system/networkmanager.service
+}
+
+package_lib32-networkmanager-git() {
+  pkgdesc+=" (32bit)"
+  depends=(lib32-dbus-glib dhclient lib32-libsoup lib32-polkit wpa_supplicant)
+  makedepends=(git lib32-gobject-introspection gtk-doc intltool lib32-libndp-git lib32-libnl lib32-libmm-glib)
+  optdepends=('modemmanager: for modem management service'
+  'dnsmasq: Connection sharing'
+  'lib32-bluez: Bluetooth support'
+  'openresolv: resolvconf support')
+  provides=(lib32-networkmanager=$pkgver)
+  conflicts=(lib32-networkmanager)
+  make -C networkmanager DESTDIR="$pkgdir" install
+  install -m644 NetworkManager.conf "$pkgdir"/etc/NetworkManager/
+  rm -r "$pkgdir"/var/run
+  # Provide native service for arch-daemons generator
+  ln -s NetworkManager.service "$pkgdir"/usr/lib/systemd/system/networkmanager.service
+
+  rm -rf "${pkgdir}"/{etc,usr/{share,include,bin}}
+}

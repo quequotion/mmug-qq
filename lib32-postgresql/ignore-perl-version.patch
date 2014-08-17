@@ -1,0 +1,61 @@
+--- src/postgresql-9.3.5/config/perl.m4~	2014-07-22 04:10:42.000000000 +0900
++++ src/postgresql-9.3.5/config/perl.m4	2014-08-17 02:36:39.820249441 +0900
+@@ -10,16 +10,16 @@
+ fi
+ 
+ if test "$PERL"; then
+-  pgac_perl_version=`$PERL -v 2>/dev/null | sed -n ['s/This is perl.*v[a-z ]*\([0-9]\.[0-9][0-9.]*\).*$/\1/p']`
++  pgac_perl_version=`$PERL -v 2>/dev/null | sed -n ['s/This is perl.*v[a-z ]*\([0-9]\.[0-9][0-9.]*\).*$/\1/p']` # BROKEN
+   AC_MSG_NOTICE([using perl $pgac_perl_version])
+-  if echo "$pgac_perl_version" | sed ['s/[.a-z_]/ /g'] | \
+-    $AWK '{ if ([$]1 = 5 && [$]2 >= 8) exit 1; else exit 0;}'
+-  then
+-    AC_MSG_WARN([
+-*** The installed version of Perl, $PERL, is too old to use with PostgreSQL.
+-*** Perl version 5.8 or later is required, but this is $pgac_perl_version.])
+-    PERL=""
+-  fi
++#  if echo "$pgac_perl_version" | sed ['s/[.a-z_]/ /g'] | \
++#    $AWK '{ if ([$]1 = 5 && [$]2 >= 8) exit 1; else exit 0;}'
++#  then
++#    AC_MSG_WARN([
++#*** The installed version of Perl, $PERL, is too old to use with PostgreSQL.
++#*** Perl version 5.8 or later is required, but this is $pgac_perl_version.])
++#    PERL=""
++#  fi
+ fi
+ 
+ if test -z "$PERL"; then
+--- src/postgresql-9.3.5/configure~	2014-07-22 04:10:42.000000000 +0900
++++ src/postgresql-9.3.5/configure	2014-08-17 02:45:09.161275351 +0900
+@@ -7413,18 +7413,18 @@
+ if test "$PERL"; then
+   pgac_perl_version=`$PERL -v 2>/dev/null | sed -n 's/This is perl.*v[a-z ]*\([0-9]\.[0-9][0-9.]*\).*$/\1/p'`
+   { $as_echo "$as_me:$LINENO: using perl $pgac_perl_version" >&5
+-$as_echo "$as_me: using perl $pgac_perl_version" >&6;}
+-  if echo "$pgac_perl_version" | sed 's/[.a-z_]/ /g' | \
+-    $AWK '{ if ($1 = 5 && $2 >= 8) exit 1; else exit 0;}'
+-  then
+-    { $as_echo "$as_me:$LINENO: WARNING:
+-*** The installed version of Perl, $PERL, is too old to use with PostgreSQL.
+-*** Perl version 5.8 or later is required, but this is $pgac_perl_version." >&5
+-$as_echo "$as_me: WARNING:
+-*** The installed version of Perl, $PERL, is too old to use with PostgreSQL.
+-*** Perl version 5.8 or later is required, but this is $pgac_perl_version." >&2;}
+-    PERL=""
+-  fi
++$as_echo "$as_me: using perl $pgac_perl_version" >&6;} #BROKEN
++#  if echo "$pgac_perl_version" | sed 's/[.a-z_]/ /g' | \
++#    $AWK '{ if ($1 = 5 && $2 >= 8) exit 1; else exit 0;}'
++#  then
++#    { $as_echo "$as_me:$LINENO: WARNING:
++#*** The installed version of Perl, $PERL, is too old to use with PostgreSQL.
++#*** Perl version 5.8 or later is required, but this is $pgac_perl_version." >&5
++#$as_echo "$as_me: WARNING:
++#*** The installed version of Perl, $PERL, is too old to use with PostgreSQL.
++#*** Perl version 5.8 or later is required, but this is $pgac_perl_version." >&2;}
++#    PERL=""
++#  fi
+ fi
+ 
+ if test -z "$PERL"; then
