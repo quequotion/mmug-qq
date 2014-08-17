@@ -1,0 +1,72 @@
+# Maintainer: Joel Teichroeb <joel@teichroeb.net>
+
+pkbbase=libxkbcommon-git-multilib
+pkgname=('libxkbcommon-git' 'lib32-libxkbcommon-git')
+pkgver=0.4.2.r21.g4df720b
+pkgrel=1
+pkgdesc="A library to handle keyboard descriptions."
+url="http://xkbcommon.org/"
+arch=(i686 x86_64)
+license=('custom')
+source=(git://github.com/xkbcommon/libxkbcommon.git)
+sha1sums=('SKIP')
+
+pkgver() {
+  cd libxkbcommon
+
+  git describe --long | sed -r 's/^xkbcommon.//;s/([^-]*-g)/r\1/;s/-/./g'
+}
+
+build() {
+  cd libxkbcommon
+
+  #Build 64bit libraries
+  [[ -d build-x86_64 ]] || mkdir build-x86_64
+  pushd build-x86_64
+
+  ../autogen.sh --prefix=/usr --disable-static
+
+  make
+
+  popd
+
+  #Build 32bit libraries
+  [[ -d build-i686 ]] || mkdir build-i686
+  pushd build-i686
+
+  export CC='gcc -m32'
+  export CXX='g++ -m32'
+  export LDFLAGS='-m32'
+  export PKG_CONFIG_PATH='/usr/lib32/pkgconfig'
+
+  ../autogen.sh --prefix=/usr --libdir=/usr/lib32 --libexecdir=/usr/lib32 --disable-static
+
+  make
+
+  popd
+}
+
+package_libxkbcommon-git() {
+  depends=('glibc')
+  makedepends=('git' 'xorg-util-macros' 'xkeyboard-config' 'libxcb')
+  provides=('libxkbcommon' 'libxkbcommon-x11')
+  conflicts=('libxkbcommon' 'libxkbcommon-x11')
+  cd libxkbcommon/build-x86_64
+
+  make DESTDIR=${pkgdir} install
+
+  install -Dm644 ../COPYING "$pkgdir/usr/share/licenses/${pkgname}/LICENSE"
+}
+
+package_lib32-libxkbcommon-git() {
+  depends=('lib32-glibc')
+  makedepends=('git' 'xorg-util-macros' 'xkeyboard-config' 'lib32-libxcb')
+  provides=('lib32-libxkbcommon' 'lib32-libxkbcommon-x11')
+  conflicts=('lib32-libxkbcommon' 'lib32-libxkbcommon-x11')
+  cd libxkbcommon/build-i686
+
+  make DESTDIR=${pkgdir} install
+  rm -rf "${pkgdir}"/{etc,usr/{share,include,bin}}
+
+  install -Dm644 ../COPYING "$pkgdir/usr/share/licenses/${pkgname}/LICENSE"
+}
