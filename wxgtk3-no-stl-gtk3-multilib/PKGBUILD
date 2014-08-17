@@ -1,0 +1,96 @@
+# Maintainer: Que Quotion <quequotion@bugmenot.com>
+# Maintainer: Samuel Mesa <samuelmesa@linuxmail.org>
+# Maintainer: Eric Bélanger <eric@archlinux.org>
+
+pkgbase=wxgtk-gtk3-multilib
+pkgname=('wxgtk-gtk3' 'lib32-wxgtk-gtk3')
+pkgver=3.0.1
+pkgrel=1
+pkgdesc="GTK+ implementation of wxWidgets API for GUI"
+arch=('i686' 'x86_64')
+url="http://wxwidgets.org"
+license=('custom:wxWindows')
+options=('!emptydirs')
+source=("http://downloads.sourceforge.net/wxwindows/wxWidgets-${pkgver}.tar.bz2"
+        'wxGTK-collision.patch'
+        'wx-gdk-wayland.patch')
+sha512sums=('5934442fbb77f50e2cb234ee2218e5f61e4757202b28da53f0b8a28dd499eeefca4cb8375359e42aeca2a93f8b24435ac4299da300303c9d9436bfba0cae6cd5'
+            'baa442f636777b3ecc5e0cfccbc0f668ad553c4fea756d23e5682c9bbe450c7d151be151b9b30163fe28deb5ff8ad320c52c51ecc176fa2a94a0311dfab4a465'
+            '95a9e10aec17dab62256f941dd32ceab07e081eae40ba6fe99cc7ea4ef3ed6d042a215c1763fdd2f08fa51ad4b7d7fa17577914893f2a8dcb6ffc37be5271997')
+
+prepare() {
+  cd wxWidgets-${pkgver}
+
+  patch -Np1 -i ${srcdir}/wx-gdk-wayland.patch
+}
+
+build() {
+
+
+  cd wxWidgets-${pkgver}
+
+  #Build 64bit libraries
+  [[ -d build-x86_64 ]] || mkdir build-x86_64
+  pushd build-x86_64
+
+
+  ../configure --prefix=/usr --libdir=/usr/lib \
+              --enable-{graphics_ctx,mediactrl,unicode,webview} \
+              --with-lib{jpeg,png,tiff,xpm}=sys --with-regex=builtin --with-opengl --with-gtk=3 \
+              --disable-precomp-headers
+  make #-j1
+  make -C ../locale allmo
+
+  popd
+
+  #Build 32bit libraries
+  patch -Np1 < ${srcdir}/wxGTK-collision.patch
+
+  [[ -d build-i686 ]] || mkdir build-i686
+  pushd build-i686
+
+  export CC='gcc -m32'
+  export CXX='g++ -m32'
+  export LDFLAGS='-m32'
+  export PKG_CONFIG_PATH='/usr/lib32/pkgconfig'
+
+  ../configure --prefix=/usr --libdir=/usr/lib32 \
+              --enable-{graphics_ctx,mediactrl,unicode,webview} \
+              --with-lib{jpeg,png,tiff,xpm}=sys --with-regex=builtin --with-opengl --with-gtk=3 \
+              --disable-precomp-headers
+  make #-j1
+  make -C ../locale allmo
+
+  popd
+}
+
+package_wxgtk-gtk3() {
+  depends=('gtk3' 'gstreamer0.10-base' 'libnotify' 'libsm')
+  makedepends=('gstreamer0.10-base-plugins' 'glu' 'gconf' 'webkitgtk')
+  provides=('wxgtk' 'wxgtk3')
+  conflicts=('wxgtk')
+
+  cd "${srcdir}/wxWidgets-${pkgver}/build-x86_64"
+
+  make DESTDIR="${pkgdir}" install
+
+  install -dm 755 "${pkgdir}"/usr/share/licenses
+  install -D -m644 docs/licence.txt "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
+}
+
+package_lib32-wxgtk-gtk3() {
+  pkgdesc+=" (32bit)"
+  depends=('lib32-gtk2' 'lib32-gstreamer0.10-base' 'lib32-libsm' "${pkgname#*-}")
+  makedepends=('lib32-gstreamer0.10-base-plugins' 'lib32-glu')
+  provides=('lib32-wxgtk' 'lib32-wxgtk3')
+  conflicts=('lib32-wxgtk')
+
+  cd "${srcdir}/wxWidgets-${pkgver}/build-i686"
+
+  make DESTDIR="${pkgdir}" install
+
+  rm -rf "${pkgdir}"/{etc,usr/{share,include,bin}}
+
+  install -dm 755 "${pkgdir}"/usr/share/licenses
+  install -D -m644 docs/licence.txt "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
+}
