@@ -75,7 +75,9 @@ build() {
   export pyexecdir=/usr/lib32/python2.7/site-packages
   export pythondir=/usr/lib32/python2.7/site-packages
 
-  ../autogen.sh --prefix=/usr --libdir=/usr/lib32 --libexecdir=/usr/lib32 --disable-static --enable-doctool \
+  ../autogen.sh --prefix=/usr --libdir=/usr/lib32 --libexecdir=/usr/lib32 \
+                --program-suffix=-32 --includedir=/usr/lib32/gobject-introspection/include \
+                --disable-static --enable-doctool \
                 --with-python=/usr/bin/python2.7-32
 
   make
@@ -115,5 +117,5 @@ package_lib32-gobject-introspection-git() {
   sed -i '1s|#!/usr/bin/env python$|&2|' \
     "$pkgdir"/usr/lib32/gobject-introspection/giscanner/*.py
 
-  rm -rf "${pkgdir}"/{etc,usr/{share,include,bin}}
+  rm -rf "${pkgdir}"/{etc,usr/{share,include}} # needs bin/
 }
