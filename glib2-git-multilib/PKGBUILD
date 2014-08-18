@@ -5,7 +5,7 @@
 
 pkgbase=glib2-git-multilib
 pkgname=('glib2-git' 'lib32-glib2-git')
-pkgver=2.41.3.2.g96af008
+pkgver=2.41.3.3.g4c8480e
 pkgrel=1
 pkgdesc="Common C routines used by GTK+ 2.4 and other libs"
 arch=(i686 x86_64)
