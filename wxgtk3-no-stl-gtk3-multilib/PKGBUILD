@@ -80,8 +80,8 @@ package_wxgtk-gtk3() {
 
 package_lib32-wxgtk-gtk3() {
   pkgdesc+=" (32bit)"
-  depends=('lib32-gtk2' 'lib32-gstreamer0.10-base' 'lib32-libsm' "${pkgname#*-}")
-  makedepends=('lib32-gstreamer0.10-base-plugins' 'lib32-glu')
+  depends=('lib32-gtk3' 'lib32-gstreamer0.10-base' 'lib32-libnotify' 'lib32-libsm' "${pkgname#*-}")
+  makedepends=('lib32-gstreamer0.10-base-plugins' 'lib32-glu' 'gconf' 'lib32-webkitgtk')
   provides=('lib32-wxgtk' 'lib32-wxgtk3')
   conflicts=('lib32-wxgtk')
 
