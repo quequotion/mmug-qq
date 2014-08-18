@@ -32,14 +32,8 @@ makedepends=('lib32-libxcb' 'xcb-proto' 'lib32-xcb-util' 'lib32-xcb-util-image' 
             'lib32-mesa' 'lib32-at-spi2-core' 'lib32-alsa-lib' 'lib32-gstreamer0.10-base-plugins' 
             'lib32-libmng' 'lib32-libjpeg-turbo' 'cups' 'lib32-libpulse' 'hicolor-icon-theme' 'desktop-file-utils'
             'postgresql-libs' 'lib32-libmariadbclient' 'lib32-sqlite' 'lib32-unixodbc' 'lib32-libfbclient'
-            'lib32-python2' 'ruby' 'gperf' 'lib32-libxslt' 'lib32-libxcomposite' 'lib32-fontconfig'
-            'lib32-openal' 'lib32-gtk2' 'lib32-libxkbcommon-x11' 'lib32-python' 'lib32-mtdev' 'lib32-harfbuzz') # 'lib32-gst-plugins-base-libs' will not build; overflow allocation error
-#makedepends=('lib32-libxcb' 'UNFOUNDxcb-proto' 'lib32-xcb-util' 'lib32-xcb-util-image' 'lib32-xcb-util-wm' 'lib32-xcb-util-keysyms'
-#            'lib32-mesa' 'lib32-at-spi2-core' 'lib32-alsa-lib' 'MAKENEWgst-plugins-base-libs' 'lib32-gstreamer0.10-base-plugins' 
-#            'lib32-libmng' 'lib32-libjpeg-turbo' 'UNFOUNDcups' 'lib32-libpulse' 'UNFOUNDhicolor-icon-theme' 'UNFOUNDdesktop-file-utils'
-#            'lib32-postgresql-libs' 'lib32-libmariadbclient' 'lib32-sqlite' 'lib32-unixodbc' 'lib32-libfbclient'
-#            'lib32-python2' 'UNFOUNDruby' 'UNFOUNDgperf' 'lib32-libxslt' 'lib32-libxcomposite' 'lib32-fontconfig'
-#            'lib32-openal' 'lib32-gtk2' 'lib32-libxkbcommon-x11' 'lib32-python' 'lib32-mtdev' 'lib32-harfbuzz') 
+            'lib32-python2' 'ruby' 'gperf' 'lib32-libxslt' 'lib32-gst-plugins-base-libs' 'lib32-libxcomposite' 'lib32-fontconfig'
+            'lib32-openal' 'lib32-gtk2' 'lib32-libxkbcommon-x11' 'lib32-python' 'lib32-mtdev' 'lib32-harfbuzz') 
 groups=('qt' 'qt5')
 _pkgfqn="qt-everywhere-opensource-src-${pkgver}"
 source=("http://download.qt-project.org/official_releases/qt/5.3/${pkgver}/single/${_pkgfqn}.tar.xz"
@@ -80,7 +74,7 @@ build() {
 
   [[ "${CARCH}" = "i686" ]] && SSE2="-no-sse2"
 
-  PYTHON=/usr/bin/python2.7-32 ./configure -v -continue -confirm-license -opensource \
+  PYTHON=/usr/bin/python2.7-32 ./configure -confirm-license -opensource \
     -platform linux-g++-32 \
     -xplatform linux-g++-32 \
     -prefix /usr \
