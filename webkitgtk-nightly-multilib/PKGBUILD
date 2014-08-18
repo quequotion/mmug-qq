@@ -62,7 +62,7 @@ package_webkitgtk-nightly() {
   depends=(libwebp libxt libxslt sqlite libsoup enchant libgl 
 	   geoclue gtk3 gst-plugins-base-libs libsecret harfbuzz-icu cmake)
   makedepends=(git gtk3 gperf gobject-introspection python mesa 
-	       ruby gtk-doc)
+	       ruby gtk-doc gst-plugins-base)
 
   cd "$srcdir"/WebKit-${pkgver}/build-x86_64
   make -j1 DESTDIR="$pkgdir/" install 
@@ -78,8 +78,8 @@ package_lib32-webkitgtk-nightly() {
   provides=("lib32-webkitgtk" "lib32-webkitgtk3")
   depends=(lib32-libwebp lib32-libxt lib32-libxslt lib32-sqlite lib32-libsoup lib32-enchant lib32-libgl 
 	   geoclue lib32-gtk3 lib32-gst-plugins-base-libs lib32-libsecret lib32-harfbuzz-icu cmake)
-  makedepends=(git lib32-gtk3 gperf gobject-introspection python lib32-mesa 
-	       ruby gtk-doc)
+  makedepends=(git lib32-gtk3 gperf lib32-gobject-introspection python lib32-mesa 
+	       ruby gtk-doc lib32-gst-plugins-base)
   cd "$srcdir"/WebKit-${pkgver}/build-i686
 
   make -j1 DESTDIR="$pkgdir/" install
