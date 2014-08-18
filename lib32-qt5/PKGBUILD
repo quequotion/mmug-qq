@@ -46,11 +46,11 @@ source=("http://download.qt-project.org/official_releases/qt/5.3/${pkgver}/singl
         'assistant.desktop' 'designer.desktop' 'linguist.desktop' 'qdbusviewer.desktop'
         'use-python2.patch')
 md5sums=('f9a24a0d5645efa0715b6ff0fa13d60f'
-         'b2897dd6a2967bccf8f10e397aafee55'
-         '9638a78e502719ef8fe5f8d10d0361a9'
-         '188da8f4c87316e730ebf1c6217bf5a0'
-         '322b419b16c75d4de0ee7ad0a246caa1'
-         'a378deccf363bd6079da459c89aff7b9')
+         'a837e41cc347731304219a31b45a2c5b'
+         '49bb7467469919f3c1d37e2066ac2734'
+         '90738f44b8d8651315285364b78462ec'
+         'cb765f40c0924ff4c729b98aee8a8536'
+         'a29659eafcfc06c93ae4a51361f82175')
 
 prepare() {
   cd ${_pkgfqn}
@@ -59,10 +59,10 @@ prepare() {
   sed -i "/^QMAKE_LFLAGS_RPATH/s| -Wl,-rpath,||g" qtbase/mkspecs/common/gcc-base-unix.conf
   sed -i "/^QMAKE_LFLAGS\s/s|+=|+= ${LDFLAGS}|g" qtbase/mkspecs/common/gcc-base.conf
 
-  # Use python2 for Python 2.x
+  # Use python2.7-32 for Python 2.x
   patch -p1 -i "${srcdir}"/use-python2.patch
-  sed -i -e "s|#![ ]*/usr/bin/python$|#!/usr/bin/python2|" \
-    -e "s|#![ ]*/usr/bin/env python$|#!/usr/bin/env python2|" \
+  sed -i -e "s|#![ ]*/usr/bin/python$|#!/usr/bin/python2.7-32|" \
+    -e "s|#![ ]*/usr/bin/env python$|#!/usr/bin/env python2.7-32|" \
     $(find . -name '*.py')
 }
 
@@ -80,7 +80,9 @@ build() {
 
   [[ "${CARCH}" = "i686" ]] && SSE2="-no-sse2"
 
-  PYTHON=/usr/bin/python2 ./configure -confirm-license -opensource \
+  PYTHON=/usr/bin/python2.7-32 ./configure -v -continue -confirm-license -opensource \
+    -platform linux-g++-32 \
+    -xplatform linux-g++-32 \
     -prefix /usr \
     -bindir /usr/lib32/qt/bin \
     -docdir /usr/share/doc/qt \
