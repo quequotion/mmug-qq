@@ -114,7 +114,7 @@ build() {
 
 package_networkmanager-git() {
   depends=(dbus-glib dhclient libsoup polkit wpa_supplicant)
-  makedepends=(git gobject-introspection gtk-doc intltool libndp-git libnl libmm-glib)
+  makedepends=(git gobject-introspection gtk-doc intltool libndp-git libnl libmm-glib qt5)
   optdepends=('modemmanager: for modem management service'
   'dnsmasq: Connection sharing'
   'bluez: Bluetooth support'
@@ -131,7 +131,7 @@ package_networkmanager-git() {
 package_lib32-networkmanager-git() {
   pkgdesc+=" (32bit)"
   depends=(lib32-dbus-glib dhclient lib32-libsoup lib32-polkit wpa_supplicant)
-  makedepends=(git lib32-gobject-introspection gtk-doc intltool lib32-libndp-git lib32-libnl lib32-libmm-glib)
+  makedepends=(git lib32-gobject-introspection gtk-doc intltool lib32-libndp-git lib32-libnl lib32-libmm-glib lib32-qt5)
   optdepends=('modemmanager: for modem management service'
   'dnsmasq: Connection sharing'
   'lib32-bluez: Bluetooth support'
