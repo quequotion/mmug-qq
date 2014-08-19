@@ -1,0 +1,39 @@
+--- src/gstreamer/autogen.sh~	2014-08-18 22:08:42.836943973 +0900
++++ src/gstreamer/autogen.sh	2014-08-18 22:10:15.377937142 +0900
+@@ -17,21 +17,21 @@
+ package=gst-plugins-base
+ srcfile=gst-plugins-base.doap
+ 
+-# Make sure we have common
+-if test ! -f common/gst-autogen.sh;
+-then
+-  echo "+ Setting up common submodule"
+-  git submodule init
+-fi
+-git submodule update
+-
+-# source helper functions
+-if test ! -f common/gst-autogen.sh;
+-then
+-  echo There is something wrong with your source tree.
+-  echo You are missing common/gst-autogen.sh
+-  exit 1
+-fi
++## Make sure we have common
++#if test ! -f common/gst-autogen.sh;
++#then
++#  echo "+ Setting up common submodule"
++#  git submodule init
++#fi
++#git submodule update
++#
++## source helper functions
++#if test ! -f common/gst-autogen.sh;
++#then
++#  echo There is something wrong with your source tree.
++#  echo You are missing common/gst-autogen.sh
++#  exit 1
++#fi
+ . common/gst-autogen.sh
+ 
+ # install pre-commit hook for doing clean commits

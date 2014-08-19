@@ -2,9 +2,6 @@
 # Contributor: Kerrick Staley <mail@kerrickstaley.com>
 # Contributor: Jan de Groot <jgc@archlinux.org>
 
-pkgbase=gstreamer-git-multilib
-##pkgname=('gstreamer-git' 'lib32-gstreamer-git')
-#pkgname=gstreamer-git
 pkgname=lib32-gstreamer-git
 pkgver=1.5.0.1.15703.86d7a59
 pkgrel=1
@@ -14,8 +11,12 @@ license=('LGPL')
 url='http://gstreamer.freedesktop.org/'
 optdepends=('sh: feedback script')
 options=('!libtool')
-source=('git+git://anongit.freedesktop.org/gstreamer/gstreamer')
-md5sums=('SKIP')
+source=('git+git://anongit.freedesktop.org/gstreamer/gstreamer'
+        'git://anongit.freedesktop.org/gstreamer/common'
+        'common-submodule.patch')
+sha512sums=('SKIP'
+            'SKIP'
+            'c46a6a5dc93a77af023a558fa23496fb38f31db586cea4e3ae04d722a7b3ec9331a0e4deff6382bceaaf7175cd20d8805c211e8499ad290dc9aa3c805b888ff6')
 
 _gitname='gstreamer'
 
@@ -31,28 +32,23 @@ pkgver() {
 build() {
   cd $_gitname
 
-#  #Build 64bit libraries
-#  [[ -d build-x86_64 ]] || mkdir build-x86_64
-#  pushd build-x86_64
-#
-#  ../autogen.sh --prefix=/usr --sysconfdir=/etc --localstatedir=/var \
-#                --libdir=/usr/lib --libexecdir=/usr/lib --enable-gtk-doc --disable-static
-#  make
-#
-#  popd
+  #Saves some time and bandwidth on rebuilds
+  rm -rf common/
+  patch -Np2 < ../common-submodule.patch
+  ln -s ../common/ ./common
 
   #Build 32bit libraries
-
   [[ -d build-i686 ]] || mkdir build-i686
   pushd build-i686
 
   export CC='gcc -m32'
   export CXX='g++ -m32'
-  #export LDFLAGS='-m32'
+  export LDFLAGS='-m32'
   export PKG_CONFIG_PATH='/usr/lib32/pkgconfig'
 
   ../autogen.sh --prefix=/usr --sysconfdir=/etc --localstatedir=/var \
-                --libdir=/usr/lib32 --libexecdir=/usr/lib32 --enable-gtk-doc --disable-static
+                --libdir=/usr/lib32 --libexecdir=/usr/lib32 --enable-gtk-doc --disable-static \
+                --enable-introspection=no
   make
 
   popd
@@ -63,23 +59,10 @@ build() {
 #  make check
 #}
 
-##package_gstreamer-git() {
-#package() {
-#  depends=('libxml2' 'glib2')
-#  makedepends=('intltool' 'pkgconfig' 'gtk-doc' 'gobject-introspection')
-#  provides=('gstreamer='$pkgver)
-#  conflicts=('gstreamer')
-##  cd $_gitname/build-x86_64
-#  cd $_gitname
-##
-#  make DESTDIR="${pkgdir}" install
-#}
-
-##package_lib32-gstreamer-git() {
 package() {
   pkgdesc+=" (32bit)"
   depends=('lib32-libxml2' 'glib2')
-  makedepends=('intltool' 'pkgconfig' 'gtk-doc' 'gobject-introspection')
+  makedepends=('intltool' 'pkgconfig' 'gtk-doc' 'lib32-gobject-introspection')
   provides=('lib32-gstreamer='$pkgver)
   conflicts=('lib32-gstreamer')
   cd $_gitname/build-i686

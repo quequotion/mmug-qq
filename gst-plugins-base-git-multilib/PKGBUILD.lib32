@@ -1,0 +1,76 @@
+# Original Package: Jan de Groot <jgc@archlinux.org>
+# Maintainer: Lubosz Sarnecki <lubosz@gmail.com>
+
+pkgname='lib32-gst-plugins-base-git'
+pkgver=1.5.0.1.13524.844ae7c
+pkgrel=1
+pkgdesc="GStreamer Multimedia Framework Base Plugins"
+arch=('i686' 'x86_64')
+license=('LGPL')
+options=(!libtool !emptydirs)
+url="http://gstreamer.freedesktop.org/"
+source=('git://anongit.freedesktop.org/gstreamer/gst-plugins-base'
+        'git://anongit.freedesktop.org/gstreamer/common'
+        'common-submodule.patch'
+        'remove-qt.patch')
+sha512sums=('SKIP'
+            'SKIP'
+            '0031836c23d63c849515d16948fe2572310b51ad54e8707f3213aaa5393e6b08622b25ffc364ff973398655a8a3b006a2e8433cab5601d967fa915b2ee496547'
+            '5eae795f17b5e04b0322c5dea7a98f64cecfd279abc15ff726b6735fcf397ea51601bd7ee143ec459311d9627460b79f90a584e7b6fa9bb7392af874d647a3f8')
+
+_gitname='gst-plugins-base'
+
+pkgver() {
+  cd $_gitname
+  version=$(grep AC_INIT configure.ac | sed 's/AC_INIT(\[GStreamer Base Plug-ins\],\[//' | sed 's/\],\[http:\/\/bugzilla.gnome.org\/enter_bug.cgi?product=GStreamer\],\[gst-plugins-base\])//')
+  hash=$(git log --pretty=format:'%h' -n 1)
+  revision=$(git rev-list --count HEAD)
+  
+  echo $version.$revision.$hash
+}
+
+build() {
+  cd $_gitname
+
+  #Saves some time and bandwidth on rebuilds
+  rm -rf common/
+  patch -Np2 < ../common-submodule.patch
+  ln -s ../common/ ./common
+
+  #Build 32bit libraries
+
+  #This code depends on lib32-qt5, which will not build without lib32-gst-plugins-base... wait what?
+  patch -Np2 < ../remove-qt.patch
+
+  [[ -d build-i686 ]] || mkdir build-i686
+  pushd build-i686
+
+  export CC='gcc -m32'
+  export CXX='g++ -m32'
+  export LDFLAGS='-m32'
+  export PKG_CONFIG_PATH='/usr/lib32/pkgconfig'
+
+  ../autogen.sh --prefix=/usr --sysconfdir=/etc --localstatedir=/var --libdir=/usr/lib32 --libexecdir=/usr/lib32 \
+                --disable-static --enable-experimental --disable-fatal-warnings \
+                --enable-introspection=no
+  make
+
+  popd
+}
+
+package() {
+  pkgdesc+=" (32bit)"
+  makedepends=('pkgconfig' 'lib32-gstreamer-git' 'lib32-orc' 'lib32-libxv' 'lib32-alsa-lib' 'lib32-cdparanoia' 
+               'lib32-libvisual' 'lib32-libvorbis' 'lib32-libtheora' 'lib32-pango' 'lib32-gobject-introspection')
+  depends=('lib32-gstreamer-git' 'lib32-orc' 'lib32-libxv' 'lib32-alsa-lib' 'lib32-cdparanoia' 'lib32-libvisual'
+           'lib32-libvorbis' 'lib32-libtheora' 'lib32-pango')
+  conflicts=('lib32-gst-plugins-base' 'lib32-gst-plugins-base-libs')
+  provides=('lib32-gst-plugins-base='$pkgver 'lib32-gst-plugins-base-libs='$pkgver)
+ 
+  cd $_gitname/build-i686
+
+  make DESTDIR="${pkgdir}" install
+
+  rm -rf "${pkgdir}"/{etc,usr/{share,include,bin}}
+}
+
