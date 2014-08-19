@@ -5,7 +5,7 @@ pkgbase="gobject-introspection-git-multilib"
 pkgname=("gobject-introspection-git" "lib32-gobject-introspection-git")
 #pkgname=("gobject-introspection-git")
 #pkgname=("lib32-gobject-introspection-git")
-pkgver=1.41.4.21.g57d0362
+pkgver=1.41.4.22.gadf3ada
 pkgrel=1
 pkgdesc="GObject Introspection (git version)"
 epoch=1
@@ -35,31 +35,6 @@ build() {
   make
 
   popd
-
-  #There appears to be no way to make lib32-gobject-introspection understand the concept of lib32-python2
-  #
-  #This was the best I could do; at somepoint it tries to use /usr/lib/python despite being told in every possible way not to.
-  #
-  #Traceback (most recent call last):
-  #File "./g-ir-scanner", line 53, in <module>
-  #  from giscanner.scannermain import scanner_main
-  #File "../giscanner/scannermain.py", line 26, in <module>
-  #  import shutil
-  #File "/usr/lib/python2.7/shutil.py", line 12, in <module>
-  #  import collections
-  #File "/usr/lib/python2.7/collections.py", line 8, in <module>
-  #  from _collections import deque, defaultdict
-  #ImportError: /usr/lib/python2.7/lib-dynload/_collections.so: wrong ELF class: ELFCLASS64
-  #
-  #I did however, find a crazy workaround:
-  #
-  #sudo mv /usr/lib/python2.7 /usr/lib/ignore-python2.7 #Get 64bit python out of the way
-  #sudo ln -s /usr/lib32/python2.7 /usr/lib/python2.7   #Pretend that 32bit python is 64bit python
-  #sudo pacman -S python2-mako                          #This nonarch package will be missing from 32bit python
-  #Swap commenting of the 32bit and 64bit sections of this PKGBUILD
-  #makepkg
-  #sudo rm /usr/lib/python2.7                           #Stop pretending
-  #sudo mv /usr/lib/ignore-python2.7 /usr/lib/python2.7 #Put 64bit python back and hope for the best.
 
   #Build 32bit libraries
   [[ -d build-i686 ]] || mkdir build-i686
