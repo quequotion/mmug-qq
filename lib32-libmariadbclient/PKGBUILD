@@ -1,24 +1,25 @@
 # $Id: PKGBUILD 186282 2013-05-23 19:15:33Z bpiotrowski $
 # Maintainer: Bartłomiej Piotrowski <nospam@bpiotrowski.pl>
 
-_pkgbase=mariadb
-pkgname='lib32-libmariadbclient'
-pkgdesc='MariaDB client libraries (32 bit)'
-pkgver=5.5.36
+pkgbase=lib32-mariadb
+pkgname=('lib32-libmariadbclient' 'lib32-mariadb-clients' 'lib32-mariadb' )
+pkgver=10.0.13
 pkgrel=1
 arch=('x86_64')
 license=('GPL')
 url='http://mariadb.org/'
-makedepends=('cmake' 'lib32-libaio' 'lib32-libevent' 'lib32-openssl' 'lib32-zlib' 'lib32-pam')
-depends=('lib32-openssl')
-conflicts=('lib32-libmysqlclient')
-provides=("lib32-libmysqlclient=$pkgver")
-options=('!libtool')
-source=(http://mirrors.supportex.net/$_pkgbase/$_pkgbase-$pkgver/kvm-tarbake-jaunty-x86/$_pkgbase-$pkgver.tar.gz)
-sha256sums=('16f2cc9c219b4fbe0b3e97f14d1ed6fd8b7d377b22b95f31adae91965e36bb0c')
+makedepends=('cmake' 'lib32-libaio' 'lib32-libevent' 'lib32-openssl' 'lib32-zlib' 'lib32-pam' 'lib32-libxml2')
+source=(https://downloads.mariadb.org/interstitial/mariadb-$pkgver/source/mariadb-$pkgver.tar.gz
+        mariadb.service
+        mariadb-post.sh
+        mariadb-tmpfile.conf)
+sha256sums=('1a56a0ad1178e26723dfd7e77a2266a7da89552f12ea6bd5116a00bd13fa3c0d'
+            '8a4ce5aaa3701543d3324749a54f26f6fa51f64be1da51fcb809b39e6692ab2a'
+            'bf2a06fbd8d6b55040ccf6bfb5d17dc28356c01097169a74b6b077d3a0d8a148'
+            '5877179a808978c6d77cf3f32740a52a5be6174f77e459871f384fa22c1c60c7')
 
 prepare() {
-  cd $_pkgbase-$pkgver
+  cd mariadb-$pkgver
   sed -i '63d' storage/tokudb/ft-index/cmake_modules/TokuSetupCTest.cmake
 }
 
@@ -32,9 +33,12 @@ build() {
   export LDFLAGS='-m32'
   export PKG_CONFIG_PATH='/usr/lib32/pkgconfig'
 
-  CMAKE_PREFIX_PATH=/usr/lib32 cmake ../$_pkgbase-$pkgver \
-    -DCMAKE_BUILD_TYPE=Release \
+  CMAKE_PREFIX_PATH=/usr/lib32 cmake ../mariadb-$pkgver \
+    -DCMAKE_AR=/usr/bin/gcc-ar \
+    -DCMAKE_RANLIB=/usr/bin/gcc-ranlib \
+    -DBUILD_CONFIG=mysql_release \
     -DCMAKE_INSTALL_PREFIX=/usr \
+    -DSYSCONFDIR=/etc/mysql \
     -DMYSQL_DATADIR=/var/lib/mysql \
     -DMYSQL_UNIX_ADDR=/run/mysqld/mysqld.sock \
     -DDEFAULT_CHARSET=utf8 \
@@ -42,9 +46,9 @@ build() {
     -DENABLED_LOCAL_INFILE=ON \
     -DINSTALL_MANDIR=share/man \
     -DINSTALL_LIBDIR=lib32 \
-    -DINSTALL_PLUGINDIR=/usr/lib32/mysql/plugin \
+    -DINSTALL_PLUGINDIR=lib32/mysql/plugin \
     -DINSTALL_SCRIPTDIR=bin \
-    -DINSTALL_INCLUDEDIR=/usr/lib32/mysql/include/mysql \
+    -DINSTALL_INCLUDEDIR=lib32/mysql/include \
     -DINSTALL_DOCREADMEDIR=share/mysql \
     -DINSTALL_SUPPORTFILESDIR=share/mysql \
     -DINSTALL_MYSQLSHAREDIR=share/mysql \
@@ -53,41 +57,117 @@ build() {
     -DWITH_READLINE=ON \
     -DWITH_ZLIB=system \
     -DWITH_SSL=system \
+    -DWITH_PCRE=system \
     -DWITH_LIBWRAP=OFF \
     -DWITH_EXTRA_CHARSETS=complex \
-    -DWITH_EMBEDDED_SERVER=1 \
-    -DWITHOUT_PARTITION_STORAGE_ENGINE=1 \
-	-DWITHOUT_ARIA_STORAGE_ENGINE=1 \
-    -DWITHOUT_ARCHIVE_STORAGE_ENGINE=1 \
-    -DWITHOUT_BLACKHOLE_STORAGE_ENGINE=1 \
-    -DWITHOUT_CSV_STORAGE_ENGINE=1 \
+    -DWITH_EMBEDDED_SERVER=ON \
+    -DWITH_ARCHIVE_STORAGE_ENGINE=1 \
+    -DWITH_BLACKHOLE_STORAGE_ENGINE=1 \
+    -DWITH_INNOBASE_STORAGE_ENGINE=1 \
+    -DWITH_PARTITION_STORAGE_ENGINE=1 \
+    -DWITH_TOKUDB_STORAGE_ENGINE=1 \
     -DWITHOUT_EXAMPLE_STORAGE_ENGINE=1 \
     -DWITHOUT_FEDERATED_STORAGE_ENGINE=1 \
-    -DWITHOUT_FEDERATEDX_STORAGE_ENGINE=1 \
-    -DWITHOUT_HEAP_STORAGE_ENGINE=1 \
-    -DWITHOUT_INNOBASE_STORAGE_ENGINE=1 \
-    -DWITHOUT_MARIA_STORAGE_ENGINE=1 \
-    -DWITHOUT_MYISAM_STORAGE_ENGINE=1 \
-    -DWITHOUT_MYISAMMRG_STORAGE_ENGINE=1 \
-    -DWITHOUT_NDB_STORAGE_ENGINE=1 \
-    -DWITHOUT_OQGRAPH_STORAGE_ENGINE=1 \
-    -DWITHOUT_PERFSCHEMA_STORAGE_ENGINE=1 \
-    -DWITHOUT_SPHINX_STORAGE_ENGINE=1 \
-    -DWITHOUT_TOKUDB_STORAGE_ENGINE=1 \
-    -DWITHOUT_XTRADB_STORAGE_ENGINE=1 \
-    -DCMAKE_C_FLAGS="-m32 -fPIC ${CFLAGS} -fno-strict-aliasing -DBIG_JOINS=1 -fomit-frame-pointer" \
-    -DCMAKE_CXX_FLAGS="-m32 -fPIC ${CXXFLAGS} -fno-strict-aliasing -DBIG_JOINS=1 -felide-constructors -fno-rtti" \
+    -DWITHOUT_PBXT_STORAGE_ENGINE=1 \
+    -DCMAKE_C_FLAGS="-m32 -fPIC ${CFLAGS} -fno-strict-aliasing -DBIG_JOINS=1 -fomit-frame-pointer -fno-delete-null-pointer-checks" \
+    -DCMAKE_CXX_FLAGS="-m32 -fPIC ${CXXFLAGS} -fno-strict-aliasing -DBIG_JOINS=1 -felide-constructors -fno-rtti -fno-delete-null-pointer-checks" \
     -DWITH_MYSQLD_LDFLAGS="${LDFLAGS}"
 
   make
 }
 
-package() {
-  cd "$srcdir"/build
-  for dir in libmysql libmysqld libservices; do
+package_lib32-libmariadbclient() {
+  pkgdesc='MariaDB client libraries'
+  depends=('lib32-openssl' 'lib32-libaio' 'lib32-zlib' 'lib32-pcre')
+  conflicts=('lib32-libmysqlclient')
+  provides=("lib32-libmysqlclient=$pkgver")
+  options=('staticlibs')
+
+  cd build
+  for dir in include libmysql libmysqld libservices; do
     make -C $dir DESTDIR="$pkgdir" install
   done
 
+  install -Dm755 scripts/mysql_config "$pkgdir"/usr/bin/mysql_config
+  install -d "$pkgdir"/usr/share/man/man1
+  for man in mysql_config mysql_client_test_embedded mysqltest_embedded; do
+    install -m644 "$srcdir"/mariadb-$pkgver/man/$man.1 "$pkgdir"/usr/share/man/man1/$man.1
+  done
+
+  rm "$pkgdir"/usr/lib32/libmysql{client,client_r,d}.a
+
   rm -rf "${pkgdir}"/{etc,usr/{share,include,bin}}
 }
+
+package_lib32-mariadb-clients() {
+  pkgdesc='MariaDB client tools'
+  depends=('lib32-libmariadbclient' 'lib32-zlib' 'lib32-openssl')
+  conflicts=('lib32-mysql-clients')
+  provides=("lib32-mysql-clients=$pkgver")
+
+  cd build
+  make -C client DESTDIR="$pkgdir" install
+
+  # install man pages
+  install -d "$pkgdir"/usr/share/man/man1
+  for man in mysql mysqladmin mysqlcheck mysqldump mysqlimport mysqlshow mysqlslap; do
+    install -m644 "$srcdir"/mariadb-$pkgver/man/$man.1 "$pkgdir"/usr/share/man/man1/$man.1
+  done
+
+  # provided by mariadb
+  rm "$pkgdir"/usr/bin/{mysql_{plugin,upgrade},mysqlbinlog,mysqltest}
+
+  rm -rf "${pkgdir}"/{etc,usr/{share,include,bin}}
+
+}
+
+#package_lib32-mytop() {
+#  pkgdesc='Top clone for MariaDB'
+#  depends=('lib32-perl' 'lib32-perl-dbd-mysql' 'lib32-perl-term-readkey')
+#
+#  cd build
+#  install -Dm755 scripts/mytop "$pkgdir"/usr/bin/mytop
+#
+#  rm -rf "${pkgdir}"/{etc,usr/{share,include,bin}}
+#}
+
+package_lib32-mariadb() {
+  pkgdesc='Fast SQL database server, drop-in replacement for MySQL'
+  backup=('etc/mysql/my.cnf')
+  #install=mariadb.install
+  depends=('lib32-mariadb-clients' 'inetutils' 'lib32-libaio' 'lib32-libxml2' 'lib32-pcre')
+  optdepends=('lib32-perl-dbd-mysql: for mysqlhotcopy, mysql_convert_table_format and mysql_setpermission')
+  conflicts=('lib32-mysql')
+  provides=("lib32-mysql=$pkgver")
+  options=('emptydirs')
+
+  cd build
+  make DESTDIR="$pkgdir" install
+
+  install -Dm644 "$pkgdir"/usr/share/mysql/my-medium.cnf "$pkgdir"/etc/mysql/my.cnf
+  install -Dm755 ../mariadb-post.sh "$pkgdir"/usr/bin/mysqld-post
+  #install -Dm644 ../mariadb.service "$pkgdir"/usr/lib32/systemd/system/mysqld.service
+  install -Dm644 ../mariadb-tmpfile.conf "$pkgdir"/usr/lib32/tmpfiles.d/mysql.conf
+
+  # provided by libmariadbclient
+  cd "$pkgdir"
+  rm usr/bin/{mysql_config,mysql_client_test_embedded,mysqltest_embedded}
+  rm usr/lib32/libmysql*
+  rm -r usr/lib32/mysql/include/
+  rm usr/share/man/man1/{mysql_config,mysql_client_test_embedded,mysqltest_embedded}.1
+
+  # provided by mariadb-clients
+  rm usr/bin/{mysql,mysqladmin,mysqlcheck,mysqldump,mysqlimport,mysqlshow,mysqlslap}
+  rm usr/share/man/man1/{mysql,mysqladmin,mysqlcheck,mysqldump,mysqlimport,mysqlshow,mysqlslap}.1
+
+  # provided by mytop
+  rm usr/bin/mytop
+
+  # not needed
+  rm -r usr/{data,mysql-test,sql-bench}
+  rm usr/share/man/man1/mysql-test-run.pl.1
+
+  rm -rf "${pkgdir}"/{etc,usr/{share,include,bin}}
+}
+
 
