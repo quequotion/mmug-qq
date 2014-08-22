@@ -44,7 +44,7 @@ build() {
     -DINSTALL_LIBDIR=lib32 \
     -DINSTALL_PLUGINDIR=/usr/lib32/mysql/plugin \
     -DINSTALL_SCRIPTDIR=bin \
-    -DINSTALL_INCLUDEDIR=include/mysql \
+    -DINSTALL_INCLUDEDIR=/usr/lib32/mysql/include/mysql \
     -DINSTALL_DOCREADMEDIR=share/mysql \
     -DINSTALL_SUPPORTFILESDIR=share/mysql \
     -DINSTALL_MYSQLSHAREDIR=share/mysql \
