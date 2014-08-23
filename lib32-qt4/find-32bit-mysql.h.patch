@@ -1,0 +1,42 @@
+--- src/qt-everywhere-opensource-src-4.8.6/config.tests/unix/mysql/mysql.cpp~	2014-04-11 03:37:08.000000000 +0900
++++ src/qt-everywhere-opensource-src-4.8.6/config.tests/unix/mysql/mysql.cpp	2014-08-23 05:05:40.362301546 +0900
+@@ -39,7 +39,7 @@
+ **
+ ****************************************************************************/
+ 
+-#include "mysql.h"
++#include "/usr/lib32/mysql/include/mysql.h"
+ 
+ int main(int, char **)
+ {
+--- src/qt-everywhere-opensource-src-4.8.6/tools/configure/configureapp.cpp~	2014-04-11 03:37:12.000000000 +0900
++++ src/qt-everywhere-opensource-src-4.8.6/tools/configure/configureapp.cpp	2014-08-23 03:13:54.561960421 +0900
+@@ -2289,7 +2289,7 @@
+     else if (part == "LIBTIFF")
+         available = findFile("tiffio.h");
+     else if (part == "SQL_MYSQL")
+-        available = findFile("mysql.h") && findFile("libmySQL.lib");
++        available = findFile("/usr/lib32/mysql/include", "mysql.h", 1) && findFile("/usr/lib32/mysql/include", "libmySQL.lib", 1);
+     else if (part == "SQL_ODBC")
+         available = findFile("sql.h") && findFile("sqlext.h") && findFile("odbc32.lib");
+     else if (part == "SQL_OCI")
+@@ -2299,7 +2299,7 @@
+     else if (part == "SQL_TDS")
+         available = findFile("sybfront.h") && findFile("sybdb.h") && findFile("ntwdblib.lib");
+     else if (part == "SQL_DB2")
+-        available = findFile("sqlcli.h") && findFile("sqlcli1.h") && findFile("db2cli.lib");
++        available = findFile("/usr/lib32/mysql/include", "sqlcli.h", 1) && findFile("/usr/lib32/mysql/include", "sqlcli1.h", 1) && findFile("/usr/lib32", "db2cli.lib", 1);
+     else if (part == "SQL_SQLITE")
+         if (dictionary.contains("XQMAKESPEC") && dictionary["XQMAKESPEC"].startsWith("symbian"))
+             available = false; // In Symbian we only support system sqlite option
+--- src/qt-everywhere-opensource-src-4.8.6/src/sql/drivers/mysql/qsql_mysql.h~	2014-04-11 03:37:12.000000000 +0900
++++ src/qt-everywhere-opensource-src-4.8.6/src/sql/drivers/mysql/qsql_mysql.h	2014-08-24 05:36:25.876790611 +0900
+@@ -49,7 +49,7 @@
+ #include <QtCore/qt_windows.h>
+ #endif
+ 
+-#include <mysql.h>
++#include "/usr/lib32/mysql/include/mysql.h"
+ 
+ #ifdef QT_PLUGIN
+ #define Q_EXPORT_SQLDRIVER_MYSQL

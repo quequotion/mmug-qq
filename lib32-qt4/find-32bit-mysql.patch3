@@ -1,0 +1,11 @@
+--- src/qt-everywhere-opensource-src-4.8.6/src/sql/drivers/mysql/qsql_mysql.h~	2014-04-11 03:37:12.000000000 +0900
++++ src/qt-everywhere-opensource-src-4.8.6/src/sql/drivers/mysql/qsql_mysql.h	2014-08-24 05:36:25.876790611 +0900
+@@ -49,7 +49,7 @@
+ #include <QtCore/qt_windows.h>
+ #endif
+ 
+-#include <mysql.h>
++#include "/usr/lib32/mysql/include/mysql.h"
+ 
+ #ifdef QT_PLUGIN
+ #define Q_EXPORT_SQLDRIVER_MYSQL
