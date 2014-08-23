@@ -113,7 +113,7 @@ package() {
 
   # Dependants use the binary to find the headers...
   cd "${pkgdir}"/usr/bin
-  rm 2to3-3.4 idle3.4 pydoc3.4-32 pyvenv-3.4 2to3 idle3 pydoc3 python3-32 python3-32-config pyvenv
+  rm 2to3-3.4 idle3.4 pydoc3.4 pyvenv-3.4 2to3 idle3 pydoc3 python3-32 python3-32-config pyvenv
 
   # License
   install -Dm644 ${srcdir}/Python-${pkgver}/LICENSE "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
