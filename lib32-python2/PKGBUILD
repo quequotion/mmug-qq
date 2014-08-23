@@ -17,17 +17,18 @@ optdepends=('lib32-tk: for IDLE')
 conflicts=('lib32-python<3')
 options=('!makeflags')
 source=("http://www.python.org/ftp/python/${pkgver%rc?}/Python-${pkgver}.tar.xz"
-        'find-32bit.patch'
-        'python-config-32.patch')
+        'python-config-32.patch'
+        'lib32-distutils-sysconfig.patch')
 sha512sums=('0a992e34b6b704f028f5178c0404f8ca5fd9a7ab9da1879a20f0c72ffa712dc4925e45eb78e9368d6a17ee618259fc3f078d71766b314a732a1a28e526511a5e'
             '12adc36d90063ea066b4a2002452487581fb03a0d4af13800d1d5f16fe873521c080e61e28b7e0c2929822f05ef7e9233b359cd0038e7cb4139a8354fbee024a'
-            '68643c7632bd5a8c17fd095589ae97b137313852f75904cc1065d424b731702c9ef5bed4ff711bbde9ce1fe869eac3a32de0743e56070faca66ab63e227d6469')
+            '68643c7632bd5a8c17fd095589ae97b137313852f75904cc1065d424b731702c9ef5bed4ff711bbde9ce1fe869eac3a32de0743e56070faca66ab63e227d6469'
+            '6a661446a022f3c2e7f0273310c90cd6325efa3aaa0cad833b8fc63f89afd3f70a07795fe46b160a227f5094af25e03e19d094996d49f76f4ecb867b92edff49')
 
 prepare() {
   cd "${srcdir}/Python-${pkgver}"
 
-  #This should probably be done by hacking system.py
-  patch -Np2 < ../find-32bit.patch
+  #Just how many places does one have to patch Python?
+  patch -Np2 < ../lib32-distutils-sysconfig.patch
 
   #Give the configuration script an extention
   patch -Np2 < ../python-config-32.patch
