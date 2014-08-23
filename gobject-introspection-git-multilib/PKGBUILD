@@ -3,8 +3,6 @@
 
 pkgbase="gobject-introspection-git-multilib"
 pkgname=("gobject-introspection-git" "lib32-gobject-introspection-git")
-#pkgname=("gobject-introspection-git")
-#pkgname=("lib32-gobject-introspection-git")
 pkgver=1.41.4.22.gadf3ada
 pkgrel=1
 pkgdesc="GObject Introspection (git version)"
@@ -61,7 +59,6 @@ build() {
 }
 
 package_gobject-introspection-git() {
-#package(){
   depends=("glib2-git" 'python2' 'python2-mako')
   makedepends=('git' 'pkgconfig' 'autoconf' 'gtk-doc' 'gnome-common-git'
                'bison' 'cairo' 'mesa' 'flex')
@@ -77,7 +74,6 @@ package_gobject-introspection-git() {
 }
 
 package_lib32-gobject-introspection-git() {
-#package() {
   pkgdesc+=" (32bit)"
   depends=("lib32-glib2-git" 'lib32-python2' 'python2-mako')
   makedepends=('git' 'pkgconfig' 'autoconf' 'gtk-doc' 'gnome-common-git'
