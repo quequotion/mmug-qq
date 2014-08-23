@@ -23,15 +23,21 @@ optdepends=('python-setuptools'
             'lib32-xz: for lzma'
             'lib32-tk: for tkinter')
 options=('!makeflags')
-source=(http://www.python.org/ftp/python/${pkgver%rc*}/Python-${pkgver}.tar.xz
-        find-32bit.patch)
+source=("http://www.python.org/ftp/python/${pkgver%rc*}/Python-${pkgver}.tar.xz"
+        'lib32-distutils-sysconfig.patch'
+        'python-config-32.patch')
 sha512sums=('09b6390c07334974f189fb1c90bc2310898aef76661b1cecaa2b4d50001fa3df0fa0c63d3471a5a0dc7f9e08dd559d38d3bc45a6c05a816d8b2ed6b2a20e5fa9'
-            'b36cfb962072d480c6f4d1d672616e918d7faba89bc1507dab2b55a71febbbcde2b7fa121b2f12fb2f1e2708589aeafb4c923034a212f604c5e75f9da6df78dd')
+            'a67f3da0ad76dd72e973b2e9c106d2136f0b65c6803b9ccf6d474fe0c1be4bf9f3d6636b439178cbc60deda30e6adea512ab11285d8e919d472bc7f41970679a'
+            '447a1c853eb52e8c7c87ee1fb228411848e466e399451be3f7a12885e02a039a17e652162c549c0d4aebca4f876c4ad1b35d583a09179cbe8f15602f23d3acee')
 
 prepare() {
   cd Python-${pkgver}
 
-  patch -Np2 < ../find-32bit.patch
+  #Just how many places does one have to patch Python?
+  patch -Np2 < ../lib32-distutils-sysconfig.patch
+
+  #Give the configuration script an extention
+  patch -Np2 < ../python-config-32.patch
 
   # FS#23997
   sed -i -e "s|^#.* /usr/local/bin/python|#!/usr/bin/python|" Lib/cgi.py
@@ -44,10 +50,12 @@ prepare() {
   rm -r Modules/_decimal/libmpdec
 
   #Fix hard-coded paths
-  sed -i "s|/lib/|/lib32/|g" "${srcdir}/Python-${pkgver}/Lib/sysconfig.py"
+  sed -i "s|base}/lib|base}/lib32|g" "${srcdir}/Python-${pkgver}/Lib/sysconfig.py"
+  sed -i "s|/include|/lib32/python{py_version_short}/include|g" "${srcdir}/Python-${pkgver}/Lib/sysconfig.py"
   sed -i "s|lib/|lib32/|g" "${srcdir}/Python-${pkgver}/Modules/getpath.c"
-  sed -i "s|/lib/|/lib32/|g" "${srcdir}/Python-${pkgver}/Lib/distutils/command/install.py"
-  sed -i "s|/lib/|/lib32/|g" "${srcdir}/Python-${pkgver}/Makefile.pre.in"
+  sed -i "s|base/lib|base/lib32|g" "${srcdir}/Python-${pkgver}/Lib/distutils/command/install.py"
+  sed -i "s|/include|/lib32/python{py_version_short}/include|g" "${srcdir}/Python-${pkgver}/Lib/distutils/command/install.py"
+  sed -i "s|prefix)/lib|prefix)/lib32|g" "${srcdir}/Python-${pkgver}/Makefile.pre.in"
 
 }
 
@@ -63,7 +71,7 @@ build() {
   # Disable bundled pip & setuptools
   ./configure --prefix=/usr --libdir=/usr/lib32 --libexecdir=/usr/lib32 \
               --includedir=/usr/lib32/python${_pybasever}/include \
-              --exec_prefix=/usr/lib32/python${_pybasever}/ \
+              --exec_prefix=/usr/lib32/python${_pybasever}/ --with-suffix='-32'\
               --bindir=/usr/bin --sbindir=/usr/sbin \
               --enable-shared \
               --with-threads \
@@ -75,10 +83,6 @@ build() {
               --with-system-ffi \
               --with-system-libmpdec \
               --without-ensurepip
-
-  # Force /usr/lib to /usr/lib32
-  sed -i -e 's#$(prefix)/lib#$(prefix)/lib32#' Makefile
-
   make
 }
 
@@ -109,11 +113,7 @@ package() {
 
   # Dependants use the binary to find the headers...
   cd "${pkgdir}"/usr/bin
-  mv python3.4 python3.4-32
-  mv python3.4-config python3.4-32-config
-  mv python3.4m python3.4m-32
-  mv python3.4m-config python3.4m-32-config
-  rm 2to3-3.4 idle3.4 pydoc3.4 pyvenv-3.4 2to3 idle3 pydoc3 python3 python3-config pyvenv
+  rm 2to3-3.4 idle3.4 pydoc3.4-32 pyvenv-3.4 2to3 idle3 pydoc3 python3-32 python3-32-config pyvenv
 
   # License
   install -Dm644 ${srcdir}/Python-${pkgver}/LICENSE "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
