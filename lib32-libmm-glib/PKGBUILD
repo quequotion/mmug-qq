@@ -35,7 +35,7 @@ build() {
 }
 
 package_lib32-modemmanager() {
-  depends+=(libmm-glib)
+  depends+=(lib32-libmm-glib)
   optdepends=('usb_modeswitch: install if your modem shows up as a storage drive')
   options=(!emptydirs)
 
@@ -53,7 +53,7 @@ package_lib32-modemmanager() {
 
 package_lib32-libmm-glib() {
   pkgdesc="ModemManager library"
-  depends=(glib2)
+  depends=(lib32-glib2)
 
   install -d "$pkgdir/usr/lib32"
   mv include "$pkgdir/usr"
