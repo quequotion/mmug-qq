@@ -52,7 +52,7 @@ build() {
 
   ../autogen.sh --prefix=/usr --sysconfdir=/etc --localstatedir=/var --libdir=/usr/lib32 --libexecdir=/usr/lib32 \
                 --disable-static --enable-experimental --disable-fatal-warnings \
-                --enable-introspection=no
+                --enable-introspection=no #no other way, everything else was tried.
   make
 
   popd
@@ -63,7 +63,7 @@ package() {
   makedepends=('pkgconfig' 'lib32-gstreamer-git' 'lib32-orc' 'lib32-libxv' 'lib32-alsa-lib' 'lib32-cdparanoia' 
                'lib32-libvisual' 'lib32-libvorbis' 'lib32-libtheora' 'lib32-pango' 'lib32-gobject-introspection')
   depends=('lib32-gstreamer-git' 'lib32-orc' 'lib32-libxv' 'lib32-alsa-lib' 'lib32-cdparanoia' 'lib32-libvisual'
-           'lib32-libvorbis' 'lib32-libtheora' 'lib32-pango')
+           'lib32-libvorbis' 'lib32-libtheora' 'lib32-pango') # 'lib32-qt5'
   conflicts=('lib32-gst-plugins-base' 'lib32-gst-plugins-base-libs')
   provides=('lib32-gst-plugins-base='$pkgver 'lib32-gst-plugins-base-libs='$pkgver)
  

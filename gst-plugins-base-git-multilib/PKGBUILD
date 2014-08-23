@@ -48,7 +48,7 @@ build() {
 
 package() {
   makedepends=('pkgconfig' 'gstreamer-git' 'orc' 'libxv' 'alsa-lib' 'cdparanoia' 'libvisual' 'libvorbis'
-               'libtheora' 'pango' 'gobject-introspection')
+               'libtheora' 'pango' 'gobject-introspection' 'qt5')
   depends=('gstreamer-git' 'orc' 'libxv' 'alsa-lib' 'cdparanoia' 'libvisual' 'libvorbis' 'libtheora' 'pango')
   conflicts=('gst-plugins-base' 'gst-plugins-base-libs')
   provides=('gst-plugins-base='$pkgver 'gst-plugins-base-libs='$pkgver)
