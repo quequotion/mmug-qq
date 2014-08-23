@@ -3,7 +3,7 @@
 # Contributor: Jan de Groot <jgc@archlinux.org>
 
 pkgname=lib32-gstreamer-git
-pkgver=1.5.0.1.15703.86d7a59
+pkgver=1.5.0.1.15707.b38264a
 pkgrel=1
 pkgdesc='GStreamer Multimedia Framework (Git version)'
 arch=('i686' 'x86_64')
@@ -48,7 +48,7 @@ build() {
 
   ../autogen.sh --prefix=/usr --sysconfdir=/etc --localstatedir=/var \
                 --libdir=/usr/lib32 --libexecdir=/usr/lib32 --enable-gtk-doc --disable-static \
-                --enable-introspection=no
+                --enable-introspection=no #no other way, everything else was tried.
   make
 
   popd
