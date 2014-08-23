@@ -36,11 +36,10 @@ build() {
 
   cd bluez-${pkgver}
   ./configure \
-          --prefix=/usr --libdir=/usr/lib32 \
+          --prefix=/usr --libdir=/usr/lib32 --libexecdir=/usr/lib32 \
           --mandir=/usr/share/man \
           --sysconfdir=/etc \
           --localstatedir=/var \
-          --libexecdir=/usr/lib32 \
           --enable-sixaxis \
           --enable-experimental \
           --enable-library # this is deprecated
@@ -53,6 +52,8 @@ check() {
   #make check
 }
 
+
+#Some of these packages are empty; they only serve to appease dependency requirements.
 
 package_lib32-bluez() {
   pkgdesc="Daemons for the bluetooth protocol stack (32bit)"
