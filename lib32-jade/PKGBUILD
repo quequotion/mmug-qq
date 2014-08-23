@@ -1,0 +1,56 @@
+# $Id$
+# Maintainer:
+# Contributor: dorphell <dorphell@archlinux.org>
+# Contributor: Tom Newsom <Jeepster@gmx.co.uk>
+
+pkgname=lib32-jade
+pkgver=1.2.1
+pkgrel=9
+_debpatch=47.3
+pkgdesc="James Clark's DSSSL Engine"
+url='http://www.jclark.com/jade/'
+arch=('i686' 'x86_64')
+license=('custom')
+depends=('gcc-libs')
+replaces=('openjade')
+options=('!makeflags')
+source=("ftp://ftp.jclark.com/pub/jade/jade-${pkgver}.tar.gz"
+        "http://ftp.debian.org/debian/pool/main/j/jade/jade_${pkgver}-${_debpatch}.diff.gz"
+        "destdir.patch")
+sha512sums=('a81c676e4a7e619e840c370f47357c3c4d14275293b3c47812839d0b4d2d16c9f103e5b1222510cd145a8bc255c83a82a1777bcf2126377617f236bbaa2a046d'
+            '65eedb4cf4ff16786fb1d3fc3f5bf88ba1aa792cbdf94b6747ac0f4be4c847ec4752adf5be65c93e6a026fe6203db4b25406f2175ef866d82bcec78b227172e1'
+            '82d43672c854f2e0299d6a9b6b745efe446c50e825c2b2d82ea56af599df20c088582bc72c47aae6378878aecda0dc3b411e2c0600e93b301d533827fca97554')
+
+prepare() {
+  cd jade-${pkgver}
+  chmod -R +w *
+  patch -p1 -i "${srcdir}"/jade_${pkgver}-${_debpatch}.diff
+  patch -Np2 < ../destdir.patch
+}
+
+build() {
+  cd jade-${pkgver}
+  export CXXFLAGS="$CXXFLAGS -fpermissive"
+  chmod 755 configure
+
+  export CC='gcc -m32'
+  export CXX='g++ -m32'
+  export LDFLAGS='-m32'
+  export PKG_CONFIG_PATH='/usr/lib32/pkgconfig'
+
+  ./configure --prefix=/usr --enable-default-catalog=/usr/share/sgml/catalog \
+              --libdir=/usr/lib32 --libexecdir=/usr/lib32 
+  make
+}
+
+package() {
+  cd jade-${pkgver}
+  install -d -m755 "${pkgdir}"/usr/lib32
+  install -d -m755 "${pkgdir}"/usr/bin
+  make DESTDIR="${pkgdir}" install #prefix="${pkgdir}"/usr install
+  mv "${pkgdir}"/usr/bin/sx "${pkgdir}"/usr/bin/sgml2xml
+
+  rm -rf "${pkgdir}"/{etc,usr/{share,include,bin}}
+  install -Dm644 COPYING "${pkgdir}"/usr/share/licenses/${pkgname}/LICENSE
+}
+

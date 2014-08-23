@@ -1,0 +1,30 @@
+--- src/jade-1.2.1/Makefile.lib.in~	2014-08-24 04:01:40.417501391 +0900
++++ src/jade-1.2.1/Makefile.lib.in	2014-08-24 04:12:17.378533793 +0900
+@@ -17,10 +17,10 @@
+ 
+ lib$(LIB).la: $(LT_OBJS)
+ 	$(LIBTOOL) --mode=link $(CC) -o lib$(LIB).la $(LT_OBJS) \
+-	    -rpath $(libdir) -version-info $(LTVERSION) $(DEPLIBS)
++	    -rpath $(DESTDIR)$(libdir) -version-info $(LTVERSION) $(DEPLIBS)
+ 
+ install:
+-	$(LIBTOOL) --mode=install $(INSTALL) lib$(LIB).la $(libdir)
++	$(LIBTOOL) --mode=install $(INSTALL) lib$(LIB).la $(DESTDIR)$(libdir)
+ 
+ install-man:
+ depend: depend_src
+--- src/jade-1.2.1/Makefile.prog.in~	1998-10-12 10:36:20.000000000 +0900
++++ src/jade-1.2.1/Makefile.prog.in	2014-08-24 04:12:15.578533702 +0900
+@@ -17,9 +17,9 @@
+ 	$(LIBTOOL) --mode=link $(CXX) $(CXXFLAGS) $(LDFLAGS) -o $@ $(OBJS) $(COBJS) $(LT_LIBS)
+ 
+ install: $(PROG)
+-	-test -d $(bindir) || (mkdir $(bindir); chmod 755 $(bindir))
+-	-rm -f $(bindir)/$(PROG)
+-	$(LIBTOOL) --mode=install $(INSTALL) $(PROG) $(bindir)
++	-test -d $(bindir) || (mkdir $(DESTDIR)$(bindir); chmod 755 $(DESTDIR)$(bindir))
++	-rm -f $(DESTDIR)$(bindir)/$(PROG)
++	$(LIBTOOL) --mode=install $(INSTALL) $(PROG) $(DESTDIR)$(bindir)
+ 
+ depend: depend_src
+ depend.temp: $(GENSRCS)
