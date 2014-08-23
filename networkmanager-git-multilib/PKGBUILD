@@ -10,7 +10,7 @@
 
 pkgbase=networkmanager-git-multilib
 pkgname=('networkmanager-git' 'lib32-networkmanager-git')
-pkgver=0.9.10.beta1.428.g722712b
+pkgver=0.9.10.beta1.476.ga1907ec
 pkgrel=1
 pkgdesc="Network Management daemon"
 arch=(i686 x86_64)
@@ -83,7 +83,7 @@ build() {
 
   export CC='gcc -m32'
   export CXX='g++ -m32'
-  export LDFLAGS='-m32'
+  export LDFLAGS='-m32 -L/usr/lib32'
   export PKG_CONFIG_PATH='/usr/lib32/pkgconfig'
 
   AUTOPOINT="intltoolize -f -c --automake" autoreconf -fi ../
@@ -105,7 +105,7 @@ build() {
       --disable-static \
       --enable-more-warnings=no \
       --disable-wimax \
-      #--enable-introspection=no # lib32-gobject-introspection
+      --disable-qt #no other way, everything else was tried.
 
   make
 
@@ -114,35 +114,39 @@ build() {
 
 package_networkmanager-git() {
   depends=(dbus-glib dhclient libsoup polkit wpa_supplicant)
-  makedepends=(git gobject-introspection gtk-doc intltool libndp-git libnl libmm-glib qt5)
+  makedepends=(git gobject-introspection gtk-doc intltool libndp-git libnl libmm-glib qt4)
   optdepends=('modemmanager: for modem management service'
   'dnsmasq: Connection sharing'
   'bluez: Bluetooth support'
   'openresolv: resolvconf support')
-  provides=(networkmanager=$pkgver)
+  provides=(networkmanager=$pkgver libnm-glib)
   conflicts=(networkmanager)
-  make -C NetworkManager DESTDIR="$pkgdir" install
-  install -m644 NetworkManager.conf "$pkgdir"/etc/NetworkManager/
+
+  cd "${srcdir}/NetworkManager/build-x86_64"
+  make DESTDIR="$pkgdir" install
+  install -m644 ${srcdir}/NetworkManager.conf "$pkgdir"/etc/NetworkManager/
   rm -r "$pkgdir"/var/run
   # Provide native service for arch-daemons generator
-  ln -s NetworkManager.service "$pkgdir"/usr/lib/systemd/system/networkmanager.service
+  ln -s ${srcdir}/NetworkManager.service "$pkgdir"/usr/lib/systemd/system/networkmanager.service
 }
 
 package_lib32-networkmanager-git() {
   pkgdesc+=" (32bit)"
   depends=(lib32-dbus-glib dhclient lib32-libsoup lib32-polkit wpa_supplicant)
-  makedepends=(git lib32-gobject-introspection gtk-doc intltool lib32-libndp-git lib32-libnl lib32-libmm-glib lib32-qt5)
+  makedepends=(git lib32-gobject-introspection gtk-doc intltool lib32-libndp-git lib32-libnl lib32-libmm-glib) #lib32-qt4
   optdepends=('modemmanager: for modem management service'
   'dnsmasq: Connection sharing'
   'lib32-bluez: Bluetooth support'
   'openresolv: resolvconf support')
-  provides=(lib32-networkmanager=$pkgver)
+  provides=(lib32-networkmanager=$pkgver lib32-libnm-glib)
   conflicts=(lib32-networkmanager)
-  make -C networkmanager DESTDIR="$pkgdir" install
-  install -m644 NetworkManager.conf "$pkgdir"/etc/NetworkManager/
+
+  cd "${srcdir}/NetworkManager/build-i686"
+  make DESTDIR="$pkgdir" install
+  install -m644 ${srcdir}/NetworkManager.conf "$pkgdir"/etc/NetworkManager/
   rm -r "$pkgdir"/var/run
   # Provide native service for arch-daemons generator
-  ln -s NetworkManager.service "$pkgdir"/usr/lib/systemd/system/networkmanager.service
+  ln -s ${srcdir}/NetworkManager.service "$pkgdir"/usr/lib/systemd/system/networkmanager.service
 
-  rm -rf "${pkgdir}"/{etc,usr/{share,include,bin}}
+  rm -rf "${pkgdir}"/{etc,usr/{share,include,bin,lib,sbin}} # cruft in lib/, sbin/
 }
