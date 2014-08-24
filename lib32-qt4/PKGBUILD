@@ -18,9 +18,9 @@ optdepends=('lib32-libxinerama: Xinerama support'
             'lib32-libxfixes: Xfixes support')
 makedepends=(cups gcc-multilib lib32-{mesa,libcups,libxfixes,gtk2})
 options=('staticlibs') # libQtUiTools builds as static only FS#36606
-provides=(lib32-qtwebkit)
-replaces=(lib32-qtwebkit 'lib32-qt<=4.8.4')
-conflicts=(lib32-qtwebkit lib32-qt)
+provides=('lib32-qtwebkit')
+replaces=('lib32-qtwebkit' 'lib32-qt<=4.8.4')
+conflicts=('lib32-qtwebkit' 'lib32-qt')
 _pkgfqn="qt-everywhere-opensource-src-${pkgver}"
 source=("http://download.qt-project.org/official_releases/qt/4.8/${pkgver}/${_pkgfqn}.tar.gz"
         'find-32bit-mysql.h.patch')
@@ -55,7 +55,6 @@ build() {
   cd $srcdir/$_pkgfqn
   export QT4DIR=$srcdir/$_pkgfqn
   export LD_LIBRARY_PATH=${QT4DIR}/lib:${LD_LIBRARY_PATH}
-  export PKG_CONFIG_PATH="/usr/lib32/pkgconfig"
 
   export CC='gcc -m32'
   export CXX='g++ -m32'
@@ -94,13 +93,6 @@ build() {
 package() {
   cd $srcdir/$_pkgfqn
   make INSTALL_ROOT=$pkgdir install
-
-  # Fix wrong path in pkgconfig files
-  #find ${pkgdir}/usr/lib32/qt4/bin/pkgconfig/ -type f -name '*.pc' \
-  #  -exec perl -pi -e "s, -L${srcdir}/?\S+,,g" {} \;
-  # Fix wrong path in prl files
-  #find ${pkgdir}/usr/lib32/qt4/bin/ -type f -name '*.prl' \
-  #  -exec sed -i -e '/^QMAKE_PRL_BUILD_DIR/d;s/\(QMAKE_PRL_LIBS =\).*/\1/' {} \;
 
   rm -rf "${pkgdir}"/usr/{include,share,bin,tests}
   mkdir -p "$pkgdir/usr/share/licenses"
