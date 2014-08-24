@@ -63,7 +63,8 @@ build() {
 
   ./configure -v -confirm-license -opensource -platform linux-g++-32 \
     -prefix /usr \
-    -libdir /usr/lib32/qt4/bin \
+    -libdir /usr/lib32/qt4/ \
+    -bindir /usr/lib32/qt4/bin \
     -headerdir /usr/lib32/qt4/include \
     -docdir /usr/share/doc/qt4 \
     -plugindir /usr/lib32/qt4/plugins \
@@ -95,7 +96,10 @@ package() {
   make INSTALL_ROOT=$pkgdir install
 
   rm -rf "${pkgdir}"/usr/{include,share,bin,tests}
-  mkdir -p "$pkgdir/usr/share/licenses"
+  install -Dd "$pkgdir/usr/share/licenses"
   ln -s $_pkgbasename "$pkgdir/usr/share/licenses/$pkgname"
+  install -Dd "$pkgdir/usr/lib32/pkgconfig"
+  ln -s "$pkgdir"/usr/lib32/qt4/pkgconfig/* "$pkgdir"/usr/lib32/pkgconfig/
+
 }
 
