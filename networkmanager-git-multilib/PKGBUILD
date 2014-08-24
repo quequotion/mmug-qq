@@ -86,10 +86,6 @@ build() {
   export LDFLAGS='-m32 -L/usr/lib32'
   export PKG_CONFIG_PATH='/usr/lib32/pkgconfig'
 
-  #pkgconfig doesn't get it right and these options don't help.
-  #export QT_LIBS='-L/usr/lib32/qt4/' 
-  #export QT_CFLAGS='-I/usr/lib32/qt4/include/*/'
-
   AUTOPOINT="intltoolize -f -c --automake" autoreconf -fi ../
 
   ../configure \
@@ -109,10 +105,9 @@ build() {
       --with-session-tracking=systemd \
       --disable-static \
       --enable-more-warnings=no \
-      --disable-wimax \
-      --disable-qt
+      --disable-wimax 
+      #--disable-qt
      #Avoid an impossible dependency loop if lib32-qt4 is not installed.
-     #Actually, it can never work so just forget about the qt components.
 
   make
 
