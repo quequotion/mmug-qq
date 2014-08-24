@@ -5,7 +5,6 @@ pkgbase=lib32-qt5
 pkgname=('lib32-qt5-base'
          'lib32-qt5-connectivity'
          'lib32-qt5-declarative'
-         'lib32-qt5-doc'
          'lib32-qt5-enginio'
          'lib32-qt5-graphicaleffects'
          'lib32-qt5-imageformats'
@@ -22,7 +21,7 @@ pkgname=('lib32-qt5-base'
          'lib32-qt5-webkit'
          'lib32-qt5-websockets'
          'lib32-qt5-x11extras'
-         'lib32-qt5-xmlpatterns')
+         'lib32-qt5-xmlpatterns') # 'lib32-qt5-doc'
 pkgver=5.3.1
 pkgrel=1
 arch=('i686' 'x86_64')
@@ -68,12 +67,12 @@ build() {
   cd ${_pkgfqn}
 
   export QTDIR="${srcdir}"/${_pkgfqn}
-  export LD_LIBRARY_PATH="${QTDIR}"/qtbase/lib32:"${QTDIR}"/qttools/lib32:"${LD_LIBRARY_PATH}"
+  export LD_LIBRARY_PATH="${QTDIR}"/qtbase/lib:"${QTDIR}"/qttools/lib:"${LD_LIBRARY_PATH}"
   export QT_PLUGIN_PATH="${QTDIR}"/qtbase/plugins
 
   export CC='gcc -m32'
   export CXX='g++ -m32'
-  export LDFLAGS='-m32 -L/usr/lib32'
+  export LDFLAGS='-m32' # -L/usr/lib32'
   export PKG_CONFIG_PATH='/usr/lib32/pkgconfig'
 
   [[ "${CARCH}" = "i686" ]] && SSE2="-no-sse2"
@@ -104,13 +103,13 @@ build() {
   make
 
   # Fix paths
-  find "${QTDIR}" -name Makefile -exec sed -i "s|/usr/lib32/qt/bin/qdoc|${QTDIR}/qtbase/bin/qdoc|g" {} +
-  find "${QTDIR}" -name Makefile.qmake-docs -exec sed -i "s|/usr/lib32/qt/bin/qdoc|${QTDIR}/qtbase/bin/qdoc|g" {} +
-  find "${QTDIR}" -name Makefile -exec sed -i "s|/usr/lib32/qt/bin/qhelpgenerator|${QTDIR}/qttools/bin/qhelpgenerator|g" {} +
-  find "${QTDIR}" -name Makefile.qmake-docs -exec sed -i "s|/usr/lib32/qt/bin/qhelpgenerator|${QTDIR}/qttools/bin/qhelpgenerator|g" {} +
-  sed -i "s|/usr/lib32/qt/bin/qhelpgenerator|${QTDIR}/qttools/bin/qhelpgenerator|g" qtwebkit/Source/Makefile.api
+  #find "${QTDIR}" -name Makefile -exec sed -i "s|/usr/lib32/qt/bin/qdoc|${QTDIR}/qtbase/bin/qdoc|g" {} +
+  #find "${QTDIR}" -name Makefile.qmake-docs -exec sed -i "s|/usr/lib32/qt/bin/qdoc|${QTDIR}/qtbase/bin/qdoc|g" {} +
+  #find "${QTDIR}" -name Makefile -exec sed -i "s|/usr/lib32/qt/bin/qhelpgenerator|${QTDIR}/qttools/bin/qhelpgenerator|g" {} +
+  #find "${QTDIR}" -name Makefile.qmake-docs -exec sed -i "s|/usr/lib32/qt/bin/qhelpgenerator|${QTDIR}/qttools/bin/qhelpgenerator|g" {} +
+  #sed -i "s|/usr/lib32/qt/bin/qhelpgenerator|${QTDIR}/qttools/bin/qhelpgenerator|g" qtwebkit/Source/Makefile.api
 
-  make docs
+  #make docs
 }
 
 package_lib32-qt5-base() {
@@ -193,24 +192,24 @@ package_lib32-qt5-declarative() {
     "${pkgdir}"/usr/share/licenses/${pkgname}/LGPL_EXCEPTION.txt
 }
 
-package_lib32-qt5-doc() {
-  pkgdesc='A cross-platform application and UI framework (Documentation) (32bit)'
-  depends=('lib32-qt5-base')
+#package_lib32-qt5-doc() {
+#  pkgdesc='A cross-platform application and UI framework (Documentation) (32bit)'
+#  depends=('lib32-qt5-base')
 #  arch=('any')
-  conflicts=('lib32-qt-doc')
-  replaces=('lib32-qt-doc')
-  provides=('lib32-qt-doc')
-  options=('docs' '!emptydirs')
-  groups=()
-
-  cd ${_pkgfqn}
-  make INSTALL_ROOT="${pkgdir}" install_docs
-
-  rm -rf "${pkgdir}"/{etc,usr/{share,include,bin}}
-
-  install -D -m644 LGPL_EXCEPTION.txt \
-    "${pkgdir}"/usr/share/licenses/${pkgname}/LGPL_EXCEPTION.txt
-}
+#  conflicts=('lib32-qt-doc')
+#  replaces=('lib32-qt-doc')
+#  provides=('lib32-qt-doc')
+#  options=('docs' '!emptydirs')
+#  groups=()
+#
+#  cd ${_pkgfqn}
+#  make INSTALL_ROOT="${pkgdir}" install_docs
+#
+#  rm -rf "${pkgdir}"/{etc,usr/{share,include,bin}}
+#
+#  install -D -m644 LGPL_EXCEPTION.txt \
+#    "${pkgdir}"/usr/share/licenses/${pkgname}/LGPL_EXCEPTION.txt
+#}
 
 package_lib32-qt5-enginio() {
   pkgdesc='A Backend-as-a-Service solution to ease the backend development for connected and data-driven application (32bit)'
