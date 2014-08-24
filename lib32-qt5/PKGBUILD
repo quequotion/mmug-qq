@@ -81,6 +81,7 @@ build() {
     -platform linux-g++-32 \
     -xplatform linux-g++-32 \
     -prefix /usr \
+    -libdir /usr/lib32/qt/ \
     -bindir /usr/lib32/qt/bin \
     -docdir /usr/share/doc/qt \
     -headerdir /usr/lib32/qt/include/qt \
