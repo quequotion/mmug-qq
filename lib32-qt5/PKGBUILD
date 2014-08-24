@@ -38,13 +38,15 @@ groups=('qt' 'qt5')
 _pkgfqn="qt-everywhere-opensource-src-${pkgver}"
 source=("http://download.qt-project.org/official_releases/qt/5.3/${pkgver}/single/${_pkgfqn}.tar.xz"
         'assistant.desktop' 'designer.desktop' 'linguist.desktop' 'qdbusviewer.desktop'
-        'use-python2.patch')
+        'use-python2.7-32.patch'
+        'use-perl-32.patch')
 md5sums=('f9a24a0d5645efa0715b6ff0fa13d60f'
          'a837e41cc347731304219a31b45a2c5b'
          '49bb7467469919f3c1d37e2066ac2734'
          '90738f44b8d8651315285364b78462ec'
          'cb765f40c0924ff4c729b98aee8a8536'
-         'a29659eafcfc06c93ae4a51361f82175')
+         '09867f309c563982f0df2353647fff35'
+         '02383134b1db34b2a3d977abcdde3a1c')
 
 prepare() {
   cd ${_pkgfqn}
@@ -54,10 +56,12 @@ prepare() {
   sed -i "/^QMAKE_LFLAGS\s/s|+=|+= ${LDFLAGS}|g" qtbase/mkspecs/common/gcc-base.conf
 
   # Use python2.7-32 for Python 2.x
-  patch -p1 -i "${srcdir}"/use-python2.patch
+  patch -p1 -i "${srcdir}"/use-python2.7-32.patch
   sed -i -e "s|#![ ]*/usr/bin/python$|#!/usr/bin/python2.7-32|" \
     -e "s|#![ ]*/usr/bin/env python$|#!/usr/bin/env python2.7-32|" \
     $(find . -name '*.py')
+  # Use perl-32 for perl
+  patch -Np2 < ../use-perl-32.patch
 }
 
 build() {
@@ -69,12 +73,12 @@ build() {
 
   export CC='gcc -m32'
   export CXX='g++ -m32'
-  export LDFLAGS='-m32'
+  export LDFLAGS='-m32 -L/usr/lib32'
   export PKG_CONFIG_PATH='/usr/lib32/pkgconfig'
 
   [[ "${CARCH}" = "i686" ]] && SSE2="-no-sse2"
 
-  PYTHON=/usr/bin/python2.7-32 ./configure -confirm-license -opensource \
+  PYTHON=/usr/bin/python2.7-32 ./configure -v -confirm-license -opensource \
     -platform linux-g++-32 \
     -xplatform linux-g++-32 \
     -prefix /usr \
@@ -85,6 +89,7 @@ build() {
     -datadir /usr/share/qt \
     -sysconfdir /etc/xdg \
     -examplesdir /usr/share/doc/qt/examples \
+    -I /usr/lib32/mysql/include/ \
     -plugin-sql-{psql,mysql,sqlite,odbc,ibase} \
     -system-sqlite \
     -openssl-linked \

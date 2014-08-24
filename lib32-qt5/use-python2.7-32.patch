@@ -5,7 +5,7 @@
  inspectorValidate.input = INSPECTOR_JSON
  inspectorValidate.script = $$PWD/inspector/generate-inspector-protocol-version
 -inspectorValidate.commands = python $$inspectorValidate.script -o ${QMAKE_FILE_OUT} ${QMAKE_FILE_IN}
-+inspectorValidate.commands = python2 $$inspectorValidate.script -o ${QMAKE_FILE_OUT} ${QMAKE_FILE_IN}
++inspectorValidate.commands = python2.7-32 $$inspectorValidate.script -o ${QMAKE_FILE_OUT} ${QMAKE_FILE_IN}
  inspectorValidate.depends = $$PWD/inspector/generate-inspector-protocol-version
  inspectorValidate.add_output_to_sources = false
  GENERATORS += inspectorValidate
@@ -14,7 +14,7 @@
  inspectorJSON.input = INSPECTOR_JSON
  inspectorJSON.script = $$PWD/inspector/CodeGeneratorInspector.py
 -inspectorJSON.commands = python $$inspectorJSON.script $$PWD/inspector/Inspector.json --output_h_dir ${QMAKE_FUNC_FILE_OUT_PATH} --output_cpp_dir ${QMAKE_FUNC_FILE_OUT_PATH}
-+inspectorJSON.commands = python2 $$inspectorJSON.script $$PWD/inspector/Inspector.json --output_h_dir ${QMAKE_FUNC_FILE_OUT_PATH} --output_cpp_dir ${QMAKE_FUNC_FILE_OUT_PATH}
++inspectorJSON.commands = python2.7-32 $$inspectorJSON.script $$PWD/inspector/Inspector.json --output_h_dir ${QMAKE_FUNC_FILE_OUT_PATH} --output_cpp_dir ${QMAKE_FUNC_FILE_OUT_PATH}
  inspectorJSON.depends = $$inspectorJSON.script
  GENERATORS += inspectorJSON
  
@@ -23,7 +23,7 @@
  entities.input = HTML_ENTITIES
  entities.script = $$PWD/html/parser/create-html-entity-table
 -entities.commands = python $$entities.script -o ${QMAKE_FILE_OUT} $$HTML_ENTITIES
-+entities.commands = python2 $$entities.script -o ${QMAKE_FILE_OUT} $$HTML_ENTITIES
++entities.commands = python2.7-32 $$entities.script -o ${QMAKE_FILE_OUT} $$HTML_ENTITIES
  entities.clean = ${QMAKE_FILE_OUT}
  entities.depends = $$PWD/html/parser/create-html-entity-table
  GENERATORS += entities
@@ -34,7 +34,7 @@
  retgen.script = $$PWD/create_regex_tables
  retgen.input = retgen.script
 -retgen.commands = python $$retgen.script > ${QMAKE_FILE_OUT}
-+retgen.commands = python2 $$retgen.script > ${QMAKE_FILE_OUT}
++retgen.commands = python2.7-32 $$retgen.script > ${QMAKE_FILE_OUT}
  GENERATORS += retgen
  
  #GENERATOR: "KeywordLookup.h": decision tree used by the lexer
@@ -42,7 +42,7 @@
  klgen.script = $$PWD/KeywordLookupGenerator.py
  klgen.input = KEYWORDLUT_FILES
 -klgen.commands = python $$klgen.script ${QMAKE_FILE_NAME} > ${QMAKE_FILE_OUT}
-+klgen.commands = python2 $$klgen.script ${QMAKE_FILE_NAME} > ${QMAKE_FILE_OUT}
++klgen.commands = python2.7-32 $$klgen.script ${QMAKE_FILE_NAME} > ${QMAKE_FILE_OUT}
  GENERATORS += klgen
  
  EXTRACTOR_BINARY = LLIntOffsetsExtractor$$BIN_EXTENSION
@@ -51,7 +51,7 @@
      disassembler.script = $$PWD/disassembler/udis86/itab.py
      disassembler.depends = $$DISASSEMBLER_DEPENDENCY
 -    disassembler.commands = python $$disassembler.script ${QMAKE_FILE_NAME} --outputDir ${QMAKE_FUNC_FILE_OUT_PATH}
-+    disassembler.commands = python2 $$disassembler.script ${QMAKE_FILE_NAME} --outputDir ${QMAKE_FUNC_FILE_OUT_PATH}
++    disassembler.commands = python2.7-32 $$disassembler.script ${QMAKE_FILE_NAME} --outputDir ${QMAKE_FUNC_FILE_OUT_PATH}
      disassembler.CONFIG += no_link
      GENERATORS += disassembler
  }
@@ -62,7 +62,7 @@
          addReasonForSkippingBuild("Build not supported on BB10/QNX yet.")
      }
 -    requiredPrograms = gperf python perl bison ruby flex
-+    requiredPrograms = gperf python2 perl bison ruby flex
++    requiredPrograms = gperf python2.7-32 perl bison ruby flex
      for(program, requiredPrograms): \
          !programExistsInPath($$program): \
              addReasonForSkippingBuild("Missing $$program from PATH")
@@ -73,7 +73,7 @@
      udis86.input = ITAB
      udis86.CONFIG += no_link
 -    udis86.commands = python $$PWD/disassembler/udis86/itab.py ${QMAKE_FILE_IN}
-+    udis86.commands = python2 $$PWD/disassembler/udis86/itab.py ${QMAKE_FILE_IN}
++    udis86.commands = python2.7-32 $$PWD/disassembler/udis86/itab.py ${QMAKE_FILE_IN}
      QMAKE_EXTRA_COMPILERS += udis86
  
      udis86_tab_cfile.target = $$OUT_PWD/udis86_itab.c
@@ -82,7 +82,7 @@
  retgen.input = retgen.script
  retgen.CONFIG += no_link
 -retgen.commands = python $$retgen.script > ${QMAKE_FILE_OUT}
-+retgen.commands = python2 $$retgen.script > ${QMAKE_FILE_OUT}
++retgen.commands = python2.7-32 $$retgen.script > ${QMAKE_FILE_OUT}
  QMAKE_EXTRA_COMPILERS += retgen
  
  # Taken from WebKit/Tools/qmake/mkspecs/features/unix/default_post.prf
