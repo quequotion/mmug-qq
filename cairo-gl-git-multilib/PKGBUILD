@@ -1,0 +1,90 @@
+# Maintainer: Limao Luo <luolimao+AUR@gmail.com>
+# Contributor: Aljosha Papsch <papsch.al@gmail.com>
+# Contributor: Jan de Groot <jgc@archlinux.org>
+# Contributor: Disfido <disfido@gmail.com>
+
+pkgbase=cair-gl-git-multilib
+pkgname=('cairo-gl-git' 'lib32-cairo-gl-git')
+pkgver=1.12.16.164.g13a0952
+pkgrel=1
+pkgdesc="Cairo vector graphics library with GL and EGL enabled"
+arch=(i686 x86_64)
+url=http://cairographics.org/
+license=(LGPL2.1 MPL)
+options=(!libtool)
+source=(git://anongit.freedesktop.org/git/cairo)
+sha256sums=('SKIP')
+sha512sums=('SKIP')
+
+pkgver() {
+    cd cairo/
+    git describe | sed 's/-/./g'
+}
+
+build() {
+    cd cairo/
+
+    #Build 64bit libraries
+    [[ -d build-x86_64 ]] || mkdir build-x86_64
+    pushd build-x86_64
+
+    # glesv2 and gl cannot be enabled at the same time.
+    # Please take a look at: http://lists.freedesktop.org/archives/cairo/2011-July/022138.html
+    ../autogen.sh \
+        --prefix=/usr \
+        --sysconfdir=/etc \
+        --localstatedir=/var \
+        --enable-gl \
+        --enable-egl \
+        --enable-xcb \
+        --disable-static
+    make
+
+
+    popd
+
+    #Build 32bit libraries
+    [[ -d build-i686 ]] || mkdir build-i686
+    pushd build-i686
+ 
+    export CC='gcc -m32'
+    export CXX='g++ -m32'
+    export LDFLAGS='-m32'
+    export PKG_CONFIG_PATH='/usr/lib32/pkgconfig'
+
+    # glesv2 and gl cannot be enabled at the same time.
+    # Please take a look at: http://lists.freedesktop.org/archives/cairo/2011-July/022138.html
+    ../autogen.sh \
+        --libdir=/usr/lib32 --libexecdir=/usr/lib32 --includedir=/usr/lib32/cairo/include \
+        --prefix=/usr \
+        --sysconfdir=/etc \
+        --localstatedir=/var \
+        --enable-gl \
+        --enable-egl \
+        --enable-xcb \
+        --disable-static
+    make
+
+    popd
+}
+
+package_cairo-gl-git() {
+    depends=(fontconfig libegl libpng libxrender pixman)
+    makedepends=(gtk-doc git librsvg mesa poppler-glib libspectre)
+    provides=(cairo{,-xcb}=$pkgver cairo-git)
+    conflicts=(cairo)
+
+    make -C cairo/build-x86_64 DESTDIR="$pkgdir" install
+}
+
+package_lib32-cairo-gl-git() {
+    pkgdesc+=" (32bit)"
+    depends=(lib32-fontconfig lib32-libegl lib32-libpng lib32-libxrender lib32-pixman)
+    makedepends=(gtk-doc git lib32-librsvg lib32-mesa lib32-poppler-glib lib32-libspectre)
+    provides=(lib32-cairo{,-xcb}=$pkgver lib32-cairo-git)
+    conflicts=(lib32-cairo)
+
+    make -C cairo/build-i686 DESTDIR="$pkgdir" install
+
+    rm -rf "${pkgdir}"/{etc,usr/{share,include,bin}}
+}
