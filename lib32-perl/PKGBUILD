@@ -153,20 +153,12 @@ prepare() {
   cd ${srcdir}/perl-${pkgver}
   patch -p1 -i "$srcdir/perl-vutil-revert.patch"
   sed -i 's#version vutil.c .*#version vutil.c f1c7e4778fcf78c04141f562b80183b91cbbf6c9#' t/porting/customized.dat
-  patch -Np2 < ../skip-lnm.patch
+  #Avoid an impossible dependency loop if lib32-networkmanager is not installed
+  #patch -Np2 < ../skip-lnm.patch
 }
 
 build() {
   cd ${srcdir}/perl-${pkgver}
-
-
-#  if [ "${CARCH}" = "x86_64" ]; then
-#    # for x86_64
-#    arch_opts="-Dcccdlflags='-fPIC'"
-#  else
-#    # for i686
-#    arch_opts=""
-#  fi
 
   export CC='gcc -m32'
   export CXX='g++ -m32'
