@@ -4,7 +4,7 @@
 pkgname=lib32-openjpeg
 pkgver=1.5.2
 pkgrel=1
-pkgdesc="An open source JPEG 2000 codec"
+pkgdesc="An open source JPEG 2000 codec (32bit)"
 arch=(i686 x86_64)
 license=('BSD')
 url="http://www.openjpeg.org"
