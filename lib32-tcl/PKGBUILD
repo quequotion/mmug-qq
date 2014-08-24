@@ -28,7 +28,8 @@ build() {
   export PKG_CONFIG_PATH='/usr/lib32/pkgconfig'
 
 #  [[ $CARCH == "x86_64" ]] && BIT="--enable-64bit"
-  ./configure --prefix=/usr --libdir=/usr/lib32 --libexecdir=/usr/lib32  --mandir=/usr/share/man --enable-threads #$BIT
+  ./configure --prefix=/usr --libdir=/usr/lib32 --libexecdir=/usr/lib32  --includedir=/usr/lib32/tcl/include \
+              --mandir=/usr/share/man --enable-threads #$BIT
 
   make
 }
@@ -46,23 +47,23 @@ package() {
 
   # remove buildroot traces
   sed -e "s#${srcdir}/tcl${pkgver}/unix#/usr/lib32#" \
-      -e "s#${srcdir}/tcl${pkgver}#/usr/include#" \
+      -e "s#${srcdir}/tcl${pkgver}#/usr/lib32/tcl/include#" \
       -i "${pkgdir}/usr/lib32/tclConfig.sh"
 
   sed -e "s#${srcdir}/tcl${pkgver}/unix/pkgs/tdbc1.0.0#/usr/lib32/tdbc1.0.0#" \
-      -e "s#${srcdir}/tcl${pkgver}/pkgs/tdbc1.0.0/generic#/usr/include#" \
+      -e "s#${srcdir}/tcl${pkgver}/pkgs/tdbc1.0.0/generic#/usr/lib32/tcl/include#" \
       -e "s#${srcdir}/tcl${pkgver}/pkgs/tdbc1.0.0/library#/usr/lib32/tcl${pkgver%.*}#" \
-      -e "s#${srcdir}/tcl${pkgver}/pkgs/tdbc1.0.0#/usr/include#" \
+      -e "s#${srcdir}/tcl${pkgver}/pkgs/tdbc1.0.0#/usr/lib32/tcl/include#" \
       -i "${pkgdir}/usr/lib32/tdbc1.0.0/tdbcConfig.sh"
 
   sed -e "s#${srcdir}/tcl${pkgver}/unix/pkgs/itcl4.0.0#/usr/lib32/itcl4.0.0#" \
-      -e "s#${srcdir}/tcl${pkgver}/pkgs/itcl4.0.0/generic#/usr/include#" \
-      -e "s#${srcdir}/tcl${pkgver}/pkgs/itcl4.0.0#/usr/include#" \
+      -e "s#${srcdir}/tcl${pkgver}/pkgs/itcl4.0.0/generic#/usr/lib32/tcl/include#" \
+      -e "s#${srcdir}/tcl${pkgver}/pkgs/itcl4.0.0#/usr/lib32/tcl/include#" \
       -i "${pkgdir}/usr/lib32/itcl4.0.0/itclConfig.sh"
 
   # remove 64-bit and unarched stuff
-  rm -rf "${pkgdir}"/{etc,usr/{share,include,bin,lib}}
+  rm -rf "${pkgdir}"/{etc,usr/{share,include,bin,lib}} # cruft in lib/ ?
 
-  install -Dm644 ../license.terms "${pkgdir}/usr/share/licenses/lib32-tcl/LICENSE"
+  install -Dm644 ../license.terms "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
 }
 
