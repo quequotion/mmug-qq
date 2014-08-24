@@ -17,11 +17,10 @@ pkgname=('lib32-qt5-base'
          'lib32-qt5-serialport'
          'lib32-qt5-svg'
          'lib32-qt5-tools'
-         'lib32-qt5-translations'
          'lib32-qt5-webkit'
          'lib32-qt5-websockets'
          'lib32-qt5-x11extras'
-         'lib32-qt5-xmlpatterns') # 'lib32-qt5-doc'
+         'lib32-qt5-xmlpatterns') # 'lib32-qt5-doc' 'lib32-qt5-translations'
 pkgver=5.3.1
 pkgrel=1
 arch=('i686' 'x86_64')
@@ -253,19 +252,19 @@ package_lib32-qt5-xmlpatterns() {
     "${pkgdir}"/usr/share/licenses/${pkgname}/LGPL_EXCEPTION.txt
 }
 
-package_lib32-qt5-translations() {
-  pkgdesc='A cross-platform application and UI framework (Translations) (32bit)'
-  depends=('lib32-qt5-base')
-  conflicts=('lib32-qt')
-
-  cd ${_pkgfqn}/qttranslations
-  make INSTALL_ROOT="${pkgdir}" install
-
-  rm -rf "${pkgdir}"/{etc,usr/{share,include,bin}}
-
-  install -D -m644 LGPL_EXCEPTION.txt \
-    "${pkgdir}"/usr/share/licenses/${pkgname}/LGPL_EXCEPTION.txt
-}
+#package_lib32-qt5-translations() {
+#  pkgdesc='A cross-platform application and UI framework (Translations) (32bit)'
+#  depends=('lib32-qt5-base')
+#  conflicts=('lib32-qt')
+#
+#  cd ${_pkgfqn}/qttranslations
+#  make INSTALL_ROOT="${pkgdir}" install
+#
+#  rm -rf "${pkgdir}"/{etc,usr/{share,include,bin}}
+#
+#  install -D -m644 LGPL_EXCEPTION.txt \
+#    "${pkgdir}"/usr/share/licenses/${pkgname}/LGPL_EXCEPTION.txt
+#}
 
 package_lib32-qt5-multimedia() {
   pkgdesc='Classes for audio, video, radio and camera functionality (32bit)'
@@ -438,8 +437,8 @@ package_lib32-qt5-svg() {
 
 package_lib32-qt5-tools() {
   pkgdesc='A cross-platform application and UI framework (Development Tools, QtHelp) (32bit)'
-  depends=('lib32-qt5-webkit' 'desktop-file-utils' 'lib32-qt5-translations' 'hicolor-icon-theme'
-           'xdg-utils')
+  depends=('lib32-qt5-webkit' 'desktop-file-utils' 'hicolor-icon-theme'
+           'xdg-utils') # 'lib32-qt5-translations'
   optdepends=('lib32-qt5-doc: documentation')
   install='qt5-tools.install'
   conflicts=('lib32-qt')
@@ -498,7 +497,7 @@ package_lib32-qt5-webkit() {
     -exec sed -i -e '/^QMAKE_PRL_BUILD_DIR/d;s/\(QMAKE_PRL_LIBS =\).*/\1/' {} \;
 
   # Fix wrong path in pc file
-  perl -pi -e "s, -L${srcdir}/?\S+,,g" "${pkgdir}"/usr/lib32/pkgconfig/Qt5WebKit.pc
+  perl-32 -pi -e "s, -L${srcdir}/?\S+,,g" "${pkgdir}"/usr/lib32/qt/pkgconfig/Qt5WebKit.pc
 
   rm -rf "${pkgdir}"/{etc,usr/{share,include,bin}}
 }
