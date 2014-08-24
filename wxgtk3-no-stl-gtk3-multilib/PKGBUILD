@@ -54,7 +54,7 @@ build() {
   export LDFLAGS='-m32'
   export PKG_CONFIG_PATH='/usr/lib32/pkgconfig'
 
-  ../configure --prefix=/usr --libdir=/usr/lib32 \
+  ../configure --prefix=/usr --libdir=/usr/lib32 --includedir=/usr/lib32/wx/ --program-suffix='-32' \
               --enable-{graphics_ctx,mediactrl,unicode,webview} \
               --with-lib{jpeg,png,tiff,xpm}=sys --with-regex=builtin --with-opengl --with-gtk=3 \
               --disable-precomp-headers
@@ -89,7 +89,7 @@ package_lib32-wxgtk-gtk3() {
 
   make DESTDIR="${pkgdir}" install
 
-  rm -rf "${pkgdir}"/{etc,usr/{share,include,bin}}
+  rm -rf "${pkgdir}"/{etc,usr/{share,include}} # needs bin/
 
   install -dm 755 "${pkgdir}"/usr/share/licenses
   install -D -m644 docs/licence.txt "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
