@@ -3,7 +3,7 @@
 # Maintainer: Jonas Heinrich <onny@project-insanity.org>
 
 pkgbase=webkitgtk-nightly-multilib
-pkgname=('webkitgtk-nightly' 'lib32-webkitgtk-nightly')
+pkgname=('lib32-webkitgtk-nightly') #'webkitgtk-nightly' 
 pkgver=r172617
 pkgrel=1
 pkgdesc="GTK+ Web content engine library (nightly build)"
@@ -12,29 +12,34 @@ url="http://webkitgtk.org/"
 license=('custom')
 optdepends=('gtk2: Netscape plugin support')
 options=('!libtool' '!emptydirs')
-source=("http://builds.nightly.webkit.org/files/trunk/src/WebKit-${pkgver}.tar.bz2")
-md5sums=('SKIP')
+source=("http://builds.nightly.webkit.org/files/trunk/src/WebKit-${pkgver}.tar.bz2"
+        'aggresively-force-32bit.patch')
+md5sums=('43df68f3087b207c7737119c7514656e'
+         '3ca3367a54f6429c54b7a8ee48f9a509')
 
 build() {
   cd "$srcdir"/WebKit-${pkgver}
 
-  #Build 64bit libraries
-  [[ -d build-x86_64 ]] || mkdir build-x86_64
-  pushd build-x86_64
-
-  cmake -DCMAKE_BUILD_TYPE=Release \
-        -DCMAKE_INSTALL_PREFIX=/usr \
-        -DLIBEXEC_INSTALL_DIR=/usr/lib \
-        -DPORT=GTK \
-        -DUSE_GTK2=OFF \
-        -DENABLE_WEBGL=ON \
-        ../
-
-  make
-
-  popd
+#  #Build 64bit libraries
+#  [[ -d build-x86_64 ]] || mkdir build-x86_64
+#  pushd build-x86_64
+#
+#  cmake -DCMAKE_BUILD_TYPE=Release \
+#        -DCMAKE_INSTALL_PREFIX=/usr \
+#        -DLIBEXEC_INSTALL_DIR=/usr/lib \
+#        -DPORT=GTK \
+#        -DENABLE_WEBGL=ON \
+#        ../
+#
+#  make
+#
+#  popd
 
   #Build 32bit libraries
+
+  #This is a rediculous thing to have to do. Just rediculous.
+  patch -Np2 < ../aggresively-force-32bit.patch
+
   [[ -d build-i686 ]] || mkdir build-i686
   pushd build-i686
 
@@ -43,33 +48,41 @@ build() {
   export LDFLAGS='-m32'
   export PKG_CONFIG_PATH='/usr/lib32/pkgconfig'
 
-  cmake -DCMAKE_BUILD_TYPE=Release \
+  CMAKE_PREFIX_PATH=/usr/lib32 cmake -DCMAKE_BUILD_TYPE=Release \
         -DCMAKE_INSTALL_PREFIX=/usr \
         -DLIBEXEC_INSTALL_DIR=/usr/lib32 \
+        -DLIB_INSTALL_DIR=/usr/lib32 \
+        -DCMAKE_C_FLAGS="-m32" \
+        -DCMAKE_CXX_FLAGS="-m32" \
+        -DCMAKE_EXE_LINKER_FLAGS="-m32" \
+        -DCMAKE_SHARED_LINKER_FLAGS="-m32" \
+        -DCMAKE_SYSTEM_PROCESSOR="i686" \
         -DPORT=GTK \
-        -DUSE_GTK2=OFF \
         -DENABLE_WEBGL=ON \
         ../
+
+        #-DPYTHON_EXECUTABLE='/usr/bin/python3.4-32' \
+        #-DPERL_EXECUTABLE='/usr/bin/perl-32' \
   make
 
   popd
 }
 
-package_webkitgtk-nightly() {
-  conflicts=('webkitgtk')
-  replaces=("webgitgtk-svn")
-  provides=("webkitgtk" "webkitgtk3")
-  depends=(libwebp libxt libxslt sqlite libsoup enchant libgl 
-	   geoclue gtk3 gst-plugins-base-libs libsecret harfbuzz-icu cmake)
-  makedepends=(git gtk3 gperf gobject-introspection python mesa 
-	       ruby gtk-doc gst-plugins-base)
-
-  cd "$srcdir"/WebKit-${pkgver}/build-x86_64
-  make -j1 DESTDIR="$pkgdir/" install 
-
-  install -Dm644 ../Source/WebKit/LICENSE \
-    "$pkgdir/usr/share/licenses/WebKit/LICENSE"
-}
+#package_webkitgtk-nightly() {
+#  conflicts=('webkitgtk')
+#  replaces=("webgitgtk-svn")
+#  provides=("webkitgtk" "webkitgtk3")
+#  depends=(libwebp libxt libxslt sqlite libsoup enchant libgl
+#            geoclue gtk3 gst-plugins-base-libs libsecret harfbuzz-icu cmake)
+#  makedepends=(git gtk3 gperf gobject-introspection python mesa 
+#                ruby gtk-doc gst-plugins-base cairo)
+#
+#  cd "$srcdir"/WebKit-${pkgver}/build-x86_64
+#  make -j1 DESTDIR="$pkgdir/" install 
+#
+#  install -Dm644 ../Source/WebKit/LICENSE \
+#    "$pkgdir/usr/share/licenses/WebKit/LICENSE"
+#}
 
 package_lib32-webkitgtk-nightly() {
   pkgdesc+=" (32bit)"
@@ -78,8 +91,8 @@ package_lib32-webkitgtk-nightly() {
   provides=("lib32-webkitgtk" "lib32-webkitgtk3")
   depends=(lib32-libwebp lib32-libxt lib32-libxslt lib32-sqlite lib32-libsoup lib32-enchant lib32-libgl 
 	   geoclue lib32-gtk3 lib32-gst-plugins-base-libs lib32-libsecret lib32-harfbuzz-icu cmake)
-  makedepends=(git lib32-gtk3 gperf lib32-gobject-introspection python lib32-mesa 
-	       ruby gtk-doc lib32-gst-plugins-base)
+  makedepends=(git lib32-gtk3 gperf lib32-gobject-introspection lib32-python lib32-mesa 
+	       ruby gtk-doc lib32-gst-plugins-base lib32-cairo)
   cd "$srcdir"/WebKit-${pkgver}/build-i686
 
   make -j1 DESTDIR="$pkgdir/" install
