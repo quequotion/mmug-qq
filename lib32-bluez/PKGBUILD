@@ -4,7 +4,7 @@
 # Contributor: Geoffroy Carrier <geoffroy@archlinux.org>
 
 pkgbase=lib32-bluez
-pkgname=('lib32-bluez' 'lib32-bluez-utils' 'lib32-bluez-libs' 'lib32-bluez-cups' 'lib32-bluez-hid2hci' 'lib32-bluez-plugins')
+pkgname=('lib32-bluez' 'lib32-bluez-libs' 'lib32-bluez-cups' 'lib32-bluez-plugins') # 'lib32-bluez-utils' 'lib32-bluez-hid2hci' 
 pkgver=5.21
 pkgrel=2
 url="http://www.bluez.org/"
@@ -52,9 +52,6 @@ check() {
   #make check
 }
 
-
-#Some of these packages are empty; they only serve to appease dependency requirements.
-
 package_lib32-bluez() {
   pkgdesc="Daemons for the bluetooth protocol stack (32bit)"
   depends=('lib32-libical' 'lib32-dbus' 'lib32-glib2')
@@ -90,32 +87,32 @@ package_lib32-bluez() {
 
 }
 
-package_lib32-bluez-utils() {
-  pkgdesc="Development and debugging utilities for the bluetooth protocol stack (32bit)"
-  depends=('lib32-dbus' 'lib32-systemd')
-  conflicts=('lib32-bluez-hcidump')
-  provides=('lib32-bluez-hcidump')
-  replaces=('lib32-bluez-hcidump' 'lib32-bluez<=4.101')
-
-  cd bluez-${pkgver}
-  make DESTDIR=${pkgdir} \
-       install-binPROGRAMS \
-       install-man1
-
-  # add experimental BT LE manager - FS#41132
-  install -Dm755 ${srcdir}/bluez-${pkgver}/tools/btmgmt ${pkgdir}/usr/bin/btmgmt
-       
-  # libbluetooth.so* are part of libLTLIBRARIES and binPROGRAMS targets
-  #make DESTDIR=${pkgdir} uninstall-libLTLIBRARIES
-  #rmdir ${pkgdir}/usr/lib32
-  rm -rf ${pkgdir}/usr/lib32
-  
-  # move the hid2hci man page out
-  mv ${pkgdir}/usr/share/man/man1/hid2hci.1 ${srcdir}/
-
-  rm -rf "${pkgdir}"/{etc,usr/{share,include,bin,lib}} # cruft in lib/
-
-}
+#package_lib32-bluez-utils() {
+#  pkgdesc="Development and debugging utilities for the bluetooth protocol stack (32bit)"
+#  depends=('lib32-dbus' 'lib32-systemd')
+#  conflicts=('lib32-bluez-hcidump')
+#  provides=('lib32-bluez-hcidump')
+#  replaces=('lib32-bluez-hcidump' 'lib32-bluez<=4.101')
+#
+#  cd bluez-${pkgver}
+#  make DESTDIR=${pkgdir} \
+#       install-binPROGRAMS \
+#       install-man1
+#
+#  # add experimental BT LE manager - FS#41132
+#  install -Dm755 ${srcdir}/bluez-${pkgver}/tools/btmgmt ${pkgdir}/usr/bin/btmgmt
+#       
+#  # libbluetooth.so* are part of libLTLIBRARIES and binPROGRAMS targets
+#  #make DESTDIR=${pkgdir} uninstall-libLTLIBRARIES
+#  #rmdir ${pkgdir}/usr/lib32
+#  rm -rf ${pkgdir}/usr/lib32
+#  
+#  # move the hid2hci man page out
+#  mv ${pkgdir}/usr/share/man/man1/hid2hci.1 ${srcdir}/
+#
+#  rm -rf "${pkgdir}"/{etc,usr/{share,include,bin,lib}} # cruft in lib/
+#
+#}
 
 package_lib32-bluez-libs() {
   pkgdesc="Deprecated libraries for the bluetooth protocol stack (32bit)"
@@ -143,21 +140,21 @@ package_lib32-bluez-cups() {
 
 }
 
-package_lib32-bluez-hid2hci() {
-  pkgdesc="Put HID proxying bluetooth HCI's into HCI mode (32bit)"
-  depends=('lib32-systemd')
-
-  cd bluez-${pkgver}
-  make DESTDIR=${pkgdir} \
-       install-udevPROGRAMS \
-       install-rulesDATA
-  
-  install -dm755 ${pkgdir}/usr/share/man/man1
-  mv ${srcdir}/hid2hci.1 ${pkgdir}/usr/share/man/man1/hid2hci.1
-
-  rm -rf "${pkgdir}"/{etc,usr/{share,include,bin,lib}} # cruft in lib/
-
-}
+#package_lib32-bluez-hid2hci() {
+#  pkgdesc="Put HID proxying bluetooth HCI's into HCI mode (32bit)"
+#  depends=('lib32-systemd')
+#
+#  cd bluez-${pkgver}
+#  make DESTDIR=${pkgdir} \
+#       install-udevPROGRAMS \
+#       install-rulesDATA
+#  
+#  install -dm755 ${pkgdir}/usr/share/man/man1
+#  mv ${srcdir}/hid2hci.1 ${pkgdir}/usr/share/man/man1/hid2hci.1
+#
+#  rm -rf "${pkgdir}"/{etc,usr/{share,include,bin,lib}} # cruft in lib/
+#
+#}
 
 package_lib32-bluez-plugins() {
   pkgdesc="bluez plugins (PS3 Sixaxis controller) (32bit)"
