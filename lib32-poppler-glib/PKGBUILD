@@ -1,0 +1,110 @@
+# $Id$
+# Maintainer: Jan de Groot <jgc@archlinux.org>
+
+pkgbase=lib32-poppler
+pkgname=('lib32-poppler' 'lib32-poppler-glib' 'lib32-poppler-qt4' 'lib32-poppler-qt5')
+pkgver=0.26.4
+pkgrel=1
+arch=(i686 x86_64)
+license=('GPL')
+makedepends=('lib32-libjpeg' 'lib32-gcc-libs' 'lib32-cairo' 'lib32-fontconfig' 'lib32-openjpeg' 'lib32-gtk2' 'lib32-qt4' 'pkgconfig' 'lib32-lcms2' 'lib32-gobject-introspection' 'lib32-icu' 'lib32-qt5-base')
+options=('!emptydirs')
+url="http://poppler.freedesktop.org/"
+_testtag=0d2bfd4af4c76a3bac27ccaff793d9129df7b57a
+source=(http://poppler.freedesktop.org/poppler-${pkgver}.tar.xz
+        http://cgit.freedesktop.org/poppler/test/snapshot/test-${_testtag}.tar.bz2)
+md5sums=('e58cdddfc7dc01f00bf7394e0e4f21ce'
+         '5ce0e8161b08dc138c0eef3ed958ad00')
+
+prepare() {
+  ln -sf test-${_testtag} test
+}
+
+build() {
+  cd poppler-${pkgver}
+
+  export CC='gcc -m32'
+  export CXX='g++ -m32'
+  export LDFLAGS='-m32'
+  export PKG_CONFIG_PATH='/usr/lib32/pkgconfig'
+
+  ./configure --prefix=/usr --sysconfdir=/etc \
+      --libdir=/usr/lib32 --libexecdir=/usr/lib32 --includedir=/usr/lib32/poppler/include \
+      --localstatedir=/var --disable-static \
+      --enable-cairo-output \
+      --enable-xpdf-headers \
+      --enable-libjpeg --enable-zlib \
+      --enable-poppler-qt4 \
+      --enable-poppler-qt5 \
+      --enable-poppler-glib
+  make
+}
+
+#check() {
+#  cd "${srcdir}/poppler-${pkgver}"
+#  LANG=en_US.UTF8 make check
+#}
+
+package_lib32-poppler() {
+  pkgdesc="PDF rendering library based on xpdf 3.0 (32bit)"
+  depends=('lib32-libjpeg' 'lib32-gcc-libs' 'lib32-cairo' 'lib32-fontconfig' 'lib32-openjpeg' 'lib32-lcms2')
+  optdepends=('poppler-data: encoding data to display PDF documents containing CJK characters')
+  conflicts=("lib32-poppler-qt3<${pkgver}")
+
+  cd "${srcdir}/poppler-${pkgver}"
+  sed -e 's/^glib_subdir =.*/glib_subdir =/' \
+      -e 's/^qt4_subdir =.*/qt4_subdir =/' \
+      -e 's/^qt5_subdir =.*/qt5_subdir =/' -i Makefile
+  make DESTDIR="${pkgdir}" install
+
+  rm -f "${pkgdir}"/usr/lib32/pkgconfig/poppler-{glib,qt4,qt5}.pc
+
+  rm -rf "${pkgdir}"/{etc,usr/{share,include,bin}}
+}
+
+package_lib32-poppler-glib() {
+  pkgdesc="Poppler glib bindings (32bit)"
+  depends=("lib32-poppler=${pkgver}" 'lib32-glib2')
+
+  cd "poppler-${pkgver}"
+  make -C poppler DESTDIR="${pkgdir}" install-libLTLIBRARIES
+  make -C glib DESTDIR="${pkgdir}" install
+  install -m755 -d "${pkgdir}/usr/lib32/pkgconfig"
+  install -m644 poppler-glib.pc "${pkgdir}/usr/lib32/pkgconfig/"
+  rm -f "${pkgdir}"/usr/lib32/libpoppler.*
+  rm -f "${pkgdir}/usr/bin/poppler-glib-demo"
+
+  rm -rf "${pkgdir}"/{etc,usr/{share,include,bin}}
+}
+
+package_lib32-poppler-qt4() {
+  pkgdesc="Poppler Qt4 bindings (32bit)"
+  provides=("lib32-poppler-qt=${pkgver}")
+  replaces=('lib32-poppler-qt')
+  conflicts=('lib32-poppler-qt')
+  depends=("lib32-poppler=${pkgver}" 'lib32-qt4')
+
+  cd "poppler-${pkgver}"
+  make -C poppler DESTDIR="${pkgdir}" install-libLTLIBRARIES
+  make -C qt4 DESTDIR="${pkgdir}" install
+  install -m755 -d "${pkgdir}/usr/lib32/pkgconfig"
+  install -m644 poppler-qt4.pc "${pkgdir}/usr/lib32/pkgconfig/"
+  rm -f "${pkgdir}"/usr/lib32/libpoppler.*
+
+  rm -rf "${pkgdir}"/{etc,usr/{share,include,bin}}
+}
+
+package_lib32-poppler-qt5() {
+  pkgdesc="Poppler Qt5 bindings (32bit)"
+  depends=("lib32-poppler=${pkgver}" 'lib32-qt5-base')
+
+  cd "poppler-${pkgver}"
+  make -C poppler DESTDIR="${pkgdir}" install-libLTLIBRARIES
+  make -C qt5 DESTDIR="${pkgdir}" install
+  install -m755 -d "${pkgdir}/usr/lib32/pkgconfig"
+  install -m644 poppler-qt5.pc "${pkgdir}/usr/lib32/pkgconfig/"
+  rm -f "${pkgdir}"/usr/lib32/libpoppler.*
+
+  rm -rf "${pkgdir}"/{etc,usr/{share,include,bin}}
+}
+
