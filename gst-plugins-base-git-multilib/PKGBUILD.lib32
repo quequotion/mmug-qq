@@ -39,7 +39,8 @@ build() {
 
   #Build 32bit libraries
 
-  #This code depends on lib32-qt5, which will not build without lib32-gst-plugins-base... wait what?
+  #Avoid an impossible dependency loop if lib32-qt5 is not installed.
+  #Actually, it can never work so just forget about the qt components.
   patch -Np2 < ../remove-qt.patch
 
   [[ -d build-i686 ]] || mkdir build-i686
@@ -49,6 +50,10 @@ build() {
   export CXX='g++ -m32'
   export LDFLAGS='-m32'
   export PKG_CONFIG_PATH='/usr/lib32/pkgconfig'
+
+  #pkgconfig doesn't get it right and these options don't help.
+  #export QT_LIBS='-L/usr/lib32/qt/'
+  #export QT_CFLAGS='-I/usr/lib32/qt/include/qt/'
 
   ../autogen.sh --prefix=/usr --sysconfdir=/etc --localstatedir=/var --libdir=/usr/lib32 --libexecdir=/usr/lib32 \
                 --disable-static --enable-experimental --disable-fatal-warnings \
