@@ -3,7 +3,7 @@
 # Contributor: Jan de Groot <jgc@archlinux.org>
 # Contributor: Disfido <disfido@gmail.com>
 
-pkgbase=cair-gl-git-multilib
+pkgbase=cairo-gl-git-multilib
 pkgname=('cairo-gl-git' 'lib32-cairo-gl-git')
 pkgver=1.12.16.164.g13a0952
 pkgrel=1
