@@ -1,0 +1,44 @@
+# $Id$
+# Maintainer: Jan de Groot <jgc@archlinux.org>
+
+pkgname=lib32-openjpeg
+pkgver=1.5.2
+pkgrel=1
+pkgdesc="An open source JPEG 2000 codec"
+arch=(i686 x86_64)
+license=('BSD')
+url="http://www.openjpeg.org"
+depends=('zlib')
+makedepends=('lib32-libtiff' 'lib32-lcms2' 'lib32-libpng' 'doxygen')
+optdepends=('lib32-lcms2: j2k_to_image and image_to_j2k programs'
+            'lib32-libpng: j2k_to_image and image_to_j2k programs')
+source=(http://downloads.sourceforge.net/openjpeg.mirror/openjpeg-${pkgver}.tar.gz)
+sha1sums=('496e99ff1d37b73bbce6a066dd9bd3576ebca0a2')
+
+
+build() {
+  cd openjpeg-$pkgver
+
+  export CC='gcc -m32'
+  export CXX='g++ -m32'
+  export LDFLAGS='-m32'
+  export PKG_CONFIG_PATH='/usr/lib32/pkgconfig'
+
+  autoreconf -fi
+  # make sure we use system libs
+  rm -rf thirdparty
+  ./configure --prefix=/usr \
+        --libdir=/usr/lib32 --libexecdir=/usr/lib32 --includedir=/usr/lib32/openjpeg/include \
+	--enable-shared --disable-static --disable-silent-rules
+  make
+}
+
+package() {
+  cd openjpeg-$pkgver
+  make DESTDIR="${pkgdir}" install
+  install -m755 -d "${pkgdir}/usr/share/licenses/$pkgname"
+  install -m644 LICENSE "${pkgdir}/usr/share/licenses/$pkgname/LICENSE"
+
+  rm -rf "${pkgdir}"/{etc,usr/{share,include,bin}}
+}
+
