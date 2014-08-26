@@ -3,7 +3,7 @@
 # Maintainer: Eric Bélanger <eric@archlinux.org>
 
 pkgbase=wxgtk-gtk3-multilib
-pkgname=('wxgtk-gtk3' 'lib32-wxgtk-gtk3')
+pkgname=('wxgtk-gtk3' 'lib32-wxgtk-gtk2')
 pkgver=3.0.1
 pkgrel=1
 pkgdesc="GTK+ implementation of wxWidgets API for GUI"
