@@ -11,8 +11,10 @@ arch=('x86_64' 'i686')
 license=('LGPL' 'GPL')
 url="http://live.gnome.org/GObjectIntrospection/"
 options=(!makeflags docs !libtool strip debug)
-source=("git://git.gnome.org/gobject-introspection")
-sha512sums=('SKIP')
+source=("git://git.gnome.org/gobject-introspection"
+        'lib32-pkgconfig.patch')
+sha512sums=('SKIP'
+            'f9410c20cc04b2f4911f483bed8cf1c58a14095c732d71d520a83051039c678824031dddf5ad38db28a865ab9eaec0fdcdf20aba464029e6ea4f7d31ce0d6fe0')
 
 pkgver() {
     cd gobject-introspection/
@@ -35,6 +37,8 @@ build() {
   popd
 
   #Build 32bit libraries
+  patch -Np2 < ../lib32-pkgconfig.patch
+
   [[ -d build-i686 ]] || mkdir build-i686
   pushd build-i686
 
