@@ -56,7 +56,7 @@ build() {
 
   ../configure --prefix=/usr --libdir=/usr/lib32 --includedir=/usr/lib32/wx/ \
               --enable-{graphics_ctx,mediactrl,unicode,webview} \
-              --with-lib{jpeg,png,tiff,xpm}=sys --with-regex=builtin --with-opengl --with-gtk=3 \
+              --with-lib{jpeg,png,tiff,xpm}=sys --with-regex=builtin --with-opengl --with-gtk=2 \
               --disable-precomp-headers
   make #-j1
   make -C ../locale allmo
@@ -78,10 +78,10 @@ package_wxgtk-gtk3() {
   install -D -m644 ../docs/licence.txt "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
 }
 
-package_lib32-wxgtk-gtk3() {
+package_lib32-wxgtk-gtk2() {
   pkgdesc+=" (32bit)"
-  depends=('lib32-gtk3' 'lib32-gstreamer0.10-base' 'lib32-libnotify' 'lib32-libsm')
-  makedepends=('lib32-gstreamer0.10-base-plugins' 'lib32-glu' 'gconf' 'lib32-webkitgtk')
+  depends=('lib32-gtk2' 'lib32-gstreamer0.10-base' 'lib32-libnotify' 'lib32-libsm')
+  makedepends=('lib32-gstreamer0.10-base-plugins' 'lib32-glu' 'gconf' 'lib32-webkitgtk2')
   provides=('lib32-wxgtk' 'lib32-wxgtk3')
   conflicts=('lib32-wxgtk')
 
