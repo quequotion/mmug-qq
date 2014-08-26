@@ -1,0 +1,86 @@
+# Maintainer: Maxime Gauduin <alucryd@gmail.com>
+# Contributor: josephgbr <rafael.f.f1@gmail.com>
+# Contributor: Themaister <maister@archlinux.us>
+
+pkgname=pcsx2-git
+pkgver=1.3.0.r5576.4d4f7ac
+pkgrel=1
+pkgdesc='A Sony PlayStation 2 emulator'
+arch=('i686' 'x86_64')
+url='http://www.pcsx2.net'
+license=('GPL2' 'GPL3' 'LGPL2.1' 'LGPL3')
+makedepends=('cmake' 'git')
+if [[ $CARCH == i686 ]]; then
+  depends=('glew' 'libaio' 'libcanberra' 'libjpeg-turbo' 'nvidia-cg-toolkit' 'portaudio' 'sdl' 'soundtouch' 'wxgtk')
+elif [[ $CARCH == x86_64 ]]; then
+  depends=('lib32-glew' 'lib32-libaio' 'lib32-libcanberra' 'lib32-libjpeg-turbo' 'lib32-nvidia-cg-toolkit' 'lib32-portaudio' 'lib32-sdl' 'lib32-soundtouch' 'lib32-wxgtk')
+  makedepends+=('gcc-multilib')
+  optdepends=('lib32-gtk-engines: GTK2 engines support'
+              'lib32-gtk-murrine: murrine GTK3 engine support'
+              'lib32-gtk-unico: unico GTK2 engine support')
+fi
+provides=("${pkgname%-*}")
+conflicts=("${pkgname%-*}")
+replaces=("${pkgname%-*}-svn")
+options=('!emptydirs')
+source=('git+https://github.com/PCSX2/pcsx2.git'
+        'gtk3-port.patch'
+        'FindGTK3.cmake')
+sha512sums=('SKIP'
+            '78993fcc666deb8a39b9bdd3ce8ec56ed725d9537cf1be34e89881e658326359caedd9897c681581e7e8150c6f14118b0ceeda6e4cf217f67594bbc3ddc83573'
+            'fee5d3ede422be9b8ef2930075f3e22170c6ae58195f314a14ebc3cbce1a36aa5321955fb517bdb84aa247b16a0b9b8563d81f673ca6945ff7c3a122934363e9')
+
+pkgver() {
+  cd ${pkgname%-*}
+
+  h=`grep -o "VersionHi.*" pcsx2/SysForwardDefs.h | grep -o "[0-9]*"`
+  m=`grep -o "VersionMid.*" pcsx2/SysForwardDefs.h | grep -o "[0-9]*"`
+  l=`grep -o "VersionLo.*" pcsx2/SysForwardDefs.h | grep -o "[0-9]*"`
+  v="$h.$m.$l"
+
+  printf "$v.r%s.%s" "$(git rev-list --count HEAD)" "$(git rev-parse --short HEAD)"
+}
+
+prepare() {
+  patch -Np1 < gtk3-port.patch
+  cp FindGTK3.cmake ${srcdir}/${pkgname%-*}/cmake/
+}
+
+build() {
+  cd ${pkgname%-*}
+
+  if [[ -d build ]]; then
+    rm -rf build
+  fi
+  mkdir build && cd build
+
+  if [[ $CARCH == i686 ]]; then
+    cmake .. -DCMAKE_INSTALL_PREFIX='/usr' -DCMAKE_LIBRARY_PATH='/usr/lib' \
+             -DPLUGIN_DIR='/usr/lib/pcsx2' -DGAMEINDEX_DIR='/usr/share/pcsx2' \
+             -DCMAKE_BUILD_TYPE='Release' \
+             -D{EXTRA_PLUGINS,PACKAGE_MODE,REBUILD_SHADER,XDG_STD}='TRUE' \
+             -DWX28_API='FALSE' -DGLSL_API='TRUE' \
+             -DwxWidgets_CONFIG_EXECUTABLE='/usr/bin/wx-config' \
+             -DwxWidgets_wxrc_EXECUTABLE='/usr/bin/wxrc'
+  elif [[ $CARCH == x86_64 ]]; then
+    export CC='gcc -m32'
+    export CXX='g++ -m32'
+    export PKG_CONFIG_PATH='/usr/lib32/pkgconfig'
+    cmake .. -DCMAKE_INSTALL_PREFIX='/usr' -DCMAKE_LIBRARY_PATH='/usr/lib32' \
+             -DPLUGIN_DIR='/usr/lib32/pcsx2' -DGAMEINDEX_DIR='/usr/share/pcsx2'\
+             -DCMAKE_BUILD_TYPE='Release' \
+             -D{EXTRA_PLUGINS,PACKAGE_MODE,REBUILD_SHADER,XDG_STD}='TRUE' \
+             -DWX28_API='FALSE' -DGLSL_API='TRUE' \
+             -DwxWidgets_CONFIG_EXECUTABLE='/usr/bin/wx-config-32' \
+             -DwxWidgets_wxrc_EXECUTABLE='/usr/bin/wxrc-32'
+  fi
+  make
+}
+
+package() {
+  cd ${pkgname%-*}/build
+
+  make DESTDIR="${pkgdir}" install
+}
+
+# vim: ts=2 sw=2 et:
