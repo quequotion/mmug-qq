@@ -15,7 +15,7 @@ source=("http://downloads.sourceforge.net/wxwindows/wxWidgets-${pkgver}.tar.bz2"
         'wxGTK-collision.patch'
         'wx-gdk-wayland.patch')
 sha512sums=('5934442fbb77f50e2cb234ee2218e5f61e4757202b28da53f0b8a28dd499eeefca4cb8375359e42aeca2a93f8b24435ac4299da300303c9d9436bfba0cae6cd5'
-            '5dccaa15ea9800f979d52c4b53c547d73f8501ea300255e6b62f7b990dd6e0226bceff85ec6e3ac26d48ed6bd95c1d5119784d0de3046da782dbf41006fd279c'
+            'bb552f481f575c164d5e9f2c0937952568bfdba7efe87fffa1182749bdce7780dd5a26c4b4a6df817be58ad6c3a49a76b1effd993a4896c3c380a02f38a669fc'
             '95a9e10aec17dab62256f941dd32ceab07e081eae40ba6fe99cc7ea4ef3ed6d042a215c1763fdd2f08fa51ad4b7d7fa17577914893f2a8dcb6ffc37be5271997')
 
 prepare() {
@@ -54,7 +54,7 @@ build() {
   export LDFLAGS='-m32'
   export PKG_CONFIG_PATH='/usr/lib32/pkgconfig'
 
-  ../configure --prefix=/usr --libdir=/usr/lib32 --includedir=/usr/lib32/wx/ --program-suffix='-32' \
+  ../configure --prefix=/usr --libdir=/usr/lib32 --includedir=/usr/lib32/wx/ \
               --enable-{graphics_ctx,mediactrl,unicode,webview} \
               --with-lib{jpeg,png,tiff,xpm}=sys --with-regex=builtin --with-opengl --with-gtk=3 \
               --disable-precomp-headers
