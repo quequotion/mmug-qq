@@ -13,32 +13,41 @@ license=('custom')
 optdepends=('gtk2: Netscape plugin support')
 options=('!libtool' '!emptydirs')
 source=("http://builds.nightly.webkit.org/files/trunk/src/WebKit-${pkgver}.tar.bz2"
-        'aggresively-force-32bit.patch')
-md5sums=('43df68f3087b207c7737119c7514656e'
-         '3ca3367a54f6429c54b7a8ee48f9a509')
+        'remove-gir.patch'
+        {gcc,g++,ld}-32)
+sha512sums=('db42750477b143b38c5938fd891ad0a0f451f000e06568a529e5aaca9730d4d6bbc030c622380792a5246f04eda95e0f407a822c89d4f55b325b4bc2175949e2'
+            '1c83c6376649b495ceb33907b0844ed9ca0c9d2cf95a995fd60960255d7aa40ac0776f64cbeed309d9700aaa23b49d17064d5e57b03266c378bcca68ceb4a268'
+            '37ac90a40dc7c080f2a86503a2723320b6b88d15486e1e685b0d49cf937ed852628c6b25f82ebdb006502914ec826447615984c1f485c16f733f3582be6fff9e'
+            '12d37c07b9bb4764bd26cadb5829b17f7d7c8e07fa6fdd407c410875d927bd5c75d9e5dccaace93c5300c0f26b543ffaf436fab09567fb44822d81c8cce38420'
+            'd972874359ec3f05114914ca571f7389e33253839d73d940e4a4c13eaaa71ebbc155ee79a9bf66eaacb3ed024424b99296547e77fcda67335eb5a8c4a2953450')
+
+prepare() {
+  #cmake has no honor, so decieve it with tricks!
+  chmod +x {gcc,g++,ld}-32
+}
 
 build() {
   cd "$srcdir"/WebKit-${pkgver}
 
-#  #Build 64bit libraries
-#  [[ -d build-x86_64 ]] || mkdir build-x86_64
-#  pushd build-x86_64
-#
-#  cmake -DCMAKE_BUILD_TYPE=Release \
-#        -DCMAKE_INSTALL_PREFIX=/usr \
-#        -DLIBEXEC_INSTALL_DIR=/usr/lib \
-#        -DPORT=GTK \
-#        -DENABLE_WEBGL=ON \
-#        ../
-#
-#  make
-#
-#  popd
+  #Build 64bit libraries
+  [[ -d build-x86_64 ]] || mkdir build-x86_64
+  pushd build-x86_64
+
+  cmake -DCMAKE_BUILD_TYPE=Release \
+        -DCMAKE_INSTALL_PREFIX=/usr \
+        -DLIBEXEC_INSTALL_DIR=/usr/lib \
+        -DPORT=GTK \
+        -DENABLE_WEBGL=ON \
+        ../
+
+  make
+
+  popd
 
   #Build 32bit libraries
 
-  #This is a rediculous thing to have to do. Just rediculous.
-  patch -Np2 < ../aggresively-force-32bit.patch
+  #gir won't allow 32bit binaries to link.
+  patch -Np2 < ../remove-gir.patch
 
   [[ -d build-i686 ]] || mkdir build-i686
   pushd build-i686
@@ -52,37 +61,44 @@ build() {
         -DCMAKE_INSTALL_PREFIX=/usr \
         -DLIBEXEC_INSTALL_DIR=/usr/lib32 \
         -DLIB_INSTALL_DIR=/usr/lib32 \
+        -DCMAKE_INSTALL_INCLUDEDIR=/usr/lib32/webkitgtk/include
+        -DCMAKE_C_COMPILER="$srcdir"/gcc-32 \
+        -DCMAKE_CXX_COMPILER="$srcdir"/g++-32 \
+        -DCMAKE_LINKER="$srcdir"/ld-32 \
+        -DINTROSPECTION_SCANNER='/usr/bin/g-ir-scanner-32' \
+        -DINTROSPECTION_COMPILER='/usr/bin/g-ir-compiler-32' \
+        -DINTROSPECTION_GENERATE='/usr/bin/g-ir-generate-32' \
+        -DINTROSPECTION_TYPELIBDIR='/usr/lib32/girepository-1.0/' \
+        -DINTROSPECTION_LIBS='/usr/lib32' \
         -DCMAKE_C_FLAGS="-m32" \
         -DCMAKE_CXX_FLAGS="-m32" \
         -DCMAKE_EXE_LINKER_FLAGS="-m32" \
         -DCMAKE_SHARED_LINKER_FLAGS="-m32" \
-        -DCMAKE_SYSTEM_PROCESSOR="i686" \
+        -DCMAKE_SYSTEM_PROCESSOR='i686' \
         -DPORT=GTK \
         -DENABLE_WEBGL=ON \
         ../
 
-        #-DPYTHON_EXECUTABLE='/usr/bin/python3.4-32' \
-        #-DPERL_EXECUTABLE='/usr/bin/perl-32' \
   make
 
   popd
 }
 
-#package_webkitgtk-nightly() {
-#  conflicts=('webkitgtk')
-#  replaces=("webgitgtk-svn")
-#  provides=("webkitgtk" "webkitgtk3")
-#  depends=(libwebp libxt libxslt sqlite libsoup enchant libgl
-#            geoclue gtk3 gst-plugins-base-libs libsecret harfbuzz-icu cmake)
-#  makedepends=(git gtk3 gperf gobject-introspection python mesa 
-#                ruby gtk-doc gst-plugins-base cairo)
-#
-#  cd "$srcdir"/WebKit-${pkgver}/build-x86_64
-#  make -j1 DESTDIR="$pkgdir/" install 
-#
-#  install -Dm644 ../Source/WebKit/LICENSE \
-#    "$pkgdir/usr/share/licenses/WebKit/LICENSE"
-#}
+package_webkitgtk-nightly() {
+  conflicts=('webkitgtk')
+  replaces=("webgitgtk-svn")
+  provides=("webkitgtk" "webkitgtk3")
+  depends=(libwebp libxt libxslt sqlite libsoup enchant libgl
+            geoclue gtk3 gst-plugins-base-libs libsecret harfbuzz-icu cmake)
+  makedepends=(git gtk3 gperf gobject-introspection python mesa 
+                ruby gtk-doc gst-plugins-base cairo)
+
+  cd "$srcdir"/WebKit-${pkgver}/build-x86_64
+  make -j1 DESTDIR="$pkgdir/" install 
+
+  install -Dm644 ../Source/WebKit/LICENSE \
+    "$pkgdir/usr/share/licenses/WebKit/LICENSE"
+}
 
 package_lib32-webkitgtk-nightly() {
   pkgdesc+=" (32bit)"
@@ -100,5 +116,5 @@ package_lib32-webkitgtk-nightly() {
   rm -rf "${pkgdir}"/{etc,usr/{share,include,bin}}
 
   install -Dm644 ../Source/WebKit/LICENSE \
-    "$pkgdir/usr/share/licenses/lib32-WebKit/LICENSE"
+    "$pkgdir"/usr/share/licenses/lib32-WebKit/LICENSE
 }
