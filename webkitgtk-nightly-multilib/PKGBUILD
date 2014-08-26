@@ -3,7 +3,7 @@
 # Maintainer: Jonas Heinrich <onny@project-insanity.org>
 
 pkgbase=webkitgtk-nightly-multilib
-pkgname=('lib32-webkitgtk-nightly') #'webkitgtk-nightly' 
+pkgname=('webkitgtk-nightly' 'lib32-webkitgtk-nightly') 
 pkgver=r172617
 pkgrel=1
 pkgdesc="GTK+ Web content engine library (nightly build)"
@@ -61,7 +61,7 @@ build() {
         -DCMAKE_INSTALL_PREFIX=/usr \
         -DLIBEXEC_INSTALL_DIR=/usr/lib32 \
         -DLIB_INSTALL_DIR=/usr/lib32 \
-        -DCMAKE_INSTALL_INCLUDEDIR=/usr/lib32/webkitgtk/include
+        -DCMAKE_INSTALL_INCLUDEDIR=/usr/lib32/webkitgtk/include \
         -DCMAKE_C_COMPILER="$srcdir"/gcc-32 \
         -DCMAKE_CXX_COMPILER="$srcdir"/g++-32 \
         -DCMAKE_LINKER="$srcdir"/ld-32 \
