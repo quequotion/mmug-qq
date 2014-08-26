@@ -14,6 +14,7 @@ optdepends=('gtk2: Netscape plugin support')
 options=('!libtool' '!emptydirs')
 source=("http://builds.nightly.webkit.org/files/trunk/src/WebKit-${pkgver}.tar.bz2"
         'remove-gir.patch'
+        'srcdir-reference.patch'
         {gcc,g++,ld}-32)
 sha512sums=('db42750477b143b38c5938fd891ad0a0f451f000e06568a529e5aaca9730d4d6bbc030c622380792a5246f04eda95e0f407a822c89d4f55b325b4bc2175949e2'
             '1c83c6376649b495ceb33907b0844ed9ca0c9d2cf95a995fd60960255d7aa40ac0776f64cbeed309d9700aaa23b49d17064d5e57b03266c378bcca68ceb4a268'
@@ -24,6 +25,10 @@ sha512sums=('db42750477b143b38c5938fd891ad0a0f451f000e06568a529e5aaca9730d4d6bbc
 prepare() {
   #cmake has no honor, so decieve it with tricks!
   chmod +x {gcc,g++,ld}-32
+
+  cd "$srcdir"/WebKit-${pkgver}
+  patch -Np2 < srcdir-reference.patch
+
 }
 
 build() {
@@ -106,7 +111,7 @@ package_lib32-webkitgtk-nightly() {
   replaces=("lib32-webgitgtk-svn")
   provides=("lib32-webkitgtk" "lib32-webkitgtk3")
   depends=(lib32-libwebp lib32-libxt lib32-libxslt lib32-sqlite lib32-libsoup lib32-enchant lib32-libgl 
-	   geoclue lib32-gtk3 lib32-gst-plugins-base-libs lib32-libsecret lib32-harfbuzz-icu cmake)
+	   geoclue lib32-gtk3 lib32-gst-plugins-base-libs lib32-libsecret harfbuzz-icu cmake)
   makedepends=(git lib32-gtk3 gperf lib32-gobject-introspection lib32-python lib32-mesa 
 	       ruby gtk-doc lib32-gst-plugins-base lib32-cairo)
   cd "$srcdir"/WebKit-${pkgver}/build-i686

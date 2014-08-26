@@ -1,0 +1,22 @@
+--- src/WebKit-r172617/Source/WebKit2/UIProcess/API/gtk/WebKitEnumTypes.h.template~	2013-10-18 11:47:52.000000000 +0900
++++ src/WebKit-r172617/Source/WebKit2/UIProcess/API/gtk/WebKitEnumTypes.h.template	2014-08-26 15:45:03.203693140 +0900
+@@ -33,7 +33,7 @@
+ 
+ 
+ /*** BEGIN file-production ***/
+-/* Enumerations from @filename@. */
++
+ /*** END file-production ***/
+ 
+ 
+--- src/WebKit-r172617/Source/WebKit2/UIProcess/API/gtk/WebKitEnumTypes.cpp.template~	2013-10-18 11:47:52.000000000 +0900
++++ src/WebKit-r172617/Source/WebKit2/UIProcess/API/gtk/WebKitEnumTypes.cpp.template	2014-08-26 15:45:54.116695730 +0900
+@@ -27,7 +27,7 @@
+ 
+ 
+ /*** BEGIN file-production ***/
+-// Enumerations from @filename@.
++
+ /*** END file-production ***/
+ 
+ 
