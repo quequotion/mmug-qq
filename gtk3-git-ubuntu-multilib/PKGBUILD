@@ -8,7 +8,7 @@
 
 pkgbase=gtk3-git-ubuntu-multilib
 pkgname=('gtk3-git-ubuntu' 'lib32-gtk3-git-ubuntu')
-pkgver=3.13.6.116.gb1ac4f9
+pkgver=3.13.7.100.g6574d99
 pkgrel=1
 pkgdesc="GObject-based multi-platform GUI toolkit (git version with Ubuntu patches from bzr)"
 arch=('i686' 'x86_64')
