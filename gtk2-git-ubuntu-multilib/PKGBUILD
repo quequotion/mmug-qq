@@ -4,7 +4,7 @@
 
 pkgbase=gtk2-git-ubuntu-multilib
 pkgname=('gtk2-git-ubuntu' 'lib32-gtk2-git-ubuntu')
-pkgver=2.24.24.10.gab3e3b1
+pkgver=2.24.24.12.gfbf38d1
 pkgrel=1
 pkgdesc="GTK+ is a multi-platform toolkit (v2) (git version with ubuntu patches from bzr)"
 arch=('i686' 'x86_64')
