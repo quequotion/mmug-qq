@@ -1,0 +1,104 @@
+# Maintainer: carstene1ns <url/mail: arch carsten-teibes de>
+# Contributor: Daniel Kirchner <daniel at ekpyron dot rog>
+# Contributor: Gustavo Alvarez <sl1pkn07 at gmail dot com>
+# Contributor: Chase Geigle <sky at skystrife dot com>
+# Contributor: Axper Jan <483ken at gmail dot com>
+
+pkgbase=sdl2-hg-multilib
+pkgname=('sdl2-hg' 'lib32-sdl2-hg')
+pkgver=2.0.3.r491.236241f5d225
+pkgrel=1
+pkgdesc="A library for portable low-level access to video, audio and input (development version)"
+arch=('i686' 'x86_64')
+url="http://www.libsdl.org"
+license=('ZLIB')
+source=(sdl2::"hg+http://hg.libsdl.org/SDL"
+        'lib32-sdl2.patch'
+        {gcc,g++,ld}-32)
+md5sums=('SKIP'
+         '7541c3ccb1955c0855f85e1bbbea819d'
+         'f6ee51fc62d2f9c74354bb46ba4215b0'
+         '4f5e7c32f7a7c8f0cdeac41127ed8e71'
+         'aaeed57a71ee2743e5e5af4fa1caddeb')
+
+pkgver() {
+  cd sdl2
+  _tag=$(hg tags -q | sort -r | grep release- | head -n1)
+  _commits=$(hg log --template "{node}\n" -r $_tag:tip | wc -l)
+  echo "${_tag/release-}.r$_commits.$(hg identify -i)"
+}
+
+prepare() {
+  #cmake has no honor, so decieve it with tricks!
+  chmod +x {gcc,g++,ld}-32
+}
+
+build() {
+
+  #Build 64bit libraries
+  [[ -d build-x86_64 ]] || mkdir build-x86_64
+  pushd build-x86_64
+
+  cmake ../sdl2 -DCMAKE_INSTALL_PREFIX=/usr -DARTS=OFF -DNAS=OFF -DESD=OFF \
+                -DSDL_STATIC=OFF -DRPATH=OFF -DVIDEO_WAYLAND=OFF
+  make
+
+  popd
+
+  #Build 32bit libraries
+
+  #patch -Np1 < ../lib32-sdl2.patch
+
+  [[ -d build-i686 ]] || mkdir build-i686
+  pushd build-i686
+
+  export EXEEXT='-32'
+
+  cmake ../sdl2 -DCMAKE_INSTALL_PREFIX=/usr -DARTS=OFF -DNAS=OFF -DESD=OFF \
+                -DSDL_STATIC=OFF -DRPATH=OFF -DVIDEO_WAYLAND=OFF \
+                -DCMAKE_INSTALL_PREFIX=/usr \
+                -DCMAKE_PREFIX_PATH=/usr/lib32 \
+                -DLIB_SUFFIX='32' \
+                -DCMAKE_C_COMPILER="$srcdir"/gcc-32 \
+                -DCMAKE_LINKER="$srcdir"/ld-32 \
+                -DCMAKE_C_FLAGS="-m32" \
+                -DEXTRA_CFLAGS="-m32" \
+                -DCMAKE_C_FLAGS="-m32" \
+                -DCMAKE_EXE_LINKER_FLAGS="-m32" \
+                -DCMAKE_SHARED_LINKER_FLAGS="-m32" \
+                -DEXTRA_LDFLAGS="-m32" \
+                -DCMAKE_SYSTEM_PROCESSOR='i686' 
+  make
+
+  popd
+}
+
+package_sdl2-hg() {
+  depends=('sh' 'libxext' 'libxrender' 'libx11' 'libgl' 'libxcursor')
+  makedepends=('mercurial' 'cmake' 'alsa-lib' 'mesa' 'libpulse' 'libxrandr' 'libxinerama' 'libxkbcommon')
+  optdepends=('alsa-lib: ALSA audio driver'
+              'libpulse: PulseAudio audio driver')
+  provides=('sdl2')
+  conflicts=('sdl2')
+  make -C build-x86_64 DESTDIR="$pkgdir/" install
+
+  install -Dm644 sdl2/COPYING.txt "$pkgdir"/usr/share/licenses/$pkgname/COPYING
+}
+
+package_lib32-sdl2-hg() {
+  pkgdesc+=" (32bit)"
+  depends=('sh' 'lib32-libxext' 'lib32-libxrender' 'lib32-libx11' 'lib32-libgl' 'lib32-libxcursor')
+  makedepends=('mercurial' 'cmake' 'lib32-alsa-lib' 'lib32-mesa' 'lib32-libpulse' 'lib32-libxrandr' 
+               'lib32-libxinerama' 'lib32- libxkbcommon')
+  optdepends=('lib32-alsa-lib: ALSA audio driver'
+              'lib32-libpulse: PulseAudio audio driver')
+  provides=('lib32-sdl2')
+  conflicts=('lib32-sdl2')
+  make -C build-i686 DESTDIR="$pkgdir/" install
+
+  mv "$pkgdir"/usr/bin/sdl2-config "$pkgdir"/usr/bin/sdl2-config-32
+
+  rm -rf "${pkgdir}"/{etc,usr/{share,include}} # needs bin/
+
+  install -Dm644 sdl2/COPYING.txt "$pkgdir"/usr/share/licenses/$pkgname/COPYING
+}
