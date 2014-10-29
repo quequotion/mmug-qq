@@ -1,0 +1,74 @@
+pkgname=(libepoxy-git lib32-libepoxy-git)
+_name=libepoxy
+pkgver=1.2.8.r212.gb2ae054
+pkgrel=1
+pkgdesc="Epoxy is a library for handling OpenGL function pointer management for you"
+url="https://github.com/anholt/libepoxy"
+arch=('i686' 'x86_64')
+license=('BSD')
+options=('!libtool')
+source=("git+https://github.com/anholt/libepoxy.git")
+sha512sums=('SKIP')
+
+pkgver() {
+  cd $_name
+  #echo $(git rev-list --count HEAD).$(git describe --tags --long | tr -d v | tr - .)
+  echo $(git describe --long --tags | cut -d 'g' -f1)r$(git rev-list HEAD --count).g$(git describe --always) | tr -d v | tr - .
+}
+
+build() {
+  #  export CFLAGS="-Og -ggdb"
+  #  export CXXFLAGS="-Og -ggdb"
+  cd "$_name"
+
+  #Build 64bit libraries
+  [[ -d build-x86_64 ]] || mkdir build-x86_64
+  pushd build-x86_64
+
+    ../autogen.sh --prefix=/usr
+    #../configure --prefix=/usr
+
+  popd
+
+  #Build 32bit libraries
+  [[ -d build-i686 ]] || mkdir build-i686
+  pushd build-i686
+
+  export CC='gcc -m32'
+  export CXX='g++ -m32'
+  export LDFLAGS='-m32'
+  export PKG_CONFIG_PATH='/usr/lib32/pkgconfig'
+
+    ../autogen.sh --prefix=/usr --libdir=/usr/lib32 --libexecdir=/usr/lib32
+    #../configure --prefix=/usr
+
+  popd
+
+
+}
+
+#check() {
+#  cd "$_name"
+#  make -k check
+#}
+
+package_libepoxy-git() {
+  depends=() # ???
+  makedepends=("xorg-util-macros" "libx11" "python" "git")
+  provides=("libepoxy")
+  conflicts=("libepoxy")
+
+  cd "$_name/build-x86_64"
+  make DESTDIR="$pkgdir" install
+}
+
+package_lib32-libepoxy-git() {
+  depends=() # ???
+  makedepends=("xorg-util-macros" "lib32-libx11" "python" "git")
+  provides=("lib32-libepoxy")
+  conflicts=("lib32-libepoxy")
+
+  cd "$_name/build-i686"
+  make DESTDIR="$pkgdir" install
+  rm -rf "${pkgdir}"/{etc,usr/{share,include,bin}}
+}
