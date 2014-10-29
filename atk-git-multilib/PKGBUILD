@@ -1,0 +1,74 @@
+# Maintainer: polterge|st
+pkgbase=atk-git
+pkgname=(atk-git lib32-atk-git)
+pkgver=2.15.1
+pkgrel=1
+pkgdesc="git version of atk"
+arch=(i686 x86_64)
+url="http://www.gnome.org"
+license=('LGPL')
+options=('!libtool')
+source=(atk::git://git.gnome.org/atk)
+sha512sums=('SKIP')
+
+build() {
+  cd "${srcdir}/atk"
+
+  # BUILD HERE
+
+  sed -i -e '/AC_PATH_XTRA/d' configure.ac
+  # autoreconf --force --install
+
+  #Build 64bit libraries
+  [[ -d build-x86_64 ]] || mkdir build-x86_64
+  pushd build-x86_64
+
+  ../autogen.sh --prefix=/usr --sysconfdir=/etc \
+    --disable-schemas-compile
+  make
+
+  popd
+
+  #Build 32bit libraries
+  [[ -d build-i686 ]] || mkdir build-i686
+  pushd build-i686
+
+  export CC='gcc -m32'
+  export CXX='g++ -m32'
+  export LDFLAGS='-m32'
+  export PKG_CONFIG_PATH='/usr/lib32/pkgconfig'
+
+  ../autogen.sh --prefix=/usr --sysconfdir=/etc \
+    --libdir=/usr/lib32 --libexecdir=/usr/lib32 \
+    --disable-schemas-compile
+  make
+
+
+  popd
+
+}
+
+package_atk-git() {
+  depends=('glib2')
+  makedepends=('pkgconfig' 'gobject-introspection')
+  provides=('atk')
+  conflicts=('atk')
+
+  cd "${srcdir}/atk/build-x86_64"
+  make DESTDIR="${pkgdir}" install
+}
+
+package_lib32-atk-git() {
+  pkgdesc+=" (32bit)"
+  depends=('lib32-glib2')
+  makedepends=('pkgconfig' 'gobject-introspection')
+  provides=('lib32-atk')
+  conflicts=('lib32-atk')
+
+  cd "${srcdir}/atk/build-i686"
+  make DESTDIR="${pkgdir}" install
+  rm -rf "${pkgdir}"/{etc,usr/{share,include,bin}}
+}
+
+
+# vim:set ts=2 sw=2 et:
