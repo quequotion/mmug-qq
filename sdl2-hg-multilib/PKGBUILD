@@ -5,21 +5,22 @@
 # Contributor: Axper Jan <483ken at gmail dot com>
 
 pkgbase=sdl2-hg-multilib
-pkgname=('sdl2-hg' 'lib32-sdl2-hg')
-pkgver=2.0.3.r491.236241f5d225
+pkgname=({lib32-,}sdl2-hg)
+pkgver=2.0.3.r681.47a5c5dae9b6
 pkgrel=1
 pkgdesc="A library for portable low-level access to video, audio and input (development version)"
+depends=('sh')
+makedepends=('mercurial' 'cmake')
 arch=('i686' 'x86_64')
 url="http://www.libsdl.org"
 license=('ZLIB')
 source=(sdl2::"hg+http://hg.libsdl.org/SDL"
         'lib32-sdl2.patch'
-        {gcc,g++,ld}-32)
+        {gcc,ld}-flagged)
 md5sums=('SKIP'
          '7541c3ccb1955c0855f85e1bbbea819d'
-         'f6ee51fc62d2f9c74354bb46ba4215b0'
-         '4f5e7c32f7a7c8f0cdeac41127ed8e71'
-         'aaeed57a71ee2743e5e5af4fa1caddeb')
+         '1cb09d4c1569e261f21a03fc2e08e5ac'
+         '4e16a96b05c986bc940e8aef595d5cb6')
 
 pkgver() {
   cd sdl2
@@ -30,7 +31,7 @@ pkgver() {
 
 prepare() {
   #cmake has no honor, so decieve it with tricks!
-  chmod +x {gcc,g++,ld}-32
+  chmod +x {gcc,ld}-flagged
 }
 
 build() {
@@ -39,8 +40,11 @@ build() {
   [[ -d build-x86_64 ]] || mkdir build-x86_64
   pushd build-x86_64
 
-  cmake ../sdl2 -DCMAKE_INSTALL_PREFIX=/usr -DARTS=OFF -DNAS=OFF -DESD=OFF \
-                -DSDL_STATIC=OFF -DRPATH=OFF -DVIDEO_WAYLAND=OFF
+  cmake ../sdl2 \
+    -DCMAKE_INSTALL_PREFIX=/usr \
+    -D{ARTS,NAS,ESD,SDL_STATIC,RPATH,VIDEO_WAYLAND}=OFF \
+    -DCMAKE_C_COMPILER="$srcdir"/gcc-flagged \
+    -DCMAKE_LINKER="$srcdir"/ld-flagged
   make
 
   popd
@@ -54,28 +58,25 @@ build() {
 
   export EXEEXT='-32'
 
-  cmake ../sdl2 -DCMAKE_INSTALL_PREFIX=/usr -DARTS=OFF -DNAS=OFF -DESD=OFF \
-                -DSDL_STATIC=OFF -DRPATH=OFF -DVIDEO_WAYLAND=OFF \
-                -DCMAKE_INSTALL_PREFIX=/usr \
-                -DCMAKE_PREFIX_PATH=/usr/lib32 \
-                -DLIB_SUFFIX='32' \
-                -DCMAKE_C_COMPILER="$srcdir"/gcc-32 \
-                -DCMAKE_LINKER="$srcdir"/ld-32 \
-                -DCMAKE_C_FLAGS="-m32" \
-                -DEXTRA_CFLAGS="-m32" \
-                -DCMAKE_C_FLAGS="-m32" \
-                -DCMAKE_EXE_LINKER_FLAGS="-m32" \
-                -DCMAKE_SHARED_LINKER_FLAGS="-m32" \
-                -DEXTRA_LDFLAGS="-m32" \
-                -DCMAKE_SYSTEM_PROCESSOR='i686' 
+  CFLAGS="$CFLAGS -m32"
+  LDFLAGS="$LDFLAGS -m32"
+
+  cmake ../sdl2 \
+    -DCMAKE_INSTALL_PREFIX=/usr \
+    -D{ARTS,NAS,ESD,SDL_STATIC,RPATH,VIDEO_WAYLAND}=OFF \
+    -DCMAKE_PREFIX_PATH=/usr/lib32 \
+    -DLIB_SUFFIX='32' \
+    -DCMAKE_C_COMPILER="$srcdir"/gcc-flagged \
+    -DCMAKE_LINKER="$srcdir"/ld-flagged 
+
   make
 
   popd
 }
 
 package_sdl2-hg() {
-  depends=('sh' 'libxext' 'libxrender' 'libx11' 'libgl' 'libxcursor')
-  makedepends=('mercurial' 'cmake' 'alsa-lib' 'mesa' 'libpulse' 'libxrandr' 'libxinerama' 'libxkbcommon')
+  depends+=('libxext' 'libxrender' 'libx11' 'libgl' 'libxcursor')
+  makedepends+=('alsa-lib' 'mesa' 'libpulse' 'libxrandr' 'libxinerama' 'libxkbcommon')
   optdepends=('alsa-lib: ALSA audio driver'
               'libpulse: PulseAudio audio driver')
   provides=('sdl2')
@@ -87,9 +88,8 @@ package_sdl2-hg() {
 
 package_lib32-sdl2-hg() {
   pkgdesc+=" (32bit)"
-  depends=('sh' 'lib32-libxext' 'lib32-libxrender' 'lib32-libx11' 'lib32-libgl' 'lib32-libxcursor')
-  makedepends=('mercurial' 'cmake' 'lib32-alsa-lib' 'lib32-mesa' 'lib32-libpulse' 'lib32-libxrandr' 
-               'lib32-libxinerama' 'lib32- libxkbcommon')
+  depends+=(lib32-{libxext,libxrender,libx11,libgl,libxcursor})
+  makedepends+=(lib32-{alsa-lib,mesa,libpulse,libxrandr,libxinerama,libxkbcommon})
   optdepends=('lib32-alsa-lib: ALSA audio driver'
               'lib32-libpulse: PulseAudio audio driver')
   provides=('lib32-sdl2')
