@@ -2,27 +2,26 @@
 # Contributor: Kerrick Staley <mail@kerrickstaley.com>
 # Contributor: Jan de Groot <jgc@archlinux.org>
 
-pkgname=gstreamer-git
-pkgver=1.5.0.1.15707.b38264a
+pkgbase=gstreamer-git-multilib
+pkgname=({lib32-,}gstreamer-git)
+pkgver=1.5.0.1.15887.3390b70
 pkgrel=1
 pkgdesc='GStreamer Multimedia Framework (Git version)'
 arch=('i686' 'x86_64')
 license=('LGPL')
 url='http://gstreamer.freedesktop.org/'
+makedepends=('intltool' 'pkgconfig' 'gtk-doc')
 optdepends=('sh: feedback script')
 options=('!libtool')
 source=('git+git://anongit.freedesktop.org/gstreamer/gstreamer'
-
         'git://anongit.freedesktop.org/gstreamer/common'
         'common-submodule.patch')
 sha512sums=('SKIP'
             'SKIP'
             'c46a6a5dc93a77af023a558fa23496fb38f31db586cea4e3ae04d722a7b3ec9331a0e4deff6382bceaaf7175cd20d8805c211e8499ad290dc9aa3c805b888ff6')
 
-_gitname='gstreamer'
-
 pkgver() {
-  cd $_gitname
+  cd gstreamer
   version=$(grep AC_INIT configure.ac | sed 's/AC_INIT(\[GStreamer\],\[//' | sed 's/\],\[http:\/\/bugzilla.gnome.org\/enter_bug.cgi?product=GStreamer\],\[gstreamer\])//')
   hash=$(git log --pretty=format:'%h' -n 1)
   revision=$(git rev-list --count HEAD)
@@ -31,7 +30,7 @@ pkgver() {
 }
 
 build() {
-  cd $_gitname
+  cd gstreamer
 
   #Saves some time and bandwidth on rebuilds
   rm -rf common/
@@ -39,28 +38,65 @@ build() {
   ln -s ../common/ ./common
 
   #Build 64bit libraries
-  [[ -d build-x86_64 ]] || mkdir build-x86_64
-  pushd build-x86_64
+#  [[ -d build-x86_64 ]] || mkdir build-x86_64
+#  pushd build-x86_64
 
-  ../autogen.sh --prefix=/usr --sysconfdir=/etc --localstatedir=/var \
+  #Build 64bit libraries
+  git clone "$srcdir/gstreamer" "$srcdir/gstreamer-build-x86_64"
+  pushd ../gstreamer-build-x86_64
+
+  ./autogen.sh --prefix=/usr --sysconfdir=/etc --localstatedir=/var \
                 --libdir=/usr/lib --libexecdir=/usr/lib --enable-gtk-doc --disable-static
+  make
+
+  popd
+
+  #Build 32bit libraries
+#  [[ -d build-i686 ]] || mkdir build-i686
+#  pushd build-i686
+
+  #Build 32bit libraries
+  git clone "$srcdir/gstreamer" "$srcdir/gstreamer-build-i686"
+  pushd ../gstreamer-build-i686
+
+  export CC='gcc -m32'
+  export CXX='g++ -m32'
+  export LDFLAGS='-m32'
+  export PKG_CONFIG_PATH='/usr/lib32/pkgconfig'
+
+  ./autogen.sh --prefix=/usr --sysconfdir=/etc --localstatedir=/var \
+                --libdir=/usr/lib32 --libexecdir=/usr/lib32 --enable-gtk-doc --disable-static \
+                --enable-introspection=no #no other way, everything else was tried.
   make
 
   popd
 }
 
+
 #check() {
-#  cd $_gitname
+#  cd gstreamer
 #  make check
 #}
 
-package() {
+package_gstreamer-git() {
   depends=('libxml2' 'glib2')
-  makedepends=('intltool' 'pkgconfig' 'gtk-doc' 'gobject-introspection')
+  makedepends+=('gobject-introspection')
   provides=('gstreamer='$pkgver)
   conflicts=('gstreamer')
-  cd $_gitname/build-x86_64
+  cd gstreamer-build-x86_64
 
   make DESTDIR="${pkgdir}" install
 }
 
+package_lib32-gstreamer-git() {
+  pkgdesc+=" (32bit)"
+  depends=(lib32-{libxml2,glib2})
+  #makedepends+=('lib32-gobject-introspection')
+  provides=('lib32-gstreamer='$pkgver)
+  conflicts=('lib32-gstreamer')
+  cd gstreamer-build-i686
+
+  make DESTDIR="${pkgdir}" install
+
+  rm -rf "${pkgdir}"/{etc,usr/{share,include,bin}}
+}
