@@ -4,6 +4,7 @@ pkgname=(atk-git lib32-atk-git)
 pkgver=2.15.3.0.r1654
 pkgrel=1
 pkgdesc="ATK (git version)"
+makedepends=('git')
 arch=(i686 x86_64)
 url="http://www.gnome.org"
 license=('LGPL')
@@ -55,8 +56,8 @@ build() {
 
 package_atk-git() {
   depends=('glib2')
-  makedepends=('pkgconfig' 'gobject-introspection')
-  provides=('atk')
+  makedepends+=('pkgconfig' 'gobject-introspection')
+  provides=(atk{,-git}=$pkgver)
   conflicts=('atk')
 
   cd "${srcdir}/atk/build-x86_64"
@@ -66,8 +67,8 @@ package_atk-git() {
 package_lib32-atk-git() {
   pkgdesc+=" (32bit)"
   depends=('lib32-glib2')
-  makedepends=('pkgconfig' 'lib32-gobject-introspection')
-  provides=('lib32-atk')
+  makedepends+=('pkgconfig' 'lib32-gobject-introspection' 'gcc-multilib')
+  provides=(lib32-atk{,-git}=$pkgver)
   conflicts=('lib32-atk')
 
   cd "${srcdir}/atk/build-i686"
