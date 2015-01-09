@@ -1,0 +1,169 @@
+# $Id: PKGBUILD 173082 2012-12-10 12:00:17Z jgc $
+# Maintainer (stable): Jan de Groot <jgc@archlinux.org>
+# Maintainer (git): Progandy <admin@progandy.de>
+
+pkgbase=libcanberra-git-multilb
+pkgname=({,lib32-}libcanberra{,-{pulse,gstreamer}}-git)
+pkgver=0.30.2.r398.g0.30.2.gc0620e4
+pkgrel=1
+arch=(i686 x86_64)
+license=(LGPL)
+options=(!emptydirs)
+url=http://0pointer.de/lennart/projects/libcanberra
+source=("git+http://git.0pointer.net/libcanberra.git/" "libcanberra.xinit")
+sha512sums=('SKIP'
+            'd7e9400ac2a00a69fca5134fc32f97015222d06b164b09531dc16f584c0028f0690224a3f7b96e30b4794b7ffc19e15f9e4e83994712247e625a4a006913404a')
+
+_majorver=0.30
+
+pkgver() {
+  cd libcanberra
+  echo $(git describe --long --tags | cut -d 'g' -f1)r$(git rev-list HEAD --count).g$(git describe --always) | tr -d v | tr - .
+}
+
+build() {
+  cd "$srcdir"
+
+  rm -rf "$srcdir/libcanberra-build"
+
+  #Build 64bit libraries
+  git clone "$srcdir/libcanberra" "$srcdir/libcanberra-build-x86_64"
+  pushd libcanberra-build-x86_64
+
+  ./autogen.sh
+  ./configure --sysconfdir=/etc --prefix=/usr --localstatedir=/var \
+      --disable-static --with-builtin=dso --enable-null --disable-oss \
+      --enable-alsa --enable-gstreamer --enable-pulse \
+      --with-systemdsystemunitdir=/usr/lib/systemd/system
+
+  # Fight unused direct deps
+  sed -i -e 's/ -shared / -Wl,-O1,--as-needed\0 /g' -e 's/    if test "$export_dynamic" = yes && test -n "$export_dynamic_flag_spec"; then/      func_append compile_command " -Wl,-O1,--as-needed"\n      func_append finalize_command " -Wl,-O1,--as-needed"\n\0/' libtool
+
+  make
+
+  popd
+
+  #Build 32bit libraries
+  git clone "$srcdir/libcanberra" "$srcdir/libcanberra-build-i686"
+  pushd libcanberra-build-i686
+
+  export CC="gcc -m32"
+  export CXX="g++ -m32"
+  export PKG_CONFIG_PATH="/usr/lib32/pkgconfig"
+
+
+  ./autogen.sh
+  ./configure --sysconfdir=/etc --prefix=/usr --localstatedir=/var \
+      --disable-static --with-builtin=dso --enable-null --disable-oss \
+      --enable-alsa --enable-gstreamer --enable-pulse \
+      --disable-udev --libdir=/usr/lib32
+
+  # Fight unused direct deps
+  sed -i -e 's/ -shared / -Wl,-O1,--as-needed\0 /g' -e 's/    if test "$export_dynamic" = yes && test -n "$export_dynamic_flag_spec"; then/      func_append compile_command " -Wl,-O1,--as-needed"\n      func_append finalize_command " -Wl,-O1,--as-needed"\n\0/' libtool
+
+  make
+
+  popd
+}
+
+
+package_libcanberra-git() {
+  pkgdesc="A small and lightweight implementation of the XDG Sound Theme Specification (GIT build)"
+  install=libcanberra.install
+  depends=(libvorbis libltdl alsa-lib tdb sound-theme-freedesktop)
+  makedepends=(gtk{-doc,2,3} libpulse gstreamer)
+  optdepends=("libcanberra-pulse: PulseAudio driver"
+              "libcanberra-gstreamer: GStreamer driver")
+  provides=("libcanberra=$pkgver")
+  conflicts=("libcanberra")
+
+  cd "$srcdir/libcanberra-build-x86_64"
+
+  make -j1 DESTDIR="$pkgdir" install
+  rm "$pkgdir"/usr/lib/libcanberra-gtk*.la
+  rm "$pkgdir"/usr/lib/gtk-{2,3}.0/modules/*.la
+
+  install -D "$srcdir/libcanberra.xinit" \
+    "$pkgdir/etc/X11/xinit/xinitrc.d/40-libcanberra-gtk-module"
+
+  # Split plugins
+  for _p in pulse gstreamer; do
+    [ -d ../$_p-plugin-x86_64 ] || mkdir ../$_p-plugin-x86_64
+    mv "$pkgdir/usr/lib/libcanberra-$_majorver"/libcanberra-$_p.* ../$_p-plugin-x86_64
+  done
+}
+
+package_libcanberra-pulse-git() {
+  pkgdesc="PulseAudio plugin for libcanberra (GIT build)"
+  depends=("libcanberra=$pkgver" libpulse)
+  #makedepends=(libpulse)
+  provides=("libcanberra-pulse")
+  conflicts=("libcanberra-pulse")
+
+  install -d "$pkgdir/usr/lib/libcanberra-$_majorver"
+  mv pulse-plugin-x86_64/* "$pkgdir/usr/lib/libcanberra-$_majorver"
+}
+
+package_libcanberra-gstreamer-git() {
+  pkgdesc="GStreamer plugin for libcanberra (GIT build)"
+  depends=("libcanberra=$pkgver" gstreamer)
+  #makedepends=(gstreamer)
+  provides=("libcanberra-gstreamer")
+  conflicts=("libcanberra-gstreamer")
+
+  install -d "$pkgdir/usr/lib/libcanberra-$_majorver"
+  mv gstreamer-plugin-x86_64/* "$pkgdir/usr/lib/libcanberra-$_majorver"
+}
+
+package_lib32-libcanberra-git() {
+  pkgdesc="A small and lightweight implementation of the XDG Sound Theme Specification (GIT build) (32bit)"
+  #install=libcanberra.install
+  depends=(lib32-{libvorbis,libltdl,alsa-lib,tdb} sound-theme-freedesktop)
+  makedepends=(gtk-doc lib32{-gtk{2,3},libpulse,gstreamer} )
+  optdepends=("lib32-libcanberra-pulse: PulseAudio driver"
+              "lib32-libcanberra-gstreamer: GStreamer driver")
+  provides=("lib32-libcanberra=$pkgver")
+  conflicts=("lib32-libcanberra")
+
+  cd "$srcdir/libcanberra-build-i686"
+
+  make -j1 DESTDIR="$pkgdir" install
+  rm "$pkgdir"/usr/lib32/libcanberra-gtk*.la
+  rm "$pkgdir"/usr/lib32/gtk-{2,3}.0/modules/*.la
+
+  install -D "$srcdir/libcanberra.xinit" \
+    "$pkgdir/etc/X11/xinit/xinitrc.d/40-libcanberra-gtk-module"
+
+  # Split plugins
+  for _p in pulse gstreamer; do
+    [ -d ../$_p-plugin-i686 ] || mkdir ../$_p-plugin-i686
+    mv "$pkgdir/usr/lib32/libcanberra-$_majorver"/libcanberra-$_p.* ../$_p-plugin-i686
+  done
+
+  rm -r "$pkgdir"/usr/{include,share,bin,lib32/gnome-settings-daemon-3.0}
+  rm "$pkgdir"/usr/lib32/*.la
+  rm -r "$pkgdir"/etc
+
+}
+
+package_lib32-libcanberra-pulse-git() {
+  pkgdesc="PulseAudio plugin for libcanberra (GIT build) (32bit)"
+  depends=(lib32-{libcanberra=$pkgver,libpulse})
+  #makedepends=(lib32-libpulse)
+  provides=("lib32-libcanberra-pulse")
+  conflicts=("lib32-libcanberra-pulse")
+
+  install -d "$pkgdir/usr/lib32/libcanberra-$_majorver"
+  mv pulse-plugin-i686/* "$pkgdir/usr/lib32/libcanberra-$_majorver"
+}
+
+package_lib32-libcanberra-gstreamer-git() {
+  pkgdesc="GStreamer plugin for libcanberra (GIT build) (32bit)"
+  depends=(lib32-{libcanberra=$pkgver,gstreamer})
+  #makedepends=(lib32-gstreamer)
+  provides=("lib32-libcanberra-gstreamer")
+  conflicts=("lib32-libcanberra-gstreamer")
+
+  install -d "$pkgdir/usr/lib32/libcanberra-$_majorver"
+  mv gstreamer-plugin-i686/* "$pkgdir/usr/lib32/libcanberra-$_majorver"
+}
