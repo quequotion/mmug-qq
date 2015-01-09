@@ -1,15 +1,20 @@
 # Maintainer: polterge|st
 pkgbase=atk-git
 pkgname=(atk-git lib32-atk-git)
-pkgver=2.15.1
+pkgver=2.15.3.0.r1654
 pkgrel=1
-pkgdesc="git version of atk"
+pkgdesc="ATK (git version)"
 arch=(i686 x86_64)
 url="http://www.gnome.org"
 license=('LGPL')
 options=('!libtool')
 source=(atk::git://git.gnome.org/atk)
 sha512sums=('SKIP')
+
+pkgver() {
+  cd atk
+  echo $(git describe --long --tags | cut -d 'g' -f1| sed 's/ATK_//')r$(git rev-list HEAD --count) | tr -d v | tr - . | tr _ .
+}
 
 build() {
   cd "${srcdir}/atk"
@@ -61,7 +66,7 @@ package_atk-git() {
 package_lib32-atk-git() {
   pkgdesc+=" (32bit)"
   depends=('lib32-glib2')
-  makedepends=('pkgconfig' 'gobject-introspection')
+  makedepends=('pkgconfig' 'lib32-gobject-introspection')
   provides=('lib32-atk')
   conflicts=('lib32-atk')
 
