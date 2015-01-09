@@ -6,6 +6,7 @@ pkgbase=libcanberra-git-multilb
 pkgname=({,lib32-}libcanberra{,-{pulse,gstreamer}}-git)
 pkgver=0.30.2.r398.g0.30.2.gc0620e4
 pkgrel=1
+makedepends=('git')
 arch=(i686 x86_64)
 license=(LGPL)
 options=(!emptydirs)
@@ -71,10 +72,10 @@ package_libcanberra-git() {
   pkgdesc="A small and lightweight implementation of the XDG Sound Theme Specification (GIT build)"
   install=libcanberra.install
   depends=(libvorbis libltdl alsa-lib tdb sound-theme-freedesktop)
-  makedepends=(gtk{-doc,2,3} libpulse gstreamer)
+  makedepends+=(gtk{-doc,2,3} libpulse gstreamer)
   optdepends=("libcanberra-pulse: PulseAudio driver"
               "libcanberra-gstreamer: GStreamer driver")
-  provides=("libcanberra=$pkgver")
+  provides=(libcanberra{,-git}=$pkgver)
   conflicts=("libcanberra")
 
   cd "$srcdir/libcanberra-build-x86_64"
@@ -96,8 +97,8 @@ package_libcanberra-git() {
 package_libcanberra-pulse-git() {
   pkgdesc="PulseAudio plugin for libcanberra (GIT build)"
   depends=("libcanberra=$pkgver" libpulse)
-  #makedepends=(libpulse)
-  provides=("libcanberra-pulse")
+  #makedepends+=(libpulse)
+  provides=(libcanberra-pulse{,-git}=$pkgver)
   conflicts=("libcanberra-pulse")
 
   install -d "$pkgdir/usr/lib/libcanberra-$_majorver"
@@ -107,8 +108,8 @@ package_libcanberra-pulse-git() {
 package_libcanberra-gstreamer-git() {
   pkgdesc="GStreamer plugin for libcanberra (GIT build)"
   depends=("libcanberra=$pkgver" gstreamer)
-  #makedepends=(gstreamer)
-  provides=("libcanberra-gstreamer")
+  #makedepends+=(gstreamer)
+  provides=(libcanberra-gstreamer{,-git}=$pkgver)
   conflicts=("libcanberra-gstreamer")
 
   install -d "$pkgdir/usr/lib/libcanberra-$_majorver"
@@ -119,10 +120,10 @@ package_lib32-libcanberra-git() {
   pkgdesc="A small and lightweight implementation of the XDG Sound Theme Specification (GIT build) (32bit)"
   #install=libcanberra.install
   depends=(lib32-{libvorbis,libltdl,alsa-lib,tdb} sound-theme-freedesktop)
-  makedepends=(gtk-doc lib32{-gtk{2,3},libpulse,gstreamer} )
+  makedepends+=(gtk-doc lib32{-gtk{2,3},libpulse,gstreamer} 'gcc-multilib')
   optdepends=("lib32-libcanberra-pulse: PulseAudio driver"
               "lib32-libcanberra-gstreamer: GStreamer driver")
-  provides=("lib32-libcanberra=$pkgver")
+  provides=(lib32-libcanberra=$pkgver{,-git}=$pkgver)
   conflicts=("lib32-libcanberra")
 
   cd "$srcdir/libcanberra-build-i686"
@@ -149,8 +150,8 @@ package_lib32-libcanberra-git() {
 package_lib32-libcanberra-pulse-git() {
   pkgdesc="PulseAudio plugin for libcanberra (GIT build) (32bit)"
   depends=(lib32-{libcanberra=$pkgver,libpulse})
-  #makedepends=(lib32-libpulse)
-  provides=("lib32-libcanberra-pulse")
+  #makedepends+=('lib32-libpulse' 'gcc-multilib')
+  provides=(lib32-libcanberra-pulse{,-git}=$pkgver)
   conflicts=("lib32-libcanberra-pulse")
 
   install -d "$pkgdir/usr/lib32/libcanberra-$_majorver"
@@ -160,8 +161,8 @@ package_lib32-libcanberra-pulse-git() {
 package_lib32-libcanberra-gstreamer-git() {
   pkgdesc="GStreamer plugin for libcanberra (GIT build) (32bit)"
   depends=(lib32-{libcanberra=$pkgver,gstreamer})
-  #makedepends=(lib32-gstreamer)
-  provides=("lib32-libcanberra-gstreamer")
+  #makedepends+=('lib32-gstreamer' 'gcc-multilib')
+  provides=(lib32-libcanberra-gstreamer{,-git}=$pkgver)
   conflicts=("lib32-libcanberra-gstreamer")
 
   install -d "$pkgdir/usr/lib32/libcanberra-$_majorver"

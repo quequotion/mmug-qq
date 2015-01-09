@@ -10,7 +10,7 @@ pkgdesc='GStreamer Multimedia Framework (Git version)'
 arch=('i686' 'x86_64')
 license=('LGPL')
 url='http://gstreamer.freedesktop.org/'
-makedepends=('intltool' 'pkgconfig' 'gtk-doc')
+makedepends=('intltool' 'pkgconfig' 'gtk-doc' 'git')
 optdepends=('sh: feedback script')
 options=('!libtool')
 source=('git+git://anongit.freedesktop.org/gstreamer/gstreamer'
@@ -81,7 +81,7 @@ build() {
 package_gstreamer-git() {
   depends=('libxml2' 'glib2')
   makedepends+=('gobject-introspection')
-  provides=('gstreamer='$pkgver)
+  provides=(gstreamer{,-git}=$pkgver)
   conflicts=('gstreamer')
   cd gstreamer-build-x86_64
 
@@ -92,7 +92,8 @@ package_lib32-gstreamer-git() {
   pkgdesc+=" (32bit)"
   depends=(lib32-{libxml2,glib2})
   #makedepends+=('lib32-gobject-introspection')
-  provides=('lib32-gstreamer='$pkgver)
+  makedepends+=('gcc-multilib')
+  provides=(lib32-gstreamer{,-git}=$pkgver)
   conflicts=('lib32-gstreamer')
   cd gstreamer-build-i686
 
