@@ -3,10 +3,12 @@
 # Contributor: hbdee <hbdee.arch@gmail.com>
 
 pkgbase=gtk2-git-ubuntu-multilib
-pkgname=('gtk2-git-ubuntu' 'lib32-gtk2-git-ubuntu')
-pkgver=2.24.24.12.gfbf38d1
+pkgname=({lib32-,}gtk2-git-ubuntu)
+pkgver=2.24.25.6.ge48ae6f
 pkgrel=1
 pkgdesc="GTK+ is a multi-platform toolkit (v2) (git version with ubuntu patches from bzr)"
+depends=('shared-mime-info' 'gtk-update-icon-cache')
+makedepends=('pkgconfig' 'gtk-doc')
 arch=('i686' 'x86_64')
 options=('!libtool')
 backup=('etc/gtk-2.0/gtkrc')
@@ -17,13 +19,11 @@ source=('bzr+lp:~ubuntu-desktop/gtk/ubuntu'
         'arch_xid-collision-debug.patch'
         'fix-ubuntumenuproxy-build.patch'
         'repatch-backport_gtkmountoperation_signal_fix.patch')
-	#'gtk-modules-32.patch')
 sha512sums=('SKIP'
             'SKIP'
             '89e3223c86731a76b12d39245f1ec4cf8b4860ab1d11d74a10e5deb0db302f20b4bb5d9034da1d8aeb96369dbdeddcdd2f28943270dc501476c694562b960159'
             '4b27afecb82e3517c2584665f8d2a2911193254a00b82ff8064caf4016ab029c76e99af502bb9271a66209594b50b2729797defcc9512d341aa61aff4f64ec24'
             '8f5755382d7094571e9eff4519b1da6e7b07195dd381d9f7db42d1311c3f1016539653dc58e19e9853787d87130f271ca5578538e69dc07d0b96502a38d6af98')
-            #'7e0c2a8a4ca36863fc575a945abaee2317655e02de5802692e7b4cb370a7c2f6a09e14bba0741186a09af8cbc950d31c9baea6a1bc175641f21ca5321ee7f781')
 
 pkgver() {
   cd "gtk+"
@@ -101,7 +101,7 @@ build() {
   GTK_IM_MODULE_FILE="gtk.immodules-32" CXX=/bin/false ../autogen.sh --prefix=/usr \
                              --sysconfdir=/etc \
                              --localstatedir=/var \
-                             --libdir=/usr/lib32 --libexecdir=/usr/lib32 \
+                             --lib{,exec}dir=/usr/lib32 \
                              --with-xinput=yes
   sed -i -e 's/ -shared / -Wl,-O1,--as-needed\0/g' libtool                                
 
@@ -112,13 +112,12 @@ build() {
 }
 
 package_gtk2-git-ubuntu() {
-  depends=('atk' 'pango' 'libxcursor' 'libxinerama' 'libxrandr' 'libxi' 'libxcomposite' \
-           'libxdamage' 'shared-mime-info' 'libcups' 'gtk-update-icon-cache' 'python2')
-  makedepends=('pkg-config' 'gobject-introspection' 'gtk-doc')
-  provides=("gtk2=${pkgver}" "gtk2-ubuntu=${pkgver}" "gtk2-git=${pkgver}")
-  conflicts=('gtk2' 'gtk2-ubuntu')
+  depends=('atk' 'pango' 'cairo' 'gdk-pixbuf2' 'python2' lib{xcursor,xinerama,xrandr,xi,xcomposite,xdamage,cups})
+  makedepends=('gobject-introspection')
+  provides=(gtk2{,-ubuntu}{,-git}=${pkgver})
+  conflicts=(gtk2)
   replaces=('gtk2-docs')
-  install=arch_gtk2.install
+  install=gtk2-ubuntu.install
   cd "gtk+/build-x86_64"
 
   make DESTDIR="${pkgdir}" install
@@ -130,14 +129,11 @@ package_gtk2-git-ubuntu() {
 
 package_lib32-gtk2-git-ubuntu() {
   pkgdesc+=" (32bit)"
-  depends=(lib32-{'atk>=1.30.0','pango>=1.28.0','cairo>=1.10.0','gdk-pixbuf2>=2.22.1'}
-           lib32-lib{'cups>=1.4.4',xcursor,'xrandr>=1.3','xi>=1.3',xinerama,xcomposite,xdamage}
-           'gtk2-git-ubuntu')
-  makedepends=('pkgconfig' 'gcc-multilib')
-  provides=("lib32-gtk2=${pkgver}" "lib32-gtk2-ubuntu=${pkgver}" "lib32-gtk2-git=${pkgver}")
-  conflicts=('lib32-gtk2' 'lib32-gtk2-ubuntu')
-  replaces=('lib32-gtk2')
-  install=gtk2.install
+  depends=(lib32-{atk,pango,cairo,gdk-pixbuf2,python2,lib{xcursor,xinerama,xrandr,xi,xcomposite,xdamage,cups}})
+  makedepends=('lib32-gobject-introspection' 'gcc-multilib')
+  provides=(lib32-gtk2{,-ubuntu}{,-git}=${pkgver})
+  conflicts=('lib32-gtk2')
+  install=lib32-gtk2-ubuntu.install
   cd "gtk+/build-i686"
 
   make DESTDIR="${pkgdir}" install
