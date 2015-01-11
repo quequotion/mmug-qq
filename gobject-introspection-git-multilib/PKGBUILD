@@ -2,10 +2,12 @@
 # Contributor: <arsenm2@rpi.edu>
 
 pkgbase="gobject-introspection-git-multilib"
-pkgname=("gobject-introspection-git" "lib32-gobject-introspection-git")
-pkgver=1.41.4.22.gadf3ada
+pkgname=({lib32-,}gobject-introspection-git)
+pkgver=1.42.0.6.g15799d1
 pkgrel=1
 pkgdesc="GObject Introspection (git version)"
+depends=('python2-mako')
+makedepends=('git' 'pkgconfig' 'autoconf' 'gtk-doc' 'gnome-common-git' 'bison')
 epoch=1
 arch=('x86_64' 'i686')
 license=('LGPL' 'GPL')
@@ -52,7 +54,7 @@ build() {
   export pyexecdir=/usr/lib32/python2.7/site-packages
   export pythondir=/usr/lib32/python2.7/site-packages
 
-  ../autogen.sh --prefix=/usr --libdir=/usr/lib32 --libexecdir=/usr/lib32 \
+  ../autogen.sh --prefix=/usr --lib{,exec}dir=/usr/lib32 \
                 --program-suffix=-32 --includedir=/usr/lib32/gobject-introspection/include \
                 --disable-static --enable-doctool \
                 --with-python=/usr/bin/python2.7-32
@@ -63,12 +65,10 @@ build() {
 }
 
 package_gobject-introspection-git() {
-  depends=("glib2-git" 'python2' 'python2-mako')
-  makedepends=('git' 'pkgconfig' 'autoconf' 'gtk-doc' 'gnome-common-git'
-               'bison' 'cairo' 'mesa' 'flex')
-  provides=("gobject-introspection=${pkgver}")
-  conflicts=('gobject-introspection' 'gobject-introspection-svn')
-  replaces=('gobject-introspection-svn')
+  depends+=("glib2-git" "python2")
+  makedepends+=('cairo' 'mesa' 'flex')
+  provides=(gobject-introspection{,-git}=${pkgver})
+  conflicts=(gobject-introspection{,-svn})
 
   cd "$srcdir/gobject-introspection/build-x86_64"
   make DESTDIR="$pkgdir" install
@@ -79,12 +79,10 @@ package_gobject-introspection-git() {
 
 package_lib32-gobject-introspection-git() {
   pkgdesc+=" (32bit)"
-  depends=("lib32-glib2-git" 'lib32-python2' 'python2-mako')
-  makedepends=('git' 'pkgconfig' 'autoconf' 'gtk-doc' 'gnome-common-git'
-               'bison' 'lib32-cairo' 'lib32-mesa' 'lib32-flex')
-  provides=("lib32-gobject-introspection=${pkgver}")
-  conflicts=('lib32-gobject-introspection' 'lib32-gobject-introspection-svn')
-  replaces=('lib32-gobject-introspection-svn')
+  depends+=(lib32-{glib2-git,python2})
+  makedepends+=(lib32-{cairo,mesa,flex})
+  provides=(lib32-gobject-introspection{,-git}=${pkgver})
+  conflicts=(lib32-gobject-introspection{,-svn})
 
   cd "$srcdir/gobject-introspection/build-i686"
   make DESTDIR="$pkgdir" install
