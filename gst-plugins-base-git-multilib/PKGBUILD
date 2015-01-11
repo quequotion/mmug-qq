@@ -1,10 +1,12 @@
 # Original Package: Jan de Groot <jgc@archlinux.org>
 # Maintainer: Lubosz Sarnecki <lubosz@gmail.com>
 
-pkgname='gst-plugins-base-git'
-pkgver=1.5.0.1.13524.844ae7c
+pkgbase='gst-plugins-base-git-multilib'
+pkgname=({lib32-,}gst-plugins-base-git)
+pkgver=1.5.0.1.13906.13ee94e
 pkgrel=1
 pkgdesc="GStreamer Multimedia Framework Base Plugins"
+makedepends=('pkgconfig' )
 arch=('i686' 'x86_64')
 license=('LGPL')
 options=(!libtool !emptydirs)
@@ -16,10 +18,8 @@ sha512sums=('SKIP'
             'SKIP'
             '0031836c23d63c849515d16948fe2572310b51ad54e8707f3213aaa5393e6b08622b25ffc364ff973398655a8a3b006a2e8433cab5601d967fa915b2ee496547')
 
-_gitname='gst-plugins-base'
-
 pkgver() {
-  cd $_gitname
+  cd gst-plugins-base
   version=$(grep AC_INIT configure.ac | sed 's/AC_INIT(\[GStreamer Base Plug-ins\],\[//' | sed 's/\],\[http:\/\/bugzilla.gnome.org\/enter_bug.cgi?product=GStreamer\],\[gst-plugins-base\])//')
   hash=$(git log --pretty=format:'%h' -n 1)
   revision=$(git rev-list --count HEAD)
@@ -28,7 +28,7 @@ pkgver() {
 }
 
 build() {
-  cd $_gitname
+  cd gst-plugins-base
 
   #Saves some time and bandwidth on rebuilds
   rm -rf common/
@@ -36,25 +36,55 @@ build() {
   ln -s ../common/ ./common
 
   #Build 64bit libraries
-  [[ -d build-x86_64 ]] || mkdir build-x86_64
-  pushd build-x86_64
+  git clone "$srcdir/gst-plugins-base" "$srcdir/gst-plugins-base-build-x86_64"
+  pushd ../gst-plugins-base-build-x86_64
 
-  ../autogen.sh --prefix=/usr --sysconfdir=/etc --localstatedir=/var --libdir=/usr/lib --libexecdir=/usr/lib \
+  ./autogen.sh --prefix=/usr --sysconfdir=/etc --localstatedir=/var --libdir=/usr/lib --libexecdir=/usr/lib \
                 --disable-static --enable-experimental --disable-fatal-warnings
+  make
+
+  popd
+
+  #Build 32bit libraries
+  git clone "$srcdir/gst-plugins-base" "$srcdir/gst-plugins-base-build-i686"
+  pushd ../gst-plugins-base-build-i686
+
+  export CC='gcc -m32'
+  export CXX='g++ -m32'
+  export LDFLAGS='-m32'
+  export PKG_CONFIG_PATH='/usr/lib32/pkgconfig'
+
+  ./autogen.sh --prefix=/usr --sysconfdir=/etc --localstatedir=/var --libdir=/usr/lib32 --libexecdir=/usr/lib32 \
+                --disable-static --enable-experimental --disable-fatal-warnings \
+                --enable-introspection=no #no other way, everything else was tried.
   make
 
   popd
 }
 
-package() {
-  makedepends=('pkgconfig' 'gstreamer-git' 'orc' 'libxv' 'alsa-lib' 'cdparanoia' 'libvisual' 'libvorbis'
-               'libtheora' 'pango' 'gobject-introspection' 'qt5')
-  depends=('gstreamer-git' 'orc' 'libxv' 'alsa-lib' 'cdparanoia' 'libvisual' 'libvorbis' 'libtheora' 'pango')
-  conflicts=('gst-plugins-base' 'gst-plugins-base-libs')
-  provides=('gst-plugins-base='$pkgver 'gst-plugins-base-libs='$pkgver)
+package_gst-plugins-base-git() {
+  makedepends+=('gstreamer-git' 'orc' 'alsa-lib' 'cdparanoia' 'pango' 'gobject-introspection' 'qt5' lib{xv,visual,vorbis,theora})
+  depends=('gstreamer-git' 'orc' 'alsa-lib' 'cdparanoia' 'pango' lib{xv,visual,vorbis,theora})
+  conflicts=(gst-plugins-base{,-libs})
+  provides=(gst-plugins-base{,-libs}{,-git}=$pkgver)
  
-  cd $_gitname/build-x86_64
+  cd $srcdir/gst-plugins-base-build-x86_64
 
   make DESTDIR="${pkgdir}" install
+}
+
+
+package_lib32-gst-plugins-base-git() {
+  pkgdesc+=" (32bit)"
+  makedepends+=(lib32-{gstreamer-git,orc,alsa-lib,cdparanoia,pango,gobject-introspection,qt5,lib{xv,visual,vorbis,theora}})
+  depends=(lib32-{gstreamer-git,orc,alsa-lib,cdparanoia,pango,lib{xv,visual,vorbis,theora}})
+  conflicts=(lib32-gst-plugins-base{,-libs})
+  provides=(lib32-gst-plugins-base{,-libs}{,-git}=$pkgver)
+ 
+  cd $srcdir/gst-plugins-base-build-i686
+
+  make DESTDIR="${pkgdir}" install
+
+  rm -rf "${pkgdir}"/{etc,usr/{share,include,bin}}
 }
 
