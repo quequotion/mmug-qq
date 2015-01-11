@@ -1,12 +1,13 @@
-# $Id$
-# Maintainer: Tom Gundersen <teg@jklm.no>
+# Maintainer: quequotion <quequotion@bugmenot.com>
+# Contributor: Tom Gundersen <teg@jklm.no>
 # Contributor: Andrea Scarpino <andrea@archlinux.org>
 # Contributor: Geoffroy Carrier <geoffroy@archlinux.org>
 
 pkgbase=lib32-bluez
-pkgname=('lib32-bluez' 'lib32-bluez-libs' 'lib32-bluez-cups' 'lib32-bluez-plugins') # 'lib32-bluez-utils' 'lib32-bluez-hid2hci' 
+pkgname=(lib32-bluez{,-libs,-cups,-plugins}) # 'lib32-bluez-utils' 'lib32-bluez-hid2hci' 
 pkgver=5.21
 pkgrel=2
+pkgdesc="Libraries and tools for the Bluetooth protocol stack (32 bit)"
 url="http://www.bluez.org/"
 arch=('i686' 'x86_64')
 license=('GPL2')
@@ -54,10 +55,11 @@ check() {
 
 package_lib32-bluez() {
   pkgdesc="Daemons for the bluetooth protocol stack (32bit)"
-  depends=('lib32-libical' 'lib32-dbus' 'lib32-glib2')
+  depends=(lib32-{libical,dbus,glib2})
   backup=('etc/dbus-1/system.d/bluetooth.conf'
           'etc/bluetooth/main.conf')
-  conflicts=('obexd-client' 'obexd-server')
+  provides=('lib32-bluez'=$pkgver)
+  conflicts=(obexd-{client,server} 'lib32-bluez')
 
   cd bluez-${pkgver}
   #make DESTDIR=${pkgdir} install
@@ -117,6 +119,8 @@ package_lib32-bluez() {
 package_lib32-bluez-libs() {
   pkgdesc="Deprecated libraries for the bluetooth protocol stack (32bit)"
   depends=('lib32-glibc')
+  provides=('lib32-bluez-libs'=$pkgver)
+  conflicts=('lib32-bluez-libs')
   license=('LGPL2.1')
 
   cd bluez-${pkgver}
@@ -132,6 +136,8 @@ package_lib32-bluez-libs() {
 package_lib32-bluez-cups() {
   pkgdesc="CUPS printer backend for Bluetooth printers (32bit)"
   depends=('cups')
+  provides=('lib32-bluez-cups'=$pkgver)
+  conflicts=('lib32-bluez-cups')
 
   cd bluez-${pkgver}
   make DESTDIR=${pkgdir} install-cupsPROGRAMS
@@ -159,6 +165,7 @@ package_lib32-bluez-cups() {
 package_lib32-bluez-plugins() {
   pkgdesc="bluez plugins (PS3 Sixaxis controller) (32bit)"
   depends=('lib32-systemd')
+  provides=('lib32-bluez-plugins'=$pkgver)
 
   cd bluez-${pkgver}
   make DESTDIR=${pkgdir} \
