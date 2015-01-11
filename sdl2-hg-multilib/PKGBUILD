@@ -60,6 +60,7 @@ build() {
 
   CFLAGS="$CFLAGS -m32"
   LDFLAGS="$LDFLAGS -m32"
+  export PKG_CONFIG_PATH='/usr/lib32/pkgconfig'
 
   cmake ../sdl2 \
     -DCMAKE_INSTALL_PREFIX=/usr \
@@ -75,8 +76,8 @@ build() {
 }
 
 package_sdl2-hg() {
-  depends+=('libxext' 'libxrender' 'libx11' 'libgl' 'libxcursor')
-  makedepends+=('alsa-lib' 'mesa' 'libpulse' 'libxrandr' 'libxinerama' 'libxkbcommon')
+  depends+=(lib{xext,xrender,x11,gl,xcursor})
+  makedepends+=('alsa-lib' 'mesa' lib{pulse,xrandr,xinerama,xkbcommon})
   optdepends=('alsa-lib: ALSA audio driver'
               'libpulse: PulseAudio audio driver')
   provides=(sdl2{,-hg}=$pkgver)
@@ -88,8 +89,8 @@ package_sdl2-hg() {
 
 package_lib32-sdl2-hg() {
   pkgdesc+=" (32bit)"
-  depends+=(lib32-{libxext,libxrender,libx11,libgl,libxcursor})
-  makedepends+=(lib32-{alsa-lib,mesa,libpulse,libxrandr,libxinerama,libxkbcommon} 'gcc-multilib')
+  depends+=(lib32-lib{xext,xrender,x11,gl,xcursor})
+  makedepends+=(lib32-{alsa-lib,mesa,lib{pulse,xrandr,xinerama,xkbcommon}} 'gcc-multilib')
   optdepends=('lib32-alsa-lib: ALSA audio driver'
               'lib32-libpulse: PulseAudio audio driver')
   provides=(lib32-sdl2{,-hg}=$pkgver)
