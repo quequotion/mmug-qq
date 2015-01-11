@@ -1,10 +1,11 @@
 [Desktop Entry]
-Name=Qt QDbusViewer 
+Name=Qt QDbusViewer (32bit)
 GenericName=D-Bus Debugger
 Comment=Debug D-Bus applications
-Exec=/usr/lib/qt/bin/qdbusviewer
+Exec=/usr/lib32/qt/bin/qdbusviewer
 Icon=qdbusviewer
 Terminal=false
 Type=Application
+Hidden=true
 Categories=Qt;Development;Debugger;
 
