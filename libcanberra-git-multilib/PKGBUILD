@@ -4,7 +4,7 @@
 
 pkgbase=libcanberra-git-multilb
 pkgname=({,lib32-}libcanberra{,-{pulse,gstreamer}}-git)
-pkgver=0.30.2.r398.g0.30.2.gc0620e4
+pkgver=0.30.2.r398.gc0620e4
 pkgrel=1
 makedepends=('git')
 arch=(i686 x86_64)
@@ -15,11 +15,11 @@ source=("git+http://git.0pointer.net/libcanberra.git/" "libcanberra.xinit")
 sha512sums=('SKIP'
             'd7e9400ac2a00a69fca5134fc32f97015222d06b164b09531dc16f584c0028f0690224a3f7b96e30b4794b7ffc19e15f9e4e83994712247e625a4a006913404a')
 
-_majorver=0.30
+_majorver="$(printf "$pkgver" | sed 's|\.[^\.]*||2g')"
 
 pkgver() {
   cd libcanberra
-  echo $(git describe --long --tags | cut -d 'g' -f1)r$(git rev-list HEAD --count).g$(git describe --always) | tr -d v | tr - .
+  echo $(git describe --long --tags | cut -d 'g' -f1)r$(git rev-list HEAD --count).$(git describe --always | sed 's/^.*-//1') | tr -d v | tr - .
 }
 
 build() {
@@ -71,7 +71,7 @@ build() {
 package_libcanberra-git() {
   pkgdesc="A small and lightweight implementation of the XDG Sound Theme Specification (GIT build)"
   install=libcanberra.install
-  depends=(libvorbis libltdl alsa-lib tdb sound-theme-freedesktop)
+  depends=(lib{vorbis,ltdl} alsa-lib tdb sound-theme-freedesktop)
   makedepends+=(gtk{-doc,2,3} libpulse gstreamer)
   optdepends=("libcanberra-pulse: PulseAudio driver"
               "libcanberra-gstreamer: GStreamer driver")
@@ -119,7 +119,7 @@ package_libcanberra-gstreamer-git() {
 package_lib32-libcanberra-git() {
   pkgdesc="A small and lightweight implementation of the XDG Sound Theme Specification (GIT build) (32bit)"
   #install=libcanberra.install
-  depends=(lib32-{libvorbis,libltdl,alsa-lib,tdb} sound-theme-freedesktop)
+  depends=(lib32-{lib{vorbis,ltdl},alsa-lib,tdb} sound-theme-freedesktop)
   makedepends+=(gtk-doc lib32{-gtk{2,3},libpulse,gstreamer} 'gcc-multilib')
   optdepends=("lib32-libcanberra-pulse: PulseAudio driver"
               "lib32-libcanberra-gstreamer: GStreamer driver")
