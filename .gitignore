@@ -53,4 +53,9 @@ Thumbs.db
 
 # Particulars #
 ###############
-webgitgtk-git-multilib/
+gobject-introspection-git-multilib/
+gst-plugins-bad-git-multilib/
+gtk3-git-ubuntu-multilib/
+lib32-mjpegtools/
+libjpeg-turbo-svn/
+portaudio-svn/
