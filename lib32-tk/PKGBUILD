@@ -21,9 +21,8 @@ build() {
   export LDFLAGS='-m32'
   export PKG_CONFIG_PATH='/usr/lib32/pkgconfig'
 
-#  [[ $CARCH == "x86_64" ]] && BIT="--enable-64bit"
-  ./configure --prefix=/usr --libdir=/usr/lib32 --libexecdir=/usr/lib32 --mandir=/usr/share/man --enable-threads --disable-rpath #$BIT
-
+  ./configure --prefix=/usr --lib{,exec}dir=/usr/lib32 \
+              --mandir=/usr/share/man --enable-threads --disable-rpath
   make
 }
 
