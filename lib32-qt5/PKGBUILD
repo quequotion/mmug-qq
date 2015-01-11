@@ -1,5 +1,5 @@
-# $Id$
-# Maintainer: Andrea Scarpino <andrea@archlinux.org>
+# Maintainer: quequotion <quequotion@bugmenot.com>
+# Contributor: Andrea Scarpino <andrea@archlinux.org>
 
 pkgbase=lib32-qt5
 pkgname=('lib32-qt5-base'
@@ -26,6 +26,7 @@ pkgrel=1
 arch=('i686' 'x86_64')
 url='http://qt-project.org/'
 license=('GPL3' 'LGPL' 'FDL' 'custom')
+pkgdesc='A cross-platform application and UI framework (32bit)'
 makedepends=('xcb-proto' 'ruby' 'gperf' 'cups' 'hicolor-icon-theme' 'desktop-file-utils' 'postgresql-libs' lib32-{xcb-util,xcb-util-image,xcb-util-wm,xcb-util-keysyms,mesa,at-spi2-core,alsa-lib,gstreamer0.10-base-plugins,sqlite,unixodbc,python2,gst-plugins-base-libs,openal,gtk2,fontconfig,python,mtdev,harfbuzz,lib{xcb,mng,jpeg-turbo,pulse,mariadbclient,fbclient,xslt,xcomposite,xkbcommon-x11}}) 
 groups=('qt' 'qt5')
 _pkgfqn="qt-everywhere-opensource-src-${pkgver}"
