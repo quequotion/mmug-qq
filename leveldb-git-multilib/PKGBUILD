@@ -47,6 +47,8 @@ build() {
 
 package_leveldb-git() {
   depends=('gperftools' 'snappy')
+  provides=(leveldb{,-git}=$pkgver)
+  conflicts=('leveldb')
   cd "leveldb-build-x86_64"
 
   install -dm755 \
@@ -70,6 +72,8 @@ package_leveldb-git() {
 package_lib32-leveldb-git() {
   pkgdesc+=" (32bit)"
   depends=('lib32-gperftools' 'lib32-snappy')
+  provides=(lib32-leveldb{,-git}=$pkgver)
+  conflicts=('lib32-leveldb')
   cd "leveldb-build-i686"
 
   install -dm755 \
