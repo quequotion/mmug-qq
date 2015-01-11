@@ -3,10 +3,11 @@
 # Contributor: Scimmia
 
 pkgbase=wayland-git-multilib
-pkgname=('wayland-git' 'lib32-wayland-git')
-pkgver=1.5.90.1549.ced769a
+pkgname=({lib32-,}wayland-git)
+pkgver=1.6.90.1659.2888e97
 pkgrel=1
 pkgdesc='A computer display server protocol. (git version)'
+makedepends=('git')
 arch=(i686 x86_64)
 url='http://wayland.freedesktop.org'
 license=('MIT')
@@ -56,9 +57,9 @@ build() {
 
 package_wayland-git() {
   depends=('libffi')
-  makedepends=('git' 'expat')
+  makedepends+=('expat')
   conflicts=('wayland')
-  provides=("wayland=${pkgver}")
+  provides=(wayland{,-git}=${pkgver})
   cd wayland/build-x86_64
   make DESTDIR="${pkgdir}" install
   install -Dm 644 ../COPYING "$pkgdir/usr/share/licenses/$pkgname/COPYING"
@@ -66,10 +67,10 @@ package_wayland-git() {
 
 package_lib32-wayland-git() {
   pkgdesc+=" (32bit)"
-  depends=('lib32-libffi' "${pkgname#*-}")
-  makedepends=('git' 'lib32-expat')
+  depends=('lib32-libffi')
+  makedepends+=('lib32-expat')
   conflicts=('lib32-wayland')
-  provides=("lib32-wayland=${pkgver}")
+  provides=(lib32-wayland{,-git}=${pkgver})
   cd wayland/build-i686
 
   make DESTDIR="${pkgdir}" install
