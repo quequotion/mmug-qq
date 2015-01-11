@@ -1,4 +1,4 @@
-# $Id$
+# Maintainer: quequotion <quequotion@bugmenot.com>
 # Maintainer: AndyRTR <andyrtr@archlinux.org>
 
 ### !!! rebuild groff from core that picks up hardcoding the GS versioned font path !!! ###
@@ -9,9 +9,8 @@ pkgrel=1
 pkgdesc="An interpreter for the PostScript language (32bit)"
 arch=('i686' 'x86_64')
 license=('AGPL' 'custom')
-depends=('lib32-libxt' 'lib32-libcups' 'lib32-fontconfig' 'lib32-jasper' 'lib32-zlib' 'lib32-libpng>=1.5.7' 'lib32-libjpeg'
-         'lib32-libtiff>=4.0.0' 'lib32-lcms2' 'lib32-dbus' 'lib32-libpaper')
-makedepends=('lib32-gtk3' 'lib32-gnutls')
+depends=(lib32-{fontconfig,jasper,zlib,lcms2,dbus,lib{xt,cups,libpng>=1.5.7,jpeg,tiff>=4.0.0,paper}})
+makedepends=(lib32-{gtk3,gnutls})
 optdepends=('lib32-texlive-core:      needed for dvipdf'
             'lib32-gtk3:              needed for gsx')
 url="http://www.ghostscript.com/"
@@ -46,19 +45,11 @@ build() {
   ./configure --prefix=/usr \
         --libdir=/usr/lib32 --libexecdir=/usr/lib32 --includedir=/usr/lib32/ghostscript/include \
 	--enable-dynamic \
-	--with-ijs \
-	--with-jbig2dec \
-	--with-omni \
-	--with-x \
-	--with-drivers=ALL\
+	--with-{ijs,jbig2dec,omni,x,libpaper,system-libtiff} \
+        --with-drivers=ALL \
 	--with-fontpath=/usr/share/fonts/Type1:/usr/share/fonts \
-	--enable-fontconfig \
-	--enable-freetype \
-	--enable-openjpeg \
-	--without-luratech \
-	--without-omni \
-	--with-system-libtiff \
-	--with-libpaper \
+	--enable-{fontconfig,freetype,openjpeg} \
+	--without-{luratech,omni} \
 	--disable-compile-inits #--help # needed for linking with system-zlib
   make
 
