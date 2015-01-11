@@ -1,0 +1,127 @@
+# Maintainer: Que Quotion <quequotion@bugmenot.com>
+# Contributor: Jonas Heinrich <onny@project-insanity.org>
+# Maintainer: Jonas Heinrich <onny@project-insanity.org>
+
+pkgbase=webkitgtk-git-multilib
+pkgname=({lib32-,}webkitgtk-git) 
+pkgver=2.7.3.r158322.cb943e8
+pkgrel=1
+pkgdesc="GTK+ Web content engine library (nightly build)"
+depends=(geoclue harfbuzz-icu)
+makedepends=(git cmake ruby gperf gtk-doc)
+arch=('i686' 'x86_64')
+url="http://webkitgtk.org/"
+license=('custom')
+options=('!libtool' '!emptydirs')
+source=("git+git://git.webkit.org/WebKit.git"
+        'srcdir-reference.patch'
+        {gcc,g++,ld}-flagged)
+sha512sums=('SKIP'
+            '68080246110667bfc8377261b81cc1eec4b881c687d6413451ec6fb34db15f9e5090c175f5e3ed16b9308bd089110049d894953c612df0a1408129c0b7e62bf1'
+            '98debfc394a2ad23f129c1006c2c35d87814d3aa9d388a07551aa63d07fd275105cc616f7a803fd65d449ed4662c5738fc4ef5c4162ed3c6fd2bb3d8e3ca348b'
+            'cc9fbcca8441e1a0edd090de84c02b98c939d24fedd27cb2d9e14f2e95cb7daa4f718b282f46bbd91d1070e2612b7d454ba6264ddf9755b41839de9c3ae379b3'
+            'dbdcdf3d9a6fc557e45890ac548396c498c840837c471c60dda6d8a7557c8068db285d20f76bba6803ffaad9ca3db701e3ea0bd5f7a7fd9d3264877d92c4f044')
+
+pkgver() {
+  cd WebKit
+  echo 2.7.3.r$(git rev-list HEAD --count).$(git describe --always | sed 's/^.*-//1') | tr -d v | tr - .
+}
+
+prepare() {
+  #cmake has no honor, so decieve it with tricks!
+  chmod +x {gcc,g++,ld}-flagged
+
+  patch -Np1 < srcdir-reference.patch
+
+}
+
+build() {
+  cd "$srcdir"/WebKit
+
+  #Build 64bit libraries
+  [[ -d build-x86_64 ]] || mkdir build-x86_64
+  pushd build-x86_64
+
+  cmake ../ \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_INSTALL_PREFIX=/usr \
+    -DENABLE_INTROSPECTION=OFF \
+    -D{CMAKE_PREFIX_PATH,LIBEXEC_INSTALL_DIR,LIB_INSTALL_DIR,INTROSPECTION_LIBS}='/usr/lib' \
+    -DCMAKE_INSTALL_INCLUDEDIR=/usr/lib32/webkitgtk/include \
+    -DINTROSPECTION_SCANNER='/usr/bin/g-ir-scanner' \
+    -DINTROSPECTION_COMPILER='/usr/bin/g-ir-compiler' \
+    -DINTROSPECTION_GENERATE='/usr/bin/g-ir-generate' \
+    -DINTROSPECTION_TYPELIBDIR='/usr/lib/girepository-1.0/' \
+    -DPORT=GTK \
+    -DENABLE_WEBGL=ON \
+    -DCMAKE_C_COMPILER="$srcdir"/gcc-flagged \
+    -DCMAKE_CXX_COMPILER="$srcdir"/g++-flagged \
+    -DCMAKE_LINKER="$srcdir"/ld-flagged
+
+  make
+
+  popd
+
+  #Build 32bit libraries
+  [[ -d build-i686 ]] || mkdir build-i686
+  pushd build-i686
+
+
+  CFLAGS="$CFLAGS -m32"
+  CXXFLAGS="$CXXFLAGS -m32"
+  LDFLAGS="$LDFLAGS -m32"
+  export PKG_CONFIG_PATH='/usr/lib32/pkgconfig'
+
+  cmake ../ \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_INSTALL_PREFIX=/usr \
+    -DENABLE_INTROSPECTION=OFF \
+    -D{CMAKE_PREFIX_PATH,LIBEXEC_INSTALL_DIR,LIB_INSTALL_DIR,INTROSPECTION_LIBS}='/usr/lib32' \
+    -DCMAKE_INSTALL_INCLUDEDIR=/usr/lib32/webkitgtk/include \
+    -DINTROSPECTION_SCANNER='/usr/bin/g-ir-scanner-32' \
+    -DINTROSPECTION_COMPILER='/usr/bin/g-ir-compiler-32' \
+    -DINTROSPECTION_GENERATE='/usr/bin/g-ir-generate-32' \
+    -DINTROSPECTION_TYPELIBDIR='/usr/lib32/girepository-1.0/' \
+    -DPORT=GTK \
+    -DENABLE_WEBGL=ON \
+    -DCMAKE_C_COMPILER="$srcdir"/gcc-flagged \
+    -DCMAKE_CXX_COMPILER="$srcdir"/g++-flagged \
+    -DCMAKE_LINKER="$srcdir"/ld-flagged
+
+  make
+
+  popd
+}
+
+package_webkitgtk-git() {
+  provides=(webkitgtk{,4}{,-git})
+  conflicts=(webkitgtk)
+  depends+=(sqlite enchant gtk3 gst-plugins-{base-libs,bad} lib{webp,xt,xslt,soup,gl,secret})
+  makedepends+=(gtk3 gobject-introspection python mesa gst-plugins-{base,bad} cairo)
+  optdepends=('gtk2: Netscape plugin support')
+
+  cd "$srcdir"/WebKit/build-x86_64
+  make -j1 DESTDIR="$pkgdir/" install 
+
+  install -Dm644 ../Source/WebKit/LICENSE \
+    "$pkgdir/usr/share/licenses/WebKit/LICENSE"
+}
+
+package_lib32-webkitgtk-git() {
+  pkgdesc+=" (32bit)"
+  provides=(lib32-webkitgtk{,4}{,-no-gir}{,-git})
+  conflicts=(lib32-webkitgtk)
+  depends+=(lib32-{sqlite,enchant,gtk3,gst-plugins-{base-libs,bad},lib{webp,xt,xslt,soup,gl,secret}})
+  makedepends+=(lib32-{gtk3,gobject-introspection,python,mesa,gst-plugins-{base,bad},cairo})
+  optdepends=('lib32-gtk2: Netscape plugin support')
+
+  cd "$srcdir"/WebKit/build-i686
+
+  make -j1 DESTDIR="$pkgdir/" install
+
+  rm -rf "${pkgdir}"/{etc,usr/{share,include,bin}}
+
+  install -Dm644 ../Source/WebKit/LICENSE \
+    "$pkgdir"/usr/share/licenses/lib32-WebKit/LICENSE
+}
+
