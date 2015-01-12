@@ -1,5 +1,5 @@
-# $Id$
-# Maintainer: Jan de Groot <jgc@archlinux.org>
+# Maintainer: quequotion <quequotion@bugmenot.com>
+# Contributor: Jan de Groot <jgc@archlinux.org>
 
 pkgname=lib32-libspectre
 pkgver=0.2.7
