@@ -150,9 +150,6 @@ package_lib32-qt5-base() {
 
   install -D -m644 LGPL_EXCEPTION.txt \
     "${pkgdir}"/usr/share/licenses/${pkgname}/LGPL_EXCEPTION.txt
-
-  install -Dd "$pkgdir/usr/lib32/pkgconfig"
-  ln -s "$pkgdir"/usr/lib32/qt/pkgconfig/* "$pkgdir/usr/lib32/pkgconfig/"
 }
 
 package_lib32-qt5-connectivity() {
@@ -172,9 +169,6 @@ package_lib32-qt5-connectivity() {
 
   install -D -m644 LGPL_EXCEPTION.txt \
     "${pkgdir}"/usr/share/licenses/${pkgname}/LGPL_EXCEPTION.txt
-
-  install -Dd "$pkgdir/usr/lib32/pkgconfig"
-  ln -s "$pkgdir"/usr/lib32/qt/pkgconfig/* "$pkgdir/usr/lib32/pkgconfig/"
 }
 
 package_lib32-qt5-declarative() {
@@ -200,9 +194,6 @@ package_lib32-qt5-declarative() {
 
   install -D -m644 LGPL_EXCEPTION.txt \
     "${pkgdir}"/usr/share/licenses/${pkgname}/LGPL_EXCEPTION.txt
-
-  install -Dd "$pkgdir/usr/lib32/pkgconfig"
-  ln -s "$pkgdir"/usr/lib32/qt/pkgconfig/* "$pkgdir/usr/lib32/pkgconfig/"
 }
 
 #package_lib32-qt5-doc() {
@@ -241,9 +232,6 @@ package_lib32-qt5-enginio() {
 
   install -D -m644 LGPL_EXCEPTION.txt \
     "${pkgdir}"/usr/share/licenses/${pkgname}/LGPL_EXCEPTION.txt
-
-  install -Dd "$pkgdir/usr/lib32/pkgconfig"
-  ln -s "$pkgdir"/usr/lib32/qt/pkgconfig/* "$pkgdir/usr/lib32/pkgconfig/"
 }
 
 package_lib32-qt5-xmlpatterns() {
@@ -269,9 +257,6 @@ package_lib32-qt5-xmlpatterns() {
 
   install -D -m644 LGPL_EXCEPTION.txt \
     "${pkgdir}"/usr/share/licenses/${pkgname}/LGPL_EXCEPTION.txt
-
-  install -Dd "$pkgdir/usr/lib32/pkgconfig"
-  ln -s "$pkgdir"/usr/lib32/qt/pkgconfig/* "$pkgdir/usr/lib32/pkgconfig/"
 }
 
 #package_lib32-qt5-translations() {
@@ -320,9 +305,6 @@ package_lib32-qt5-graphicaleffects() {
 
   install -D -m644 LGPL_EXCEPTION.txt \
     "${pkgdir}"/usr/share/licenses/${pkgname}/LGPL_EXCEPTION.txt
-
-  install -Dd "$pkgdir/usr/lib32/pkgconfig"
-  ln -s "$pkgdir"/usr/lib32/qt/pkgconfig/* "$pkgdir/usr/lib32/pkgconfig/"
 }
 
 package_lib32-qt5-imageformats() {
@@ -357,9 +339,6 @@ package_lib32-qt5-location() {
 
   install -D -m644 LGPL_EXCEPTION.txt \
     "${pkgdir}"/usr/share/licenses/${pkgname}/LGPL_EXCEPTION.txt
-
-  install -Dd "$pkgdir/usr/lib32/pkgconfig"
-  ln -s "$pkgdir"/usr/lib32/qt/pkgconfig/* "$pkgdir/usr/lib32/pkgconfig/"
 }
 
 package_lib32-qt5-quick1() {
@@ -385,9 +364,6 @@ package_lib32-qt5-quick1() {
 
   install -D -m644 LGPL_EXCEPTION.txt \
     "${pkgdir}"/usr/share/licenses/${pkgname}/LGPL_EXCEPTION.txt
-
-  install -Dd "$pkgdir/usr/lib32/pkgconfig"
-  ln -s "$pkgdir"/usr/lib32/qt/pkgconfig/* "$pkgdir/usr/lib32/pkgconfig/"
 }
 
 package_lib32-qt5-quickcontrols() {
@@ -422,9 +398,6 @@ package_lib32-qt5-script() {
 
   install -D -m644 LGPL_EXCEPTION.txt \
     "${pkgdir}"/usr/share/licenses/${pkgname}/LGPL_EXCEPTION.txt
-
-  install -Dd "$pkgdir/usr/lib32/pkgconfig"
-  ln -s "$pkgdir"/usr/lib32/qt/pkgconfig/* "$pkgdir/usr/lib32/pkgconfig/"
 }
 
 package_lib32-qt5-sensors() {
@@ -444,9 +417,6 @@ package_lib32-qt5-sensors() {
 
   install -D -m644 LGPL_EXCEPTION.txt \
     "${pkgdir}"/usr/share/licenses/${pkgname}/LGPL_EXCEPTION.txt
-
-  install -Dd "$pkgdir/usr/lib32/pkgconfig"
-  ln -s "$pkgdir"/usr/lib32/qt/pkgconfig/* "$pkgdir/usr/lib32/pkgconfig/"
 }
 
 package_lib32-qt5-serialport() {
@@ -466,9 +436,6 @@ package_lib32-qt5-serialport() {
 
   install -D -m644 LGPL_EXCEPTION.txt \
     "${pkgdir}"/usr/share/licenses/${pkgname}/LGPL_EXCEPTION.txt
-
-  install -Dd "$pkgdir/usr/lib32/pkgconfig"
-  ln -s "$pkgdir"/usr/lib32/qt/pkgconfig/* "$pkgdir/usr/lib32/pkgconfig/"
 }
 
 package_lib32-qt5-svg() {
@@ -488,9 +455,6 @@ package_lib32-qt5-svg() {
 
   install -D -m644 LGPL_EXCEPTION.txt \
     "${pkgdir}"/usr/share/licenses/${pkgname}/LGPL_EXCEPTION.txt
-
-  install -Dd "$pkgdir/usr/lib32/pkgconfig"
-  ln -s "$pkgdir"/usr/lib32/qt/pkgconfig/* "$pkgdir/usr/lib32/pkgconfig/"
 
 }
 
@@ -542,9 +506,6 @@ package_lib32-qt5-tools() {
 
   install -D -m644 LGPL_EXCEPTION.txt \
     "${pkgdir}"/usr/share/licenses/${pkgname}/LGPL_EXCEPTION.txt
-
-  install -Dd "$pkgdir/usr/lib32/pkgconfig"
-  ln -s "$pkgdir"/usr/lib32/qt/pkgconfig/* "$pkgdir/usr/lib32/pkgconfig/"
 }
 
 package_lib32-qt5-webkit() {
@@ -565,9 +526,6 @@ package_lib32-qt5-webkit() {
   perl-32 -pi -e "s, -L${srcdir}/?\S+,,g" "${pkgdir}"/usr/lib32/qt/pkgconfig/Qt5WebKit.pc
 
   rm -rf "${pkgdir}"/{etc,usr/{share,include,bin}}
-
-  install -Dd "$pkgdir/usr/lib32/pkgconfig"
-  ln -s "$pkgdir"/usr/lib32/qt/pkgconfig/* "$pkgdir/usr/lib32/pkgconfig/"
 }
 
 
@@ -588,9 +546,6 @@ package_lib32-qt5-wayland() {
 
   install -D -m644 LGPL_EXCEPTION.txt \
     "${pkgdir}"/usr/share/licenses/${pkgname}/LGPL_EXCEPTION.txt
-
-  install -Dd "$pkgdir/usr/lib32/pkgconfig"
-  ln -s "$pkgdir"/usr/lib32/qt/pkgconfig/* "$pkgdir/usr/lib32/pkgconfig/"
 }
 
 package_lib32-qt5-webchannel() {
@@ -610,9 +565,6 @@ package_lib32-qt5-webchannel() {
 
   install -D -m644 LGPL_EXCEPTION.txt \
     "${pkgdir}"/usr/share/licenses/${pkgname}/LGPL_EXCEPTION.txt
-
-  install -Dd "$pkgdir/usr/lib32/pkgconfig"
-  ln -s "$pkgdir"/usr/lib32/qt/pkgconfig/* "$pkgdir/usr/lib32/pkgconfig/"
 }
 
 package_lib32-qt5-webengine() {
@@ -628,9 +580,6 @@ package_lib32-qt5-webengine() {
   #rm -rf "${pkgdir}"/usr/share/doc
 
   rm -rf "${pkgdir}"/{etc,usr/{share,include,bin}}
-
-  install -Dd "$pkgdir/usr/lib32/pkgconfig"
-  ln -s "$pkgdir"/usr/lib32/qt/pkgconfig/* "$pkgdir/usr/lib32/pkgconfig/"
 }
 
 package_lib32-qt5-websockets() {
@@ -648,9 +597,6 @@ package_lib32-qt5-websockets() {
     -exec sed -i -e '/^QMAKE_PRL_BUILD_DIR/d;s/\(QMAKE_PRL_LIBS =\).*/\1/' {} \;
 
   rm -rf "${pkgdir}"/{etc,usr/{share,include,bin}}
-
-  install -Dd "$pkgdir/usr/lib32/pkgconfig"
-  ln -s "$pkgdir"/usr/lib32/qt/pkgconfig/* "$pkgdir/usr/lib32/pkgconfig/"
 }
 
 package_lib32-qt5-x11extras() {
@@ -670,8 +616,5 @@ package_lib32-qt5-x11extras() {
 
   install -D -m644 LGPL_EXCEPTION.txt \
     "${pkgdir}"/usr/share/licenses/${pkgname}/LGPL_EXCEPTION.txt
-
-  install -Dd "$pkgdir/usr/lib32/pkgconfig"
-  ln -s "$pkgdir"/usr/lib32/qt/pkgconfig/* "$pkgdir/usr/lib32/pkgconfig/"
 }
 
