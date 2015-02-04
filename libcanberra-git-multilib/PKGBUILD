@@ -149,8 +149,8 @@ package_lib32-libcanberra-git() {
 
 package_lib32-libcanberra-pulse-git() {
   pkgdesc="PulseAudio plugin for libcanberra (GIT build) (32bit)"
-  depends=(lib32-{libcanberra=$pkgver,libpulse})
-  #makedepends+=('lib32-libpulse' 'gcc-multilib')
+  depends=(lib32-lib{"canberra=$pkgver",pulse})
+  makedepends+=('lib32-libpulse' 'gcc-multilib')
   provides=(lib32-libcanberra-pulse{,-git}=$pkgver)
   conflicts=("lib32-libcanberra-pulse")
 
@@ -161,7 +161,7 @@ package_lib32-libcanberra-pulse-git() {
 package_lib32-libcanberra-gstreamer-git() {
   pkgdesc="GStreamer plugin for libcanberra (GIT build) (32bit)"
   depends=(lib32-{libcanberra=$pkgver,gstreamer})
-  #makedepends+=('lib32-gstreamer' 'gcc-multilib')
+  makedepends+=('lib32-gstreamer' 'gcc-multilib')
   provides=(lib32-libcanberra-gstreamer{,-git}=$pkgver)
   conflicts=("lib32-libcanberra-gstreamer")
 
