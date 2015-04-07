@@ -1,12 +1,13 @@
 # Original Package: Jan de Groot <jgc@archlinux.org>
 # Maintainer: Lubosz Sarnecki <lubosz@gmail.com>
 
-pkgbase='gst-plugins-base-git-multilib'
-pkgname=({lib32-,}gst-plugins-base-git)
-pkgver=1.5.0.1.13906.13ee94e
+_gitname='gst-plugins-base'
+pkgbase=$_gitname-git-multilib
+pkgname=({lib32-,}$_gitname-git)
+pkgver=1.5.0.1.14183.0c72d0a
 pkgrel=1
 pkgdesc="GStreamer Multimedia Framework Base Plugins"
-makedepends=('pkgconfig' )
+makedepends=('pkgconfig')
 arch=('i686' 'x86_64')
 license=('LGPL')
 options=(!libtool !emptydirs)
@@ -19,7 +20,7 @@ sha512sums=('SKIP'
             '0031836c23d63c849515d16948fe2572310b51ad54e8707f3213aaa5393e6b08622b25ffc364ff973398655a8a3b006a2e8433cab5601d967fa915b2ee496547')
 
 pkgver() {
-  cd gst-plugins-base
+  cd $_gitname
   version=$(grep AC_INIT configure.ac | sed 's/AC_INIT(\[GStreamer Base Plug-ins\],\[//' | sed 's/\],\[http:\/\/bugzilla.gnome.org\/enter_bug.cgi?product=GStreamer\],\[gst-plugins-base\])//')
   hash=$(git log --pretty=format:'%h' -n 1)
   revision=$(git rev-list --count HEAD)
@@ -28,7 +29,7 @@ pkgver() {
 }
 
 build() {
-  cd gst-plugins-base
+  cd $_gitname
 
   #Saves some time and bandwidth on rebuilds
   rm -rf common/
@@ -36,27 +37,28 @@ build() {
   ln -s ../common/ ./common
 
   #Build 64bit libraries
-  git clone "$srcdir/gst-plugins-base" "$srcdir/gst-plugins-base-build-x86_64"
-  pushd ../gst-plugins-base-build-x86_64
+  cp -rf "$srcdir/$_gitname" "$srcdir/$_gitname-build-x86_64"
+  pushd ../$_gitname-build-x86_64
 
-  ./autogen.sh --prefix=/usr --sysconfdir=/etc --localstatedir=/var --libdir=/usr/lib --libexecdir=/usr/lib \
-                --disable-static --enable-experimental --disable-fatal-warnings
+  ./autogen.sh --prefix=/usr --sysconfdir=/etc --localstatedir=/var --lib{,exec}dir=/usr/lib \
+               --disable-static --enable-experimental --disable-fatal-warnings
   make
 
   popd
 
   #Build 32bit libraries
-  git clone "$srcdir/gst-plugins-base" "$srcdir/gst-plugins-base-build-i686"
-  pushd ../gst-plugins-base-build-i686
+  cp -rf "$srcdir/$_gitname" "$srcdir/$_gitname-build-i686"
+  pushd ../$_gitname-build-i686
 
   export CC='gcc -m32'
   export CXX='g++ -m32'
-  export LDFLAGS='-m32'
+  export LDFLAGS+=',-m32'
   export PKG_CONFIG_PATH='/usr/lib32/pkgconfig'
 
-  ./autogen.sh --prefix=/usr --sysconfdir=/etc --localstatedir=/var --libdir=/usr/lib32 --libexecdir=/usr/lib32 \
-                --disable-static --enable-experimental --disable-fatal-warnings \
-                --enable-introspection=no #no other way, everything else was tried.
+  ./autogen.sh --build=i686-pc-linux-gnu \
+               --prefix=/usr --sysconfdir=/etc --localstatedir=/var --lib{,exec}dir=/usr/lib32 \
+               --disable-static --enable-experimental --disable-fatal-warnings \
+               --enable-introspection=no #introspection causes an overflow error
   make
 
   popd
@@ -65,10 +67,10 @@ build() {
 package_gst-plugins-base-git() {
   makedepends+=('gstreamer-git' 'orc' 'alsa-lib' 'cdparanoia' 'pango' 'gobject-introspection' 'qt5' lib{xv,visual,vorbis,theora})
   depends=('gstreamer-git' 'orc' 'alsa-lib' 'cdparanoia' 'pango' lib{xv,visual,vorbis,theora})
-  conflicts=(gst-plugins-base{,-libs})
-  provides=(gst-plugins-base{,-libs}{,-git}=$pkgver)
+  conflicts=($_gitname{,-libs})
+  provides=($_gitname{,-libs}{,-git}=$pkgver)
  
-  cd $srcdir/gst-plugins-base-build-x86_64
+  cd $_gitname-build-x86_64
 
   make DESTDIR="${pkgdir}" install
 }
@@ -78,10 +80,10 @@ package_lib32-gst-plugins-base-git() {
   pkgdesc+=" (32bit)"
   makedepends+=(lib32-{gstreamer-git,orc,alsa-lib,cdparanoia,pango,gobject-introspection,qt5,lib{xv,visual,vorbis,theora}})
   depends=(lib32-{gstreamer-git,orc,alsa-lib,cdparanoia,pango,lib{xv,visual,vorbis,theora}})
-  conflicts=(lib32-gst-plugins-base{,-libs})
-  provides=(lib32-gst-plugins-base{,-libs}{,-git}=$pkgver)
+  conflicts=(lib32-$_gitname{,-libs})
+  provides=(lib32-$_gitname{,-libs}{,-git}=$pkgver)
  
-  cd $srcdir/gst-plugins-base-build-i686
+  cd $_gitname-build-i686
 
   make DESTDIR="${pkgdir}" install
 
