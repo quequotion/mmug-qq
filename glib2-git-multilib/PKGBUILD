@@ -3,9 +3,10 @@
 # Contributor: Yichao Yu <yyc1992@gmail.com>
 # Contributor: kfgz <kfgz@interia.pl>
 
-pkgbase=glib2-git-multilib
-pkgname=({lib32-,}glib2-git)
-pkgver=2.43.2.15.g84a1efe
+_gitname=glib2
+pkgbase=$_gitname-git-multilib
+pkgname=({lib32-,}$_gitname-git)
+pkgver=2.43.92.44.gb470b12
 pkgrel=1
 pkgdesc="Common C routines used by GTK+ 2.4 and other libs"
 makedepends=('gtk-doc' 'git')
@@ -13,7 +14,7 @@ arch=(i686 x86_64)
 url=http://git.gnome.org/browse/glib/tree/README.in
 license=(GPL2)
 options=('!emptydirs' '!libtool' '!docs')
-source=(glib2-git::git://git.gnome.org/glib
+source=(glib2::git://git.gnome.org/glib
     glib2.sh
     glib2.csh)
 sha512sums=('SKIP'
@@ -21,19 +22,19 @@ sha512sums=('SKIP'
     'c3899eb7fa5482ce8a35fe02db90fd0f928d50aa7e4365a9529ef35a2dcd1ed86d5a24f6bc5c635ef5b2d95a0ebfebc2bb6bc90404c99f6fb7484ed2fa032c06')
 
 pkgver() {
-    cd glib2-git/
+    cd $_gitname/
 
     git describe | sed 's/-/./g'
 }
 
 prepare() {
-    cd glib2-git/
+    cd $_gitname/
 
     sed -i '1i\EXTRA_DIST=""\nCLEANFILES=""\n' docs/reference/{gio{,/gdbus-object-manager-example},gobject,glib}/Makefile.am
 }
 
 build() {
-  cd glib2-git/
+  cd $_gitname/
 
   touch README
 
@@ -44,13 +45,12 @@ build() {
   PYTHON=/usr/bin/python2 ../autogen.sh \
       --prefix=/usr \
       --sysconfdir=/etc \
-      --libdir=/usr/lib \
+      --lib{,exec}dir=/usr/lib \
       --with-pcre=system \
       --enable-{static,shared} \
       --disable-fam
 
   make
-
   popd
 
   #Build 32bit libraries
@@ -59,28 +59,28 @@ build() {
 
   export CC='gcc -m32'
   export CXX='g++ -m32'
-  export LDFLAGS='-m32'
+  export LDFLAGS+=',-m32'
   export PKG_CONFIG_PATH='/usr/lib32/pkgconfig'
 
   PYTHON=/usr/bin/python2.7-32 ../autogen.sh \
+      --build=i686-pc-linux-gnu \
       --prefix=/usr \
       --sysconfdir=/etc \
-      --libdir=/usr/lib32 --libexecdir=/usr/lib32 \
+      --lib{,exec}dir=/usr/lib32 \
       --with-pcre=system \
       --enable-{static,shared} \
       --disable-fam
 
   make
-
   popd
 }
 
 package_glib2-git() {
   depends=(elfutils python2 pcre zlib lib{dbus,ffi})
   makedepends+=('python2')
-  provides=(glib2{,-git}=$pkgver)
-  conflicts=(glib2)
-  make -C glib2-git/build-x86_64 DESTDIR="$pkgdir" install
+  provides=($_gitname{,-git}=$pkgver)
+  conflicts=($_gitname)
+  make -C $_gitname/build-x86_64 DESTDIR="$pkgdir" install
   for i in glib2.{,c}sh; do
     install -Dm755 $i "$pkgdir"/etc/profile.d/$i
   done
@@ -92,9 +92,9 @@ package_lib32-glib2-git() {
   pkgdesc+=" (32bit)"
   depends=(lib32-{elfutils,python2,pcre,zlib,lib{dbus,ffi}})
   makedepends+=('lib32-python2' 'gcc-multilib' )
-  provides=(lib32-glib2{,-git}=$pkgver)
-  conflicts=(lib32-glib2)
-  make -C glib2-git/build-i686 DESTDIR="${pkgdir}" install
+  provides=(lib32-$_gitname{,-git}=$pkgver)
+  conflicts=(lib32-$_gitname)
+  make -C $_gitname/build-i686 DESTDIR="${pkgdir}" install
   for i in glib2.{,c}sh; do
     install -Dm755 $i "$pkgdir"/etc/profile.d/$i
   done
