@@ -1,0 +1,88 @@
+# Original Package: Jan de Groot <jgc@archlinux.org>
+# Maintainer: Lubosz Sarnecki <lubosz@gmail.com>
+
+_gitname='gst-plugins-good'
+pkgbase=$_gitname-git-multilib
+pkgname=({lib32-,}$_gitname-git)
+pkgver=1.5.0.1.14973.8cfebfe
+pkgrel=1
+pkgdesc="GStreamer Multimedia Framework Good Plugins"
+arch=('i686' 'x86_64')
+license=('LGPL')
+url="http://gstreamer.freedesktop.org/"
+options=(!libtool !emptydirs)
+source=('git://anongit.freedesktop.org/gstreamer/gst-plugins-good'
+        'git://anongit.freedesktop.org/gstreamer/common'
+        'common-submodule.patch')
+sha256sums=('SKIP'
+            'SKIP'
+            '87f5f45b43c7cc342b7b9efbb5ff55cd6f473f56f4ea134054395924b247a554')
+
+pkgver() {
+  cd $_gitname
+  version=$(grep AC_INIT configure.ac | sed 's/AC_INIT(\[GStreamer Good Plug-ins\],\[//' | sed 's/\],\[http:\/\/bugzilla.gnome.org\/enter_bug.cgi?product=GStreamer\],\[gst-plugins-good\])//')
+  hash=$(git log --pretty=format:'%h' -n 1)
+  revision=$(git rev-list --count HEAD)
+  
+  echo $version.$revision.$hash
+}
+
+build() {
+  cd $_gitname
+
+  #Saves some time and bandwidth on rebuilds
+  rm -rf common/
+  patch -Np2 < ../common-submodule.patch
+  ln -s ../common/ ./common
+
+  #Build 64bit libraries
+  git clone "$srcdir/$_gitname" "$srcdir/$_gitname-build-x86_64"
+  pushd ../$_gitname-build-x86_64
+
+  export CFLAGS="-Wno-error"
+  ./autogen.sh --prefix=/usr --sysconfdir=/etc --localstatedir=/var --lib{,exec}dir=/usr/lib \
+               --disable-static --enable-experimental --disable-fatal-warnings \
+               --with-gtk=3.0
+  make
+
+  popd
+
+  #Build 32bit libraries
+  git clone "$srcdir/$_gitname" "$srcdir/$_gitname-build-i686"
+  pushd ../$_gitname-build-i686
+
+  export CC='gcc -m32'
+  export CXX='g++ -m32'
+  export LDFLAGS+=',-m32'
+  export PKG_CONFIG_PATH='/usr/lib32/pkgconfig'
+
+  export CFLAGS="-Wno-error"
+  ./autogen.sh --build=i686-pc-linux-gnu \
+               --prefix=/usr --sysconfdir=/etc --localstatedir=/var --lib{,exec}dir=/usr/lib32 \
+               --disable-static --enable-experimental --disable-fatal-warnings \
+               --with-gtk=3.0 --enable-introspection=no #introspection causes an overflow error
+  make
+
+  popd
+
+}
+
+package_gst-plugins-good-git() {
+  provides=($_gitname{,-git}=$pkgver)
+  conflicts=('$_gitname')
+  depends=('jack' 'gst-plugins-base-git' 'wavpack' 'aalib' 'taglib' 'gdk-pixbuf2' 'v4l-utils' 'cairo' lib{pulse,soup,dv,shout,vpx,caca,avc1394,iec61883,xdamage} )
+  makedepends=('gstreamer' 'speex' 'flac' 'libraw1394')
+  cd $_gitname-build-x86_64
+  make GCONF_DISABLE_MAKEFILE_SCHEMA_INSTALL=1 DESTDIR="${pkgdir}" install
+}
+
+package_lib32-gst-plugins-good-git() {
+  pkgdesc+=" (32bit)"
+  provides=(lib32-$_gitname{,-git}=$pkgver)
+  conflicts=(lib32-$_gitname)
+  depends=(lib32-{jack,gst-plugins-base-git,wavpack,taglib,gdk-pixbuf2,v4l-utils,cairo,lib{pulse,soup,dv,shout,vpx,caca,xdamage}}) # lib32-{aalib,lib{avc1394,iec61883}}
+  makedepends=(lib32-{gstreamer,speex,flac,libraw1394})
+  cd $_gitname-build-i686
+  make GCONF_DISABLE_MAKEFILE_SCHEMA_INSTALL=1 DESTDIR="${pkgdir}" install
+  rm -rf "${pkgdir}"/{etc,usr/{share,include,bin}}
+}
