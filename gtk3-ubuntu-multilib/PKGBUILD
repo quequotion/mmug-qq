@@ -4,7 +4,7 @@
 
 pkgbase=gtk3-ubuntu-multilib
 pkgname=({lib32-,}gtk3-ubuntu)
-pkgver=3.14.6
+pkgver=3.14.11
 _debrel=0ubuntu1
 pkgrel=2
 pkgdesc="GObject-based multi-platform toolkit (v3) from Ubuntu"
@@ -15,8 +15,8 @@ license=(LGPL)
 source=(http://ftp.gnome.org/pub/gnome/sources/gtk+/${pkgver:0:4}/gtk+-$pkgver.tar.xz
         https://launchpad.net/ubuntu/+archive/primary/+files/gtk+3.0_$pkgver-$_debrel.debian.tar.xz
         settings.ini)
-sha256sums=('cfc424e6e10ffeb34a33762aeb77905c3ed938f0b4006ddb7e880aad234ef119'
-            'dc405f72d675d44a6a7e77a894636c8d5bbcf14e07b64739b1398e0caafec816'
+sha256sums=('3fb59e99de38001b1b84a7f292553d0e2305991053d6989d6cd09acd1418f7c8'
+            '7f7aa06db3e906f88f9fcf487319fe619beffb8239dc46b49e1b1b843eabc493'
             '14369dfd1d325c393e17c105d5d5cc5501663277bd4047ea04a50abb3cfbd119')
 
 prepare() {
@@ -46,9 +46,7 @@ build() {
   #https://bugzilla.gnome.org/show_bug.cgi?id=655517
   sed -i -e 's/ -shared / -Wl,-O1,--as-needed\0/g' libtool
 
-  msg2 "Running make..."
   make
-
   popd
 
   #Build 32bit libraries
@@ -57,7 +55,7 @@ build() {
 
   export CC='gcc -m32'
   export CXX='g++ -m32'
-  export LDFLAGS='-m32'
+  export LDFLAGS+=',-m32'
   export PKG_CONFIG_PATH='/usr/lib32/pkgconfig'
   
   export GTK_IM_MODULE_FILE='gtk.immodules-32'
@@ -67,14 +65,13 @@ build() {
       --enable-gtk2-dependency \
       --disable-schemas-compile \
       --enable-{x11,broadway,wayland}-backend \
-      --lib{exec,}dir=/usr/lib32
+      --lib{exec,}dir=/usr/lib32 \
+      --build=i686-pc-linux-gnu 
 
   #https://bugzilla.gnome.org/show_bug.cgi?id=655517
   sed -i -e 's/ -shared / -Wl,-O1,--as-needed\0/g' libtool
 
-  msg2 "Running make..."
   make
-
   popd
 }
 
@@ -85,7 +82,6 @@ package_gtk3-ubuntu() {
   conflicts=('gtk3')
   install=gtk3-ubuntu.install
   cd "gtk+-$pkgver/build-x86_64"
-  msg2 "Running make install..."
   make DESTDIR="$pkgdir" install
   install -Dm644 ../../settings.ini "$pkgdir/usr/share/gtk-3.0/settings.ini"
 }
@@ -98,7 +94,6 @@ package_lib32-gtk3-ubuntu() {
   conflicts=('lib32-gtk3')
   install=lib32-gtk3-ubuntu.install
   cd "gtk+-$pkgver/build-i686"
-  msg2 "Running make install..."
   make DESTDIR="$pkgdir" install
 
   rm -rf "${pkgdir}"/{etc,usr/{share,include}} # needs bin/
