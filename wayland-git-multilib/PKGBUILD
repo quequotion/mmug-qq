@@ -4,7 +4,7 @@
 
 pkgbase=wayland-git-multilib
 pkgname=({lib32-,}wayland-git)
-pkgver=1.6.90.1659.2888e97
+pkgver=1.7.90.1714.c45be3d
 pkgrel=1
 pkgdesc='A computer display server protocol. (git version)'
 makedepends=('git')
@@ -35,7 +35,6 @@ build() {
   ../autogen.sh --prefix=/usr \
                 --disable-{documentation,static}
   make
-
   popd
 
   #Build 32bit libraries
@@ -51,7 +50,6 @@ build() {
                 --disable-{documentation,static} \
                 --libdir='/usr/lib32' 
   make
-
   popd
 }
 
