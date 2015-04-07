@@ -3,7 +3,7 @@
 
 pkgbase="gobject-introspection-git-multilib"
 pkgname=({lib32-,}gobject-introspection-git)
-pkgver=1.42.0.6.g15799d1
+pkgver=1.44.0.2.g92d9c38
 pkgrel=1
 pkgdesc="GObject Introspection (git version)"
 depends=('python2-mako')
@@ -35,7 +35,6 @@ build() {
   ../autogen.sh --prefix=/usr --disable-static --enable-doctool
 
   make
-
   popd
 
   #Build 32bit libraries
@@ -46,7 +45,7 @@ build() {
 
   export CC='gcc -m32'
   export CXX='g++ -m32'
-  export LDFLAGS='-m32'
+  export LDFLAGS+=',-m32'
   export PKG_CONFIG_PATH='/usr/lib32/pkgconfig'
 
   export PYTHON=/usr/bin/python2.7-32
@@ -57,10 +56,10 @@ build() {
   ../autogen.sh --prefix=/usr --lib{,exec}dir=/usr/lib32 \
                 --program-suffix=-32 --includedir=/usr/lib32/gobject-introspection/include \
                 --disable-static --enable-doctool \
-                --with-python=/usr/bin/python2.7-32
+                --with-python=/usr/bin/python2.7-32 \
+                --build=i686-pc-linux-gnu
 
   make
-
   popd
 }
 
