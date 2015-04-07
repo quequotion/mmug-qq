@@ -4,7 +4,7 @@
 
 pkgbase=webkitgtk-git-multilib
 pkgname=({lib32-,}webkitgtk-git) 
-pkgver=2.7.3.r158322.cb943e8
+pkgver=2.7.3.r161510.149f996
 pkgrel=1
 pkgdesc="GTK+ Web content engine library (nightly build)"
 depends=(geoclue harfbuzz-icu)
@@ -42,8 +42,12 @@ build() {
   [[ -d build-x86_64 ]] || mkdir build-x86_64
   pushd build-x86_64
 
+
+  export CFLAGS+="-fPIC"
+  export CXXFLAGS+="-fPIC"
+
   cmake ../ \
-    -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_BUILD_TYPE=None \
     -DCMAKE_INSTALL_PREFIX=/usr \
     -DENABLE_INTROSPECTION=OFF \
     -D{CMAKE_PREFIX_PATH,LIBEXEC_INSTALL_DIR,LIB_INSTALL_DIR,INTROSPECTION_LIBS}='/usr/lib' \
@@ -59,7 +63,6 @@ build() {
     -DCMAKE_LINKER="$srcdir"/ld-flagged
 
   make
-
   popd
 
   #Build 32bit libraries
@@ -67,13 +70,13 @@ build() {
   pushd build-i686
 
 
-  CFLAGS="$CFLAGS -m32"
-  CXXFLAGS="$CXXFLAGS -m32"
-  LDFLAGS="$LDFLAGS -m32"
+  export CFLAGS+="-fPIC -m32"
+  export CXXFLAGS+="-fPIC -m32"
+  export LDFLAGS+=",-m32"
   export PKG_CONFIG_PATH='/usr/lib32/pkgconfig'
 
   cmake ../ \
-    -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_BUILD_TYPE=None \
     -DCMAKE_INSTALL_PREFIX=/usr \
     -DENABLE_INTROSPECTION=OFF \
     -D{CMAKE_PREFIX_PATH,LIBEXEC_INSTALL_DIR,LIB_INSTALL_DIR,INTROSPECTION_LIBS}='/usr/lib32' \
@@ -89,14 +92,13 @@ build() {
     -DCMAKE_LINKER="$srcdir"/ld-flagged
 
   make
-
   popd
 }
 
 package_webkitgtk-git() {
   provides=(webkitgtk{,4}{,-git})
   conflicts=(webkitgtk)
-  depends+=(sqlite enchant gtk3 gst-plugins-{base-libs,bad} lib{webp,xt,xslt,soup,gl,secret})
+  depends+=(sqlite enchant gtk3 gst-plugins-{base,bad} lib{webp,xt,xslt,soup,gl,secret})
   makedepends+=(gtk3 gobject-introspection python mesa gst-plugins-{base,bad} cairo)
   optdepends=('gtk2: Netscape plugin support')
 
@@ -111,7 +113,7 @@ package_lib32-webkitgtk-git() {
   pkgdesc+=" (32bit)"
   provides=(lib32-webkitgtk{,4}{,-no-gir}{,-git})
   conflicts=(lib32-webkitgtk)
-  depends+=(lib32-{sqlite,enchant,gtk3,gst-plugins-{base-libs,bad},lib{webp,xt,xslt,soup,gl,secret}})
+  depends+=(lib32-{sqlite,enchant,gtk3,gst-plugins-{base,bad},lib{webp,xt,xslt,soup,gl,secret}})
   makedepends+=(lib32-{gtk3,gobject-introspection,python,mesa,gst-plugins-{base,bad},cairo})
   optdepends=('lib32-gtk2: Netscape plugin support')
 
