@@ -1,0 +1,125 @@
+diff --git a/gio/glib-compile-schemas.c b/gio/glib-compile-schemas.c
+index e42949b..4e0604b 100644
+--- a/gio/glib-compile-schemas.c
++++ b/gio/glib-compile-schemas.c
+@@ -192,6 +192,9 @@ typedef struct
+ 
+   gboolean      checked;
+   GVariant     *serialised;
++
++  gboolean      summary_seen;
++  gboolean      description_seen;
+ } KeyState;
+ 
+ static KeyState *
+@@ -208,6 +211,8 @@ key_state_new (const gchar *type_string,
+   state->have_gettext_domain = gettext_domain != NULL;
+   state->is_enum = is_enum;
+   state->is_flags = is_flags;
++  state->summary_seen = FALSE;
++  state->description_seen = FALSE;
+ 
+   if (strinfo)
+     state->strinfo = g_string_new_len (strinfo->str, strinfo->len);
+@@ -1374,9 +1379,27 @@ start_element (GMarkupParseContext  *context,
+           return;
+         }
+ 
+-      else if (strcmp (element_name, "summary") == 0 ||
+-               strcmp (element_name, "description") == 0)
++      else if (strcmp (element_name, "summary") == 0)
+         {
++          if (state->key_state->summary_seen)
++            g_set_error (error, G_MARKUP_ERROR, G_MARKUP_ERROR_INVALID_CONTENT,
++                         _("Only one <%s> element allowed inside <%s>"),
++                         element_name, container);
++          state->key_state->summary_seen = TRUE;
++
++          if (NO_ATTRS ())
++            state->string = g_string_new (NULL);
++          return;
++        }
++
++      else if (strcmp (element_name, "description") == 0)
++        {
++          if (state->key_state->description_seen)
++            g_set_error (error, G_MARKUP_ERROR, G_MARKUP_ERROR_INVALID_CONTENT,
++                         _("Only one <%s> element allowed inside <%s>"),
++                         element_name, container);
++          state->key_state->description_seen = TRUE;
++
+           if (NO_ATTRS ())
+             state->string = g_string_new (NULL);
+           return;
+diff --git a/gio/tests/Makefile.am b/gio/tests/Makefile.am
+index 3e873bb..7504ee9 100644
+--- a/gio/tests/Makefile.am
++++ b/gio/tests/Makefile.am
+@@ -130,6 +130,7 @@ schema_tests = \
+ 	default-in-aliases.gschema.xml			\
+ 	default-not-in-choices.gschema.xml		\
+ 	default-out-of-range.gschema.xml		\
++	description-xmllang.gschema.xml			\
+ 	empty-key.gschema.xml				\
+ 	enum-with-aliases.gschema.xml			\
+ 	enum-with-bad-default.gschema.xml		\
+@@ -180,6 +181,7 @@ schema_tests = \
+ 	range-parse-error.gschema.xml			\
+ 	range-wrong-type.gschema.xml			\
+ 	range.gschema.xml				\
++	summary-xmllang.gschema.xml			\
+ 	wrong-category.gschema.xml			\
+ 	$(NULL)
+ 
+diff --git a/gio/tests/gschema-compile.c b/gio/tests/gschema-compile.c
+index 1d3cc19..1f2b746 100644
+--- a/gio/tests/gschema-compile.c
++++ b/gio/tests/gschema-compile.c
+@@ -126,6 +126,8 @@ static const SchemaTest tests[] = {
+   { "flags-more-than-one-bit",      NULL, "*flags values must have at most 1 bit set*"          },
+   { "flags-with-enum-attr",         NULL, "*<enum id='flags'> not (yet) defined*"               },
+   { "flags-with-enum-tag",          NULL, "*<flags id='flags'> not (yet) defined*"              },
++  { "summary-xmllang",              NULL, "*Only one <summary> element allowed*"                },
++  { "description-xmllang",          NULL, "*Only one <description> element allowed*"            },
+   { "inherit-gettext-domain",       NULL, NULL                                                  },
+   { "range-type-test",              NULL, NULL                                                  },
+   { "cdata",                        NULL, NULL                                                  }
+diff --git a/gio/tests/schema-tests/description-xmllang.gschema.xml b/gio/tests/schema-tests/description-xmllang.gschema.xml
+new file mode 100644
+index 0000000..29e771b
+--- /dev/null
++++ b/gio/tests/schema-tests/description-xmllang.gschema.xml
+@@ -0,0 +1,13 @@
++<schemalist>
++  <schema path="/org/gnome/gnome-screenshot/" id="org.gnome.gnome-screenshot">
++    <key type="b" name="take-window-shot">
++      <default>false</default>
++      <summary>Bla</summary>
++      <description>Window-specific screenshot (deprecated)</description>
++      <description xml:lang="an">Captura especifica de finestra (obsoleto)</description>
++      <description xml:lang="ar">لقطة شاشة مختصّة بنافذة (مُبطل)</description>
++      <description xml:lang="as">উইন্ডোৰ ক্ষেত্ৰত নিৰ্দিষ্ট স্ক্ৰিনশ্বট (স্খলিত)</description>
++      <description xml:lang="ast">Captura específica de ventana (obsoleto)</description>
++    </key>
++  </schema>
++</schemalist>
+diff --git a/gio/tests/schema-tests/summary-xmllang.gschema.xml b/gio/tests/schema-tests/summary-xmllang.gschema.xml
+new file mode 100644
+index 0000000..a3a8675
+--- /dev/null
++++ b/gio/tests/schema-tests/summary-xmllang.gschema.xml
+@@ -0,0 +1,13 @@
++<schemalist>
++  <schema path="/org/gnome/gnome-screenshot/" id="org.gnome.gnome-screenshot">
++    <key type="b" name="take-window-shot">
++      <default>false</default>
++      <summary>Window-specific screenshot (deprecated)</summary>
++      <summary xml:lang="an">Captura especifica de finestra (obsoleto)</summary>
++      <summary xml:lang="ar">لقطة شاشة مختصّة بنافذة (مُبطل)</summary>
++      <summary xml:lang="as">উইন্ডোৰ ক্ষেত্ৰত নিৰ্দিষ্ট স্ক্ৰিনশ্বট (স্খলিত)</summary>
++      <summary xml:lang="ast">Captura específica de ventana (obsoleto)</summary>
++      <description>Bla</description>
++    </key>
++  </schema>
++</schemalist>
+--

@@ -6,7 +6,7 @@
 _gitname=glib2
 pkgbase=$_gitname-git-multilib
 pkgname=({lib32-,}$_gitname-git)
-pkgver=2.43.92.44.gb470b12
+pkgver=2.43.92.45.g495d864
 pkgrel=1
 pkgdesc="Common C routines used by GTK+ 2.4 and other libs"
 makedepends=('gtk-doc' 'git')
@@ -16,10 +16,12 @@ license=(GPL2)
 options=('!emptydirs' '!libtool' '!docs')
 source=(glib2::git://git.gnome.org/glib
     glib2.sh
-    glib2.csh)
+    glib2.csh
+    schema-syntax.patch)
 sha512sums=('SKIP'
-    'dca2bc74d2013fcb24145ac794eef457aa3213c039e40a1a26ca5017694930768e7c80e334e17a56834549dff6549c781ddd91fae6c7bbb26fdd6a083ad8217a'
-    'c3899eb7fa5482ce8a35fe02db90fd0f928d50aa7e4365a9529ef35a2dcd1ed86d5a24f6bc5c635ef5b2d95a0ebfebc2bb6bc90404c99f6fb7484ed2fa032c06')
+            'dca2bc74d2013fcb24145ac794eef457aa3213c039e40a1a26ca5017694930768e7c80e334e17a56834549dff6549c781ddd91fae6c7bbb26fdd6a083ad8217a'
+            'c3899eb7fa5482ce8a35fe02db90fd0f928d50aa7e4365a9529ef35a2dcd1ed86d5a24f6bc5c635ef5b2d95a0ebfebc2bb6bc90404c99f6fb7484ed2fa032c06'
+            'c5d06f825df383585e9aa51b624029e58408b2ab333ec200a42b3fdd20c7ff71b9a4cd390804f111f79eae3eb3e67217a5beb9e06cbd16141b91914957df22cd')
 
 pkgver() {
     cd $_gitname/
@@ -31,6 +33,7 @@ prepare() {
     cd $_gitname/
 
     sed -i '1i\EXTRA_DIST=""\nCLEANFILES=""\n' docs/reference/{gio{,/gdbus-object-manager-example},gobject,glib}/Makefile.am
+    patch -Rp1 < ../schema-syntax.patch
 }
 
 build() {
