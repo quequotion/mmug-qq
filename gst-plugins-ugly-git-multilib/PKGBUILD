@@ -1,0 +1,79 @@
+# $Id: PKGBUILD 180531 2013-03-22 19:24:55Z heftig $
+# Maintainer: Jan de Groot <jgc@archlinux.org>
+
+_gitname='gst-plugins-ugly'
+pkgbase=$_gitname-git-multilib
+pkgname=({lib32-,}$_gitname-git)
+pkgver=1.5.0.1.5152.0b935a1
+pkgrel=1
+pkgdesc="GStreamer Multimedia Framework Ugly Plugins"
+arch=('i686' 'x86_64')
+license=('LGPL')
+url="http://gstreamer.freedesktop.org/"
+options=(!libtool !emptydirs)
+source=('git://anongit.freedesktop.org/gstreamer/gst-plugins-ugly'
+        'git://anongit.freedesktop.org/gstreamer/common'
+        'common-submodule.patch')
+sha256sums=('SKIP'
+            'SKIP'
+            '52f547497c9bcc9ac1de7eeb8e3c9f2b161e0cc4c49330cbe98f12616cd4733b')
+
+pkgver() {
+  cd $_gitname
+  version=$(grep AC_INIT configure.ac | sed 's/AC_INIT(\[GStreamer Ugly Plug-ins\],\[//' | sed 's/\],\[http:\/\/bugzilla.gnome.org\/enter_bug.cgi?product=GStreamer\],\[gst-plugins-ugly\])//')
+  hash=$(git log --pretty=format:'%h' -n 1)
+  revision=$(git rev-list --count HEAD)
+  
+  echo $version.$revision.$hash
+}
+
+build() {
+  cd $_gitname
+
+  #Saves some time and bandwidth on rebuilds
+  rm -rf common/
+  patch -Np2 < ../common-submodule.patch
+  ln -s ../common/ ./common
+
+  #Build 64bit libraries
+  cp -rf "$srcdir/$_gitname" "$srcdir/$_gitname-build-x86_64"
+  pushd ../$_gitname-build-x86_64
+
+  ./autogen.sh --prefix=/usr --sysconfdir=/etc --localstatedir=/var --lib{,exec}dir=/usr/lib \
+               --disable-static --enable-experimental
+  make
+
+  #Build 32bit libraries
+  cp -rf "$srcdir/$_gitname" "$srcdir/$_gitname-build-i686"
+  pushd ../$_gitname-build-i686
+
+  export CC='gcc -m32'
+  export CXX='g++ -m32'
+  export LDFLAGS+=',-m32'
+  export PKG_CONFIG_PATH='/usr/lib32/pkgconfig'
+
+  ./autogen.sh --build=i686-pc-linux-gnu \
+               --prefix=/usr --sysconfdir=/etc --localstatedir=/var --lib{,exec}dir=/usr/lib32 \
+               --disable-static --enable-experimental \
+               --disable-{x264,twolame} \
+               --with-gtk=3.0 --enable-introspection=no #introspection causes an overflow error
+  make
+}
+
+package_gst-plugins-ugly-git()  {
+  provides=($_gitname{,-git}=$pkgver)
+  conflicts=($_gitname)
+  depends=('gst-plugins-base' 'lame' 'a52dec' 'x264' 'opencore-amr' lib{dvdread,mpeg2,mad,sidplay,cdio})
+  cd $_gitname-build-x86_64
+  make DESTDIR="${pkgdir}" install
+}
+
+package_lib32-gst-plugins-ugly-git()  {
+  pkgdesc+=" (32bit)"
+  provides=(lib32-$_gitname{,-git}=$pkgver)
+  conflicts=(lib32-$_gitname)
+  depends=(lib32-{gst-plugins-base,a52dec,opencore-amr,lib{dvdread,mpeg2,mad,cdio}}) # lib32-{lame,lib{x264,sidplay}}
+  cd $_gitname-build-i686
+  make DESTDIR="${pkgdir}" install
+  rm -rf "${pkgdir}"/{etc,usr/{share,include,bin}}
+}
