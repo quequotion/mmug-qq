@@ -3,16 +3,17 @@
 # Contributor: Eric Bélanger <eric@archlinux.org>
 
 pkgname=lib32-tcl
-pkgver=8.6.1
+pkgver=8.6.3
 pkgrel=1
 pkgdesc="The Tcl scripting language (32-bit)"
 arch=('i686' 'x86_64')
 url="http://tcl.sourceforge.net/"
 license=('custom')
 depends=('lib32-zlib')
+provides=("lib32-tcl=$pkgver")
 options=('staticlibs')
 source=(http://downloads.sourceforge.net/sourceforge/tcl/tcl${pkgver}-src.tar.gz)
-md5sums=('aae4b701ee527c6e4e1a6f9c7399882e')
+md5sums=('db382feca91754b7f93da16dc4cdad1f')
 
 prepare() {
   cd tcl${pkgver}
@@ -50,16 +51,16 @@ package() {
       -e "s#${srcdir}/tcl${pkgver}#/usr/lib32/tcl/include#" \
       -i "${pkgdir}/usr/lib32/tclConfig.sh"
 
-  sed -e "s#${srcdir}/tcl${pkgver}/unix/pkgs/tdbc1.0.0#/usr/lib32/tdbc1.0.0#" \
-      -e "s#${srcdir}/tcl${pkgver}/pkgs/tdbc1.0.0/generic#/usr/lib32/tcl/include#" \
-      -e "s#${srcdir}/tcl${pkgver}/pkgs/tdbc1.0.0/library#/usr/lib32/tcl${pkgver%.*}#" \
-      -e "s#${srcdir}/tcl${pkgver}/pkgs/tdbc1.0.0#/usr/lib32/tcl/include#" \
-      -i "${pkgdir}/usr/lib32/tdbc1.0.0/tdbcConfig.sh"
+  sed -e "s#${srcdir}/tcl${pkgver}/unix/pkgs/tdbc1.0.2#/usr/lib32/tdbc1.0.2#" \
+      -e "s#${srcdir}/tcl${pkgver}/pkgs/tdbc1.0.2/generic#/usr/lib32/tcl/include#" \
+      -e "s#${srcdir}/tcl${pkgver}/pkgs/tdbc1.0.2/library#/usr/lib32/tcl${pkgver%.*}#" \
+      -e "s#${srcdir}/tcl${pkgver}/pkgs/tdbc1.0.2#/usr/lib32/tcl/include#" \
+      -i "${pkgdir}/usr/lib32/tdbc1.0.2/tdbcConfig.sh"
 
-  sed -e "s#${srcdir}/tcl${pkgver}/unix/pkgs/itcl4.0.0#/usr/lib32/itcl4.0.0#" \
-      -e "s#${srcdir}/tcl${pkgver}/pkgs/itcl4.0.0/generic#/usr/lib32/tcl/include#" \
-      -e "s#${srcdir}/tcl${pkgver}/pkgs/itcl4.0.0#/usr/lib32/tcl/include#" \
-      -i "${pkgdir}/usr/lib32/itcl4.0.0/itclConfig.sh"
+  sed -e "s#${srcdir}/tcl${pkgver}/unix/pkgs/itcl4.0.2#/usr/lib32/itcl4.0.2#" \
+      -e "s#${srcdir}/tcl${pkgver}/pkgs/itcl4.0.2/generic#/usr/lib32/tcl/include#" \
+      -e "s#${srcdir}/tcl${pkgver}/pkgs/itcl4.0.2#/usr/lib32/tcl/include#" \
+      -i "${pkgdir}/usr/lib32/itcl4.0.2/itclConfig.sh"
 
   # remove 64-bit and unarched stuff
   rm -rf "${pkgdir}"/{etc,usr/{share,include,bin,lib}} # cruft in lib/ ?
