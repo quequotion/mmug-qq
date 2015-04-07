@@ -12,7 +12,7 @@ depends=('lib32-gcc-libs' ${_pkgbase})
 makedepends=('gcc-multilib')
 options=('!libtool')
 source=(http://download.savannah.nongnu.org/releases/openexr/$_pkgbase-$pkgver.tar.gz)
-md5sums=('74c0d0d2873960bd0dc1993f8e03f0ae')
+md5sums=('8ba2f608191ad020e50277d8a3ba0850')
 
 build() {
   export CXX='g++ -m32'
