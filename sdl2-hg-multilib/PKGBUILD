@@ -6,7 +6,7 @@
 
 pkgbase=sdl2-hg-multilib
 pkgname=({lib32-,}sdl2-hg)
-pkgver=2.0.3.r681.47a5c5dae9b6
+pkgver=2.0.3.r837.d5925549bfe0
 pkgrel=1
 pkgdesc="A library for portable low-level access to video, audio and input (development version)"
 depends=('sh')
@@ -15,10 +15,8 @@ arch=('i686' 'x86_64')
 url="http://www.libsdl.org"
 license=('ZLIB')
 source=(sdl2::"hg+http://hg.libsdl.org/SDL"
-        'lib32-sdl2.patch'
         {gcc,ld}-flagged)
 md5sums=('SKIP'
-         '7541c3ccb1955c0855f85e1bbbea819d'
          '1cb09d4c1569e261f21a03fc2e08e5ac'
          '4e16a96b05c986bc940e8aef595d5cb6')
 
@@ -50,8 +48,6 @@ build() {
   popd
 
   #Build 32bit libraries
-
-  #patch -Np1 < ../lib32-sdl2.patch
 
   [[ -d build-i686 ]] || mkdir build-i686
   pushd build-i686
