@@ -2,18 +2,18 @@
 # Maintainer: Bartłomiej Piotrowski <nospam@bpiotrowski.pl>
 
 pkgbase=lib32-mariadb
-pkgname=('lib32-libmariadbclient' 'lib32-mariadb-clients' 'lib32-mariadb' )
-pkgver=10.0.13
+pkgname=(lib32-{libmariadbclient,mariadb{,-clients}})
+pkgver=10.0.16
 pkgrel=1
 arch=('x86_64')
 license=('GPL')
 url='http://mariadb.org/'
-makedepends=('cmake' 'lib32-libaio' 'lib32-libevent' 'lib32-openssl' 'lib32-zlib' 'lib32-pam' 'lib32-libxml2')
-source=(https://downloads.mariadb.org/interstitial/mariadb-$pkgver/source/mariadb-$pkgver.tar.gz
+makedepends=('cmake' lib32-{openssl,zlib,pam,lib{aio,event,xml2}})
+source=(ftp://ftp.yz.yamagata-u.ac.jp/pub/dbms/mariadb/mariadb-$pkgver/source/mariadb-$pkgver.tar.gz
         mariadb.service
         mariadb-post.sh
         mariadb-tmpfile.conf)
-sha256sums=('1a56a0ad1178e26723dfd7e77a2266a7da89552f12ea6bd5116a00bd13fa3c0d'
+sha256sums=('44134a5f3e174e3e8443c1d07916af57f3ffadd4c8846338d41850fedfefcde4'
             '8a4ce5aaa3701543d3324749a54f26f6fa51f64be1da51fcb809b39e6692ab2a'
             'bf2a06fbd8d6b55040ccf6bfb5d17dc28356c01097169a74b6b077d3a0d8a148'
             '5877179a808978c6d77cf3f32740a52a5be6174f77e459871f384fa22c1c60c7')
@@ -78,9 +78,9 @@ build() {
 
 package_lib32-libmariadbclient() {
   pkgdesc='MariaDB client libraries'
-  depends=('lib32-openssl' 'lib32-libaio' 'lib32-zlib' 'lib32-pcre')
+  depends=(lib32-{openssl,libaio,zlib,pcre})
   conflicts=('lib32-libmysqlclient')
-  provides=("lib32-libmysqlclient=$pkgver")
+  provides=(lib32-lib{mysql,mariadb}"client=$pkgver")
   options=('staticlibs')
 
   cd build
@@ -101,9 +101,9 @@ package_lib32-libmariadbclient() {
 
 package_lib32-mariadb-clients() {
   pkgdesc='MariaDB client tools'
-  depends=('lib32-libmariadbclient' 'lib32-zlib' 'lib32-openssl')
+  depends=(lib32-{libmariadbclient,zlib,openssl})
   conflicts=('lib32-mysql-clients')
-  provides=("lib32-mysql-clients=$pkgver")
+  provides=(lib32-{mysql,mariadb}"-clients=$pkgver")
 
   cd build
   make -C client DESTDIR="$pkgdir" install
@@ -135,10 +135,10 @@ package_lib32-mariadb() {
   pkgdesc='Fast SQL database server, drop-in replacement for MySQL'
   backup=('etc/mysql/my.cnf')
   #install=mariadb.install
-  depends=('lib32-mariadb-clients' 'inetutils' 'lib32-libaio' 'lib32-libxml2' 'lib32-pcre')
+  depends=(lib32-{mariadb-clients,pcre,lib{aio,xml2}} 'inetutils')
   optdepends=('lib32-perl-dbd-mysql: for mysqlhotcopy, mysql_convert_table_format and mysql_setpermission')
   conflicts=('lib32-mysql')
-  provides=("lib32-mysql=$pkgver")
+  provides=(lib32-{mysql,mariadb}"=$pkgver")
   options=('emptydirs')
 
   cd build
