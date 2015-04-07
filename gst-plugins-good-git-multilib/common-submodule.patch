@@ -1,8 +1,8 @@
---- src/gst-plugins-bad/autogen.sh~	2014-08-18 22:08:42.836943973 +0900
-+++ src/gst-plugins-bad/autogen.sh	2014-08-18 22:10:15.377937142 +0900
+--- src/gst-plugins-good/autogen.sh~	2014-08-18 22:08:42.836943973 +0900
++++ src/gst-plugins-good/autogen.sh	2014-08-18 22:10:15.377937142 +0900
 @@ -17,21 +17,21 @@
- package=gst-plugins-bad
- srcfile=gst-plugins-bad.doap
+ package=gst-plugins-good
+ srcfile=gst-plugins-good.doap
  
 -# Make sure we have common
 -if test ! -f common/gst-autogen.sh;

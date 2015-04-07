@@ -36,7 +36,7 @@ build() {
   ln -s ../common/ ./common
 
   #Build 64bit libraries
-  git clone "$srcdir/$_gitname" "$srcdir/$_gitname-build-x86_64"
+  cp -rf "$srcdir/$_gitname" "$srcdir/$_gitname-build-x86_64"
   pushd ../$_gitname-build-x86_64
 
   export CFLAGS="-Wno-error"
@@ -48,7 +48,7 @@ build() {
   popd
 
   #Build 32bit libraries
-  git clone "$srcdir/$_gitname" "$srcdir/$_gitname-build-i686"
+  cp -rf "$srcdir/$_gitname" "$srcdir/$_gitname-build-i686"
   pushd ../$_gitname-build-i686
 
   export CC='gcc -m32'
