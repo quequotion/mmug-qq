@@ -1,13 +1,10 @@
 # Maintainer: quequotion <quequotion@bugmenot.com>
 # Contributor: Xiao-Long Chen <chenxiaolong@cxl.epac.to>
-
-pkgbase=overlay-scrollbar-bzr-multilib
-pkgname=('overlay-scrollbar-bzr'
-         'liboverlay-scrollbar-bzr' 'lib32-liboverlay-scrollbar-bzr'
-         'liboverlay-scrollbar3-bzr' 'lib32-liboverlay-scrollbar3-bzr')
-pkgver=r385
+_bzrname="overlay-scrollbar"
+pkgbase="$_bzrname-bzr-multilib"
+pkgname=("$_bzrname-bzr" {,lib32-}lib"$_bzrname"{,3}-bzr)
+pkgver=r391
 pkgrel=1
-epoch=1
 pkgdesc="Ayatana Scrollbars, pointer-triggered overlay scrollbars to save screen real-estate."
 arch=('i686' 'x86_64')
 url="https://launchpad.net/ayatana-scrollbar"
@@ -26,7 +23,7 @@ pkgver() {
 }
 
 build() {
-  cd "${srcdir}/overlay-scrollbar"
+  cd "${srcdir}/$_bzrname"
 
   #Build 64bit libraries
   [[ -d build-x86_64 ]] || mkdir build-x86_64
@@ -77,15 +74,12 @@ build() {
 
 package_overlay-scrollbar-bzr() {
   pkgdesc+="Configuration and metapackage (multilib)"
-  depends=('dconf' 'liboverlay-scrollbar' 'liboverlay-scrollbar3'
-           'lib32-dconf' 'lib32-liboverlay-scrollbar' 'lib32-liboverlay-scrollbar3')
-  provides=('overlay-scrollbar' 'overlay-scrollbar-bzr'
-            'lib32-overlay-scrollbar' 'lib32-overlay-scrollbar-bzr')
-  conflicts=('overlay-scrollbar' 'overlay-scrollbar-bzr'
-             'lib32-overlay-scrollbar' 'lib32-overlay-scrollbar-bzr')
-  install=overlay-scrollbar.install
+  depends=({,lib32-}{dconf,lib"$_bzrname"{,3}})
+  provides=({,lib32-}"$_bzrname"{,-bzr})
+  conflicts=({,lib32-}"$_bzrname")
+  install=$_bzrname.install
 
-  cd "${srcdir}/overlay-scrollbar/build-x86_64/build-gtk3/"
+  cd "${srcdir}/$_bzrname/build-x86_64/build-gtk3/"
   make DESTDIR="${pkgdir}/" install
 
   rm -rvf "${pkgdir}/usr/lib/"
@@ -98,13 +92,12 @@ package_overlay-scrollbar-bzr() {
 }
 
 package_liboverlay-scrollbar3-bzr() {
-  pkgdesc+="gtk3"
-  pkgdesc="Scrollbar overlayed widget - GTK 3 library"
+  pkgdesc+=" gtk3"
   depends=('cairo' 'gtk3')
-  provides=('liboverlay-scrollbar3' 'liboverlay-scrollbar3-bzr')
-  conflicts=('liboverlay-scrollbar3' 'liboverlay-scrollbar3-bzr')
+  provides=(lib"$_bzrname"3{,-bzr})
+  conflicts=(lib"$_bzrname"3)
 
-  cd "${srcdir}/overlay-scrollbar/build-x86_64/build-gtk3/"
+  cd "${srcdir}/$_bzrname/build-x86_64/build-gtk3/"
   make DESTDIR="${pkgdir}/" install
 
   rm -rvf "${pkgdir}/etc/"
@@ -112,13 +105,12 @@ package_liboverlay-scrollbar3-bzr() {
 }
 
 package_liboverlay-scrollbar-bzr() {
-  pkgdesc+="gtk2"
-  pkgdesc="Scrollbar overlayed widget - GTK 2 library"
+  pkgdesc+=" gtk2"
   depends=('gtk2-ubuntu')
-  provides=('liboverlay-scrollbar' 'liboverlay-scrollbar-bzr')
-  conflicts=('liboverlay-scrollbar' 'liboverlay-scrollbar-bzr')
+  provides=(lib"$_bzrname"{,-bzr})
+  conflicts=(lib"$_bzrname")
 
-  cd "${srcdir}/overlay-scrollbar/build-x86_64/build-gtk2/"
+  cd "${srcdir}/$_bzrname/build-x86_64/build-gtk2/"
   make DESTDIR="${pkgdir}/" install
 
   rm -rvf "${pkgdir}/etc/"
@@ -126,13 +118,12 @@ package_liboverlay-scrollbar-bzr() {
 }
 
 package_lib32-liboverlay-scrollbar3-bzr() {
-  pkgdesc+="gtk3 (32bit)"
-  pkgdesc="Scrollbar overlayed widget - GTK 3 library"
-  depends=('lib32-cairo' 'lib32-gtk3')
-  provides=('lib32-liboverlay-scrollbar3' 'lib32-liboverlay-scrollbar3-bzr')
-  conflicts=('lib32-liboverlay-scrollbar3' 'lib32-liboverlay-scrollbar3-bzr')
+  pkgdesc+=" gtk3 (32bit)"
+  depends=(lib32-{cairo,gtk3})
+  provides=(lib32-lib"$_bzrname"3{,-bzr})
+  conflicts=(lib32-lib"$_bzrname"3)
 
-  cd "${srcdir}/overlay-scrollbar/build-i686/build-gtk3/"
+  cd "${srcdir}/$_bzrname/build-i686/build-gtk3/"
   make DESTDIR="${pkgdir}/" install
 
   rm -rvf "${pkgdir}/etc/"
@@ -143,12 +134,11 @@ package_lib32-liboverlay-scrollbar3-bzr() {
 
 package_lib32-liboverlay-scrollbar-bzr() {
   pkgdesc+="gtk2 (32bit)"
-  pkgdesc="Scrollbar overlayed widget - GTK 2 library"
   depends=('lib32-gtk2-ubuntu')
-  provides=('lib32-liboverlay-scrollbar' 'lib32-liboverlay-scrollbar-bzr')
-  conflicts=('lib32-liboverlay-scrollbar' 'lib32-liboverlay-scrollbar-bzr')
+  provides=(lib32-lib"$_bzrname"{,-bzr})
+  conflicts=(lib32-lib"$_bzrname")
 
-  cd "${srcdir}/overlay-scrollbar/build-i686/build-gtk2/"
+  cd "${srcdir}/$_bzrname/build-i686/build-gtk2/"
   make DESTDIR="${pkgdir}/" install
 
   rm -rvf "${pkgdir}/etc/"
