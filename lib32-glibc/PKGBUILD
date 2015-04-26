@@ -56,7 +56,7 @@ build() {
   #if [[ ${CARCH} = "i686" ]]; then
     # Hack to fix NPTL issues with Xen, only required on 32bit platforms
     # TODO: make separate glibc-xen package for i686
-    export CFLAGS="${CFLAGS} -mno-tls-direct-seg-refs"
+    export CFLAGS+=" -mno-tls-direct-seg-refs"
   #fi
 
   echo "slibdir=/usr/lib32" >> configparms

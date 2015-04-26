@@ -17,7 +17,7 @@ md5sums=('86788d4006620fa1f171c13d07fdcaab')
 
 build() {
     cd ${srcdir}/unixODBC-${pkgver}
-	CFLAGS=-m32
+	CFLAGS+=" -m32"
     ./configure --prefix=/usr --sysconfdir=/etc --libdir=/usr/lib32 --libexecdir=/usr/lib32 --includedir=/usr/lib32/unixodbc/include
     make
 }

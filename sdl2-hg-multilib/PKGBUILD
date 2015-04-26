@@ -55,8 +55,8 @@ build() {
 
   export EXEEXT='-32'
 
-  CFLAGS="$CFLAGS -m32"
-  LDFLAGS="$LDFLAGS -m32"
+  CFLAGS+=" -m32"
+  LDFLAGS+=" -m32"
   export PKG_CONFIG_PATH='/usr/lib32/pkgconfig'
 
   cmake ../sdl2 \
