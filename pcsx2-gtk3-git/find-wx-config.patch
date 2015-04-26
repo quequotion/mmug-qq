@@ -1,0 +1,21 @@
+--- src/pcsx2/cmake/SearchForStuff.cmake~	2015-04-08 08:18:09.952058358 +0900
++++ src/pcsx2/cmake/SearchForStuff.cmake	2015-04-08 08:26:34.910153659 +0900
+@@ -43,14 +43,14 @@
+ # FindwxWidgets only searches for wx-config.
+ if(CMAKE_CROSSCOMPILING)
+     # May need to fix the filenames for lib32-wx3.0.
+-    if(NOT WX28_API AND ${PCSX2_TARGET_ARCHITECTURES} MATCHES "i386" AND EXISTS "/usr/bin/wx-config32-3.0")
+-        set(wxWidgets_CONFIG_EXECUTABLE "/usr/bin/wx-config32-3.0")
++    if(NOT WX28_API AND ${PCSX2_TARGET_ARCHITECTURES} MATCHES "i386" AND EXISTS "/usr/lib32/wx/config/gtk3-unicode-3.1")
++        set(wxWidgets_CONFIG_EXECUTABLE "/usr/lib32/wx/config/gtk3-unicode-3.1")
+     elseif(WX28_API AND ${PCSX2_TARGET_ARCHITECTURES} MATCHES "i386" AND EXISTS "/usr/bin/wx-config32-2.8")
+         set(wxWidgets_CONFIG_EXECUTABLE "/usr/bin/wx-config32-2.8")
+     endif()
+ else()
+-    if(NOT WX28_API AND EXISTS "/usr/bin/wx-config-3.0")
+-        set(wxWidgets_CONFIG_EXECUTABLE "/usr/bin/wx-config-3.0")
++    if(NOT WX28_API AND EXISTS "/usr/lib/wx/config/gtk3-unicode-3.1")
++        set(wxWidgets_CONFIG_EXECUTABLE "/usr/lib/wx/config/gtk3-unicode-3.1")
+     elseif(WX28_API AND EXISTS "/usr/bin/wx-config-2.8")
+         set(wxWidgets_CONFIG_EXECUTABLE "/usr/bin/wx-config-2.8")
+     endif()

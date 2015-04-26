@@ -1,0 +1,16 @@
+--- src/pcsx2/cmake/BuildParameters.cmake~	2015-04-08 07:53:43.422722133 +0900
++++ src/pcsx2/cmake/BuildParameters.cmake	2015-04-08 08:05:21.951184551 +0900
+@@ -305,8 +305,8 @@
+ #-------------------------------------------------------------------------------
+ # Too much user/packager use experimental flags as release flags
+ #-------------------------------------------------------------------------------
+-if(CMAKE_BUILD_TYPE MATCHES "Release" OR PACKAGE_MODE)
+-    if (GTK3_API)
+-        message(FATAL_ERROR "GTK3 is highly experimental besides it requires a wxWidget built with __WXGTK3__ support !!!")
+-    endif()
+-endif()
++#if(CMAKE_BUILD_TYPE MATCHES "Release" OR PACKAGE_MODE)
++#    if (GTK3_API)
++#        message(FATAL_ERROR "GTK3 is highly experimental besides it requires a wxWidget built with __WXGTK3__ support !!!")
++#    endif()
++#endif()

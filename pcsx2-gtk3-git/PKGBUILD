@@ -9,11 +9,12 @@ pkgdesc='A Sony PlayStation 2 emulator, with bleeding edge dependencies'
 arch=('i686' 'x86_64')
 url='http://www.pcsx2.net'
 license=('GPL2' 'GPL3' 'LGPL2.1' 'LGPL3')
-depends_i686=('glew' 'libaio' 'libcanberra-git' 'libjpeg-turbo-svn' 'nvidia-cg-toolkit'
-              'portaudio-svn' 'sdl2-hg' 'soundtouch' 'wxgtk-gtk3')
-depends_x86_64=('lib32-glew' 'lib32-libaio' 'lib32-libcanberra-git'
-                'lib32-libjpeg-turbo-svn' 'lib32-nvidia-cg-toolkit'
-                'lib32-portaudio-svn' 'lib32-sdl2-hg' 'lib32-soundtouch' 'lib32-wxgtk-gtk3')
+#depends_i686=('glew' lib{aio,canberra-git,jpeg-turbo-svn} 'nvidia-cg-toolkit'
+#              'portaudio-svn' 'sdl2-hg' 'soundtouch' 'wxgtk-gtk3')
+#depends_x86_64=(lib32-{glew,lib{aio,canberra-git,jpeg-turbo-svn},nvidia-cg-toolkit,portaudio-svn,sdl2-hg,soundtouch,wxgtk-gtk3})
+depends_i686=('glew' lib{aio,canberra,jpeg-turbo} 'nvidia-cg-toolkit'
+              'portaudio' 'sdl2' 'soundtouch' 'wxgtk-gtk3')
+depends_x86_64=(lib32-{glew,lib{aio,canberra,jpeg-turbo},nvidia-cg-toolkit,portaudio,sdl2,soundtouch,wxgtk-gtk3})
 makedepends=('cmake' 'git')
 makedepends_x86_64=('gcc-multilib')
 optdepends_x86_64=('lib32-gtk-engines: GTK2 engines support'
@@ -24,10 +25,18 @@ conflicts=("pcsx2")
 options=('!emptydirs')
 source=('git+https://github.com/PCSX2/pcsx2.git'
         'gtk3-port.patch'
-        'FindGTK3.cmake')
+        'FindGTK3.cmake'
+        'enable-gtk3-release.patch'
+        'find-wx-config.patch'
+        {gcc,g++,ld}-flagged)
 sha512sums=('SKIP'
             '78993fcc666deb8a39b9bdd3ce8ec56ed725d9537cf1be34e89881e658326359caedd9897c681581e7e8150c6f14118b0ceeda6e4cf217f67594bbc3ddc83573'
-            'fee5d3ede422be9b8ef2930075f3e22170c6ae58195f314a14ebc3cbce1a36aa5321955fb517bdb84aa247b16a0b9b8563d81f673ca6945ff7c3a122934363e9')
+            'fee5d3ede422be9b8ef2930075f3e22170c6ae58195f314a14ebc3cbce1a36aa5321955fb517bdb84aa247b16a0b9b8563d81f673ca6945ff7c3a122934363e9'
+            'ea1114cab3ed7932438eb383851e38101c7568cba0e692b054d562e0bf94f835837945c27f556264a888a834ed2c1cd6cd397c551a5dce43fd92f5f51578e6cc'
+            'f850cd7539f69ef7f80e3201013f5ed6b23cd396fcc0b33826588fd71edb3e83e50a9cb075ac672dfc73b8eddebbf61d032f7a8c48cab99f740fc8671401b43c'
+            '98debfc394a2ad23f129c1006c2c35d87814d3aa9d388a07551aa63d07fd275105cc616f7a803fd65d449ed4662c5738fc4ef5c4162ed3c6fd2bb3d8e3ca348b'
+            'cc9fbcca8441e1a0edd090de84c02b98c939d24fedd27cb2d9e14f2e95cb7daa4f718b282f46bbd91d1070e2612b7d454ba6264ddf9755b41839de9c3ae379b3'
+            'dbdcdf3d9a6fc557e45890ac548396c498c840837c471c60dda6d8a7557c8068db285d20f76bba6803ffaad9ca3db701e3ea0bd5f7a7fd9d3264877d92c4f044')
 
 pkgver() {
   cd ${pkgname%-*}
@@ -41,50 +50,63 @@ pkgver() {
 }
 
 prepare() {
-  patch -Np1 < gtk3-port.patch
-  cp FindGTK3.cmake ${srcdir}/${pkgname%-*}/cmake/
+  #patch -Np1 < gtk3-port.patch
+  #cp FindGTK3.cmake ${srcdir}/${pkgname%-*}/cmake/
+  patch -Np1 < enable-gtk3-release.patch
+  patch -Np1 < find-wx-config.patch
 }
 
 build() {
-  cd ${pkgname%-*}
+  cd pcsx2
 
   if [[ -d build ]]; then
     rm -rf build
   fi
   mkdir build && cd build
 
-  if [[ $CARCH == i686 ]]; then
+ # if [[ $CARCH == i686 ]]; then
     cmake .. \
       -DCMAKE_BUILD_TYPE='Release' \
       -DCMAKE_INSTALL_PREFIX='/usr' \
       -DCMAKE_LIBRARY_PATH='/usr/lib' \
       -DPLUGIN_DIR='/usr/lib/pcsx2' \
       -DGAMEINDEX_DIR='/usr/share/pcsx2' \
-      -D{EXTRA_PLUGINS,PACKAGE_MODE,REBUILD_SHADER,XDG_STD,GLSL_API,GTK3_API,SDL2_API}='TRUE' \
-      -DWX28_API='FALSE' \
-      -DwxWidgets_CONFIG_EXECUTABLE='/usr/bin/wx-config' \
-      -DwxWidgets_wxrc_EXECUTABLE='/usr/bin/wxrc'
-  elif [[ $CARCH == x86_64 ]]; then
-    export CC='gcc -m32'
-    export CXX='g++ -m32'
-    export LD='ld -m32'
-    export PKG_CONFIG_PATH='/usr/lib32/pkgconfig'
-    cmake .. \
-      -DCMAKE_BUILD_TYPE='Release' \
-      -DCMAKE_INSTALL_PREFIX='/usr' \
-      -DCMAKE_LIBRARY_PATH='/usr/lib32' \
-      -DPLUGIN_DIR='/usr/lib32/pcsx2' \
-      -DGAMEINDEX_DIR='/usr/share/pcsx2' \
-      -D{EXTRA_PLUGINS,PACKAGE_MODE,REBUILD_SHADER,XDG_STD,GLSL_API,GTK3_API,SDL2_API}='TRUE' \
-      -DWX28_API='FALSE' \
+      -D{EXTRA_PLUGINS,PACKAGE_MODE,REBUILD_SHADER,XDG_STD,GLSL_API}='TRUE' \
       -DwxWidgets_CONFIG_EXECUTABLE='/usr/bin/wx-config-32' \
-      -DwxWidgets_wxrc_EXECUTABLE='/usr/bin/wxrc-32'
-  fi
+      -DwxWidgets_wxrc_EXECUTABLE='/usr/bin/wxrc-32' \
+      -DCMAKE_TOOLCHAIN_FILE=cmake/linux-compiler-i386-multilib.cmake \
+      -D{GTK3_API,SDL2_API,GTK_DISABLE_DEPRECATED}='TRUE' \
+      -DWX28_API='FALSE' \
+      -DCMAKE_C_COMPILER="$srcdir"/gcc-flagged \
+      -DCMAKE_CXX_COMPILER="$srcdir"/g++-flagged \
+      -DCMAKE_LINKER="$srcdir"/ld-flagged 
+
+
+ # elif [[ $CARCH == x86_64 ]]; then
+ #   CFLAGS="$CFLAGS -m32"
+ #   CXXFLAGS="$CXXFLAGS -m32"
+ #   LDFLAGS="$LDFLAGS -m32"
+ #   export PKG_CONFIG_PATH='/usr/lib32/pkgconfig'
+ #   cmake .. \
+ #     -DCMAKE_BUILD_TYPE='Release' \
+ #     -DCMAKE_INSTALL_PREFIX='/usr' \
+ #     -DCMAKE_LIBRARY_PATH='/usr/lib32' \
+ #     -DPLUGIN_DIR='/usr/lib32/pcsx2' \
+ #     -DGAMEINDEX_DIR='/usr/share/pcsx2' \
+ #     -D{EXTRA_PLUGINS,PACKAGE_MODE,REBUILD_SHADER,XDG_STD,GLSL_API,GTK3_API,SDL2_API}='TRUE' \
+ #     -DWX28_API='FALSE' \
+ #     -DwxWidgets_CONFIG_EXECUTABLE='/usr/bin/wx-config-32' \
+ #     -DwxWidgets_wxrc_EXECUTABLE='/usr/bin/wxrc-32' \
+ #     -DCMAKE_C_COMPILER="$srcdir"/gcc-flagged \
+ #     -DCMAKE_CXX_COMPILER="$srcdir"/g++-flagged \
+ #     -DCMAKE_LINKER="$srcdir"/ld-flagged \
+ #     -DCMAKE_TOOLCHAIN_FILE=cmake/linux-compiler-i386-multilib.cmake
+ # fi
   make
 }
 
 package() {
-  cd ${pkgname%-*}/build
+  cd pcsx2/build
 
   make DESTDIR="${pkgdir}" install
 }
