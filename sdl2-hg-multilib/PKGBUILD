@@ -6,7 +6,7 @@
 
 pkgbase=sdl2-hg-multilib
 pkgname=({lib32-,}sdl2-hg)
-pkgver=2.0.3.r837.d5925549bfe0
+pkgver=2.0.3.r932.4bab88dd387e
 pkgrel=1
 pkgdesc="A library for portable low-level access to video, audio and input (development version)"
 depends=('sh')
@@ -40,7 +40,8 @@ build() {
 
   cmake ../sdl2 \
     -DCMAKE_INSTALL_PREFIX=/usr \
-    -D{ARTS,NAS,ESD,SDL_STATIC,RPATH,VIDEO_WAYLAND}=OFF \
+    -D{ARTS,NAS,ESD,SDL_STATIC,RPATH,VIDEO_{WAYLAND,MIR}}=OFF \
+    -DSDL_SHARED=ON \
     -DCMAKE_C_COMPILER="$srcdir"/gcc-flagged \
     -DCMAKE_LINKER="$srcdir"/ld-flagged
   make
@@ -60,7 +61,8 @@ build() {
 
   cmake ../sdl2 \
     -DCMAKE_INSTALL_PREFIX=/usr \
-    -D{ARTS,NAS,ESD,SDL_STATIC,RPATH,VIDEO_WAYLAND}=OFF \
+    -D{ARTS,NAS,ESD,SDL_STATIC,RPATH,VIDEO_{WAYLAND,MIR}}=OFF \
+    -DSDL_SHARED=ON \
     -DCMAKE_PREFIX_PATH=/usr/lib32 \
     -DLIB_SUFFIX='32' \
     -DCMAKE_C_COMPILER="$srcdir"/gcc-flagged \
