@@ -7,9 +7,8 @@
 # Contributor: hbdee <hbdee.arch@gmail.com>
 
 pkgbase=gtk3-git-ubuntu-multilib
-pkgname=gtk3-git-ubuntu
-#pkgname=('gtk3-git-ubuntu' 'lib32-gtk3-git-ubuntu')
-pkgver=3.15.1.48.gbfd4933
+pkgname=({,lib32-}gtk3-git-ubuntu)
+pkgver=3.15.12.295.r42288.g5a643f1
 pkgrel=1
 pkgdesc="GObject-based multi-platform GUI toolkit (git version with Ubuntu patches from bzr)"
 arch=('i686' 'x86_64')
@@ -17,47 +16,17 @@ url="http://www.gtk.org/"
 license=('LGPL')
 backup=('etc/gtk-3.0/settings.ini')
 options=('!libtool')
+depends=('shared-mime-info')
+makedepends=('bzr')
 source=('bzr+lp:~ubuntu-desktop/gtk/ubuntugtk3'
         'git://git.gnome.org/gtk+'
-        'repatch-0001-Add-a-setting-for-dialog-headers.patch'
-        'repatch-018_gdkenumtypes.c_location.patch'
-        'repatch-032_mips_treeview_row_separator_height.patch'
         'repatch-071_fix-installation-of-HTML-images.patch'
-        'repatch-073_treeview_almost_fixed.patch'
-        'repatch-bzg_gtkcellrenderer_grabbing_modifier.patch'
-        'repatch-gtkdialog-don-t-use-csd-when-use-header-bar-is-FALSE.patch'
-        'repatch-message-dialog-restore-traditional-look-on-unity.patch'
-        'repatch-unset-titlebar.patch'
-        'repatch-x-canonical-accel.patch'
-        'repatch-gtkaboutdialog-support-showing-buttons-in-action-are.patch'
-        'repatch-mir-backend.patch'
-        'repatch-0001-Disable-deprecation-warnings-in-tests.patch'
-        'repatch-0001-Fight-deprecation-warnings-in-test.patch'
-        'repatch-use-secrets-service-for-cups-auth_info.patch'
-        'repatch-0001-threads-Do-not-release-the-GDK-lock-if-it-hasn-t-bee.patch'
-        'repatch-ubuntu_translation_template.patch'
-        'repatch-0001-wayland-don-t-init-if-XDG_RUNTIME_DIR-missing.patch'
+        'repatch-ubuntu_gtk_custom_menu_items.patch'
         'settings.ini')
 sha512sums=('SKIP'
             'SKIP'
-            '3e654e70ebf826168cf925429dfb59bcebb3fc66220b3a503d4399eb48f12f751bbf0ac1e38abad7d72a694be71eba0028685d0dd86d7afb235f2188d247687b'
-            'efa46de1a803ca854c5b0d8a6847e7f3cb19a77e7bcd0d76a2b7e154eb39b2052559e9f38e63405043d492d82aaeb1bec161f13fff55c55a3322159f24e4c52f'
-            'fcd6f3d00f93b48ae705eeeb3b0018e4ee5eb8581e2655c750648b286f0b5778ff1288195226d9feadc3b57eeefe596b204e2f2dc86ac9fc1ee568a143a5ea08'
             'c3dec88bc1fe45b279539087fc6d8509ecc46e5c61afbd2e4e7c91326929604f085c1f24e986059fbb905906fbbb1c04eaccbebe67ab8e67509f4d5bd386e71f'
-            'ccf4f8344726e76d846c60bbf26ae10ca07d1ed35ae52cd2a318872363397424382f815b68891dc90abac8304c035caaa8e20e3fc8ac3f02ebaa41201a6955d2'
-            'ac6ba1a6017e39548506f7bde9f7a9e54dc3438a5074c2a45832ae58b35ee5a8d0d2b346c76e63b6e8a2148d01b3b859effc74b5ff11cd402c9ee516448e9682'
-            '72632e7f22c15e28a7ae65026d09bca37aa49763e60134b7e4de5816bcc44ef6cd58ba7e71a2df80fd04b7699aa4a9c68a2c8bc57477cccbf2aad70b52869401'
-            'f1d2e52471bbc6ec6b84a4542d3461a25eb7c2a3389b4e2d9731cd4559de0d1fa13a891973b9d25456c797c464bbc0570e8140fe94d51b34a4a0ac54e8b1ede3'
-            '876d1ae632956a4c72132e57fd25048a3b8b5babdde9355361de3db0431104077938c94bbee97a0c6bccdf9fe46a0bc794b2f69df39f05d26da6dd02fa85e1ec'
-            '8d60cd96226586e697732f737f3b8d79315b68b227739ee3fbd3c616ef39fa8295113e8c480a0472b2d8f82dcac6546564b05864163af5f68e3e54e06efcb23a'
-            '8b046f147bbcc602d4e84775bb4fc38f7205b4673bfaee6502e6fa638b57e64741e0b46a99a23ec16a238c35410cbaa65fc2eb08b9253e995e4f1133369defc1'
-            '39edde5286d9f39c970268e04077cdeaef36833e406d03f5bc44721e26a10a82ada455d913bb8f39bfdfdd64b7a392696e1e07b81a7bc4c30bda8e8b9eaf535b'
-            '62051f822e8bf53b8e76eeabc6661de0cf7d58d4656682d53c2ef52074261ddea1986501b5c3c4d8a88780d17d252e0395cbbd1741b2a1b45f0096f110c80265'
-            '78da3fcc12a21f6230968c59a2bb630f5949ddc246d41fb0f043f88036d675cf02fa1142c20e2d7d1ac851e26e1166b97c59181cd06b7349519674604ca33e86'
-            'b31437214c5206ecf4160d102dc4b420a706fd35b4594197caa3d0565f65d5a7a5debe3b0105c0c64e3e6e0be4133d08190175a94e1958131f53a5fb7b988f9e'
-            'dace37d20bc317c82957e09eabff8be6e404d8da7b1796e719d19e88719ce0972dea2f76cde6dcccc3c879bf3f4cd807c184b97ed2adcd64cff90e219ec9924e'
-            '1f5e1769a6aae472b31f4ac3ef1dc76efc57d372bd8ba3d32481f3ad2a99ef886c22313ee9ac4004b2c66d3642465ce0892516ef4981421f5fef976b635aaeaf'
-            'd44d0a8631b3eb5a12c0b23712f24cd9b14659dd77c5041b1b80ecf1a3470377545bb6ecbd0184f5f8ae82eb9103222ad0cb822553ec1045153080206c20746e'
+            '869b59277849efc0556d3af37d7914f404e14b24c53d1da3f6b3eba62dd71b742857ca0d796edcf7f4cea257de0587c9a38a395c9933cc789ccb2501012b9347'
             '3ee323c287ad4354d5521f584d06149bbe6bb3c6ed4f409e7544c9ac59892a89d7b52e4b7807e6ed7e3a3e064372dc61422153153f67acb97cc371fe1d8200f2')
 
 pkgver() {
@@ -79,13 +48,19 @@ prepare() {
     fi
   done < series
 
-
   cd "$srcdir/gtk+"
 
   #Apply Ubuntu patches
   while read i; do
     if [[ "${i}" =~ ^# || -z "${i}" || "${i}" == *git* ]]; then
       continue # Skip comments, newlines, and git patches
+    elif [[ "${i}" == 0001-gtkprogressbar-fix-size-allocation.patch ]] || \
+         [[ "${i}" == 0001-Add-style-classes-to-the-title-buttons.patch ]] || \
+         [[ "${i}" == 044_tracker_fts.patch ]] || \
+         [[ "${i}" == mir-backend.patch ]] || \
+         [[ "${i}" == mir-backend-unmerged.patch ]] || \
+         [[ "${i}" == 0001-GtkApplication-Prevent-more-crashes-around-shutdown.patch ]]; then
+      continue # Skip reduntant or impossible to repair patches
     else
       msg "Applying ${i} ..."
       patch -Nsp1 < "${srcdir}/ubuntugtk3/debian/patches/${i}"
@@ -104,60 +79,47 @@ build() {
 
   ../autogen.sh --prefix=/usr \
                 --sysconfdir=/etc \
-                --prefix=/usr \
-                --sysconfdir=/etc \
                 --localstatedir=/var \
-                --enable-gtk2-dependency \
                 --disable-schemas-compile \
-                --enable-x11-backend \
-                --enable-broadway-backend \
-                --enable-wayland-backend
+                --enable-{x11,broadway,wayland}-backend
 
   #https://bugzilla.gnome.org/show_bug.cgi?id=655517
   sed -i -e 's/ -shared / -Wl,-O1,--as-needed\0/g' libtool
 
   make
-
   popd
 
   #Build 32bit libraries
-  #[[ -d build-i686 ]] || mkdir build-i686
-  #pushd build-i686
+  [[ -d build-i686 ]] || mkdir build-i686
+  pushd build-i686
 
-  #export CC='gcc -m32'
-  #export CXX='g++ -m32'
-  #export LDFLAGS='-m32'
-  #export PKG_CONFIG_PATH='/usr/lib32/pkgconfig'
+  export CC='gcc -m32'
+  export CXX='g++ -m32'
+  export LDFLAGS+=' -m32'
+  export PKG_CONFIG_PATH='/usr/lib32/pkgconfig'
   
-  #GTK_IM_MODULE_FILE="gtk.immodules-32" ../autogen.sh --prefix=/usr \
-  #              --sysconfdir=/etc \
-  #              --prefix=/usr \
-  #              --sysconfdir=/etc \
-  #              --localstatedir=/var \
-  #              --enable-gtk2-dependency \
-  #              --disable-schemas-compile \
-  #              --enable-x11-backend \
-  #              --enable-broadway-backend \
-  #              --enable-wayland-backend \
-  #              --libdir=/usr/lib32 --libexecdir=/usr/lib32
+  GTK_IM_MODULE_FILE="gtk.immodules-32" ../autogen.sh --prefix=/usr \
+                --sysconfdir=/etc \
+                --localstatedir=/var \
+                --disable-schemas-compile \
+                --enable-{x11,broadway,wayland}-backend \
+                --lib{,exec}dir=/usr/lib32
       
-  ##https://bugzilla.gnome.org/show_bug.cgi?id=655517
-  #sed -i -e 's/ -shared / -Wl,-O1,--as-needed\0/g' libtool
+  #https://bugzilla.gnome.org/show_bug.cgi?id=655517
+  sed -i -e 's/ -shared / -Wl,-O1,--as-needed\0/g' libtool
 
-  #make
-
-  #popd
-
+  make
+  popd
 }
 
 package_gtk3-git-ubuntu() {
-  depends=('atk' 'cairo' 'gtk-update-icon-cache' 'libcups' 'libxcursor' \
-           'libxinerama' 'libxrandr' 'libxi' 'libxcomposite' 'libxdamage' 'pango' \
-           'shared-mime-info' 'colord' 'at-spi2-atk' 'wayland-git' 'libxkbcommon' \
-           'glib2-git' 'gobject-introspection-git')
-  makedepends=('gobject-introspection' 'bzr')
-  provides=("gtk3=${pkgver}" "gtk3-ubuntu=${pkgver}" "gtk3-git=${pkgver}")
-  conflicts=('gtk3')
+  depends+=('atk' 'at-spi2-atk' 'cairo' 'colord' 'fontconfig' 
+            'gdk-pixbuf2' 'json-glib' 'pango' 'rest'
+            {glib2,gobject-introspection,wayland}-git 
+            lib{cups,xcursor,xinerama,xrandr,xi,xcomposite,xdamage,xkbcommon})
+  makedepends+=('gobject-introspection')
+  provides=({gtk3{,-git}{,-ubuntu},gtk-update-icon-cache{,-git}}="${pkgver}")
+  conflicts=('gtk3' 'gtk-update-icon-cache')
   install=gtk3-git.install
   cd "gtk+/build-x86_64"
   make DESTDIR="${pkgdir}" install
@@ -165,22 +127,21 @@ package_gtk3-git-ubuntu() {
 }
 
 
-#package_lib32-gtk3-git-ubuntu() {
-#  pkgdesc+=" (32bit)"
-#  depends=('lib32-atk' 'lib32-cairo' 'lib32-libcups' 'lib32-libxcursor' \
-#           'lib32-libxinerama' 'lib32-libxrandr' 'lib32-libxi' 'lib32-libxcomposite' 'lib32-libxdamage' 'lib32-pango' \
-#           'lib32-colord' 'lib32-at-spi2-atk' 'lib32-wayland-git' 'lib32-libxkbcommon' \
-#           'lib32-glib2' 'lib32-gdk-pixbuf2' 'lib32-fontconfig' 'gtk3' 'lib32-rest' 'lib32-json-glib' )
-#  makedepends=('gobject-introspection' 'bzr' 'gcc-multilib')
-#  provides=("lib32-gtk3=${pkgver}" "lib32-gtk3-ubuntu=${pkgver}" "lib32-gtk3-git=${pkgver}")
-#  conflicts=('lib32-gtk3')
-#  install=lib32-gtk3.install
-#  cd "gtk+/build-i686"
-#  make DESTDIR="${pkgdir}" install
+package_lib32-gtk3-git-ubuntu() {
+  pkgdesc+=" (32bit)"
+  depends+=(lib32-{atk,at-spi2-atk,cairo,colord,fontconfig,gdk-pixbuf2,json-glib,pango,rest} 
+            lib32-{glib2,gobject-introspection,wayland}-git 
+            lib32-lib{cups,xcursor,xinerama,xrandr,xi,xcomposite,xdamage,xkbcommon})
+  makedepends+=('lib32-gobject-introspection' 'gcc-multilib')
+  provides=(lib32-gtk3{,-git}{,-ubuntu}="${pkgver}")
+  conflicts=('lib32-gtk3')
+  install=lib32-gtk3.install
+  cd "gtk+/build-i686"
+  make DESTDIR="${pkgdir}" install
 
-#  rm -rf "${pkgdir}"/{etc,usr/{share,include}} # needs bin/
+  rm -rf "${pkgdir}"/{etc,usr/{share,include}} # needs bin/
 
-#  mv "${pkgdir}"/usr/bin/gtk-query-immodules-3.0{,-32}
-#  find "$pkgdir/usr/bin" -type f -not -name gtk-query-immodules-3.0-32 -delete
-#}
+  mv "${pkgdir}"/usr/bin/gtk-query-immodules-3.0{,-32}
+  find "$pkgdir/usr/bin" -type f -not -name gtk-query-immodules-3.0-32 -delete
+}
 
