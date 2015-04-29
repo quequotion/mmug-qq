@@ -4,7 +4,7 @@ _bzrname="overlay-scrollbar"
 pkgbase="$_bzrname-bzr-multilib"
 pkgname=("$_bzrname-bzr" {,lib32-}lib"$_bzrname"{,3}-bzr)
 pkgver=r391
-pkgrel=1
+pkgrel=2
 pkgdesc="Ayatana Scrollbars, pointer-triggered overlay scrollbars to save screen real-estate."
 arch=('i686' 'x86_64')
 url="https://launchpad.net/ayatana-scrollbar"
@@ -75,7 +75,7 @@ build() {
 package_overlay-scrollbar-bzr() {
   pkgdesc+="Configuration and metapackage (multilib)"
   depends=({,lib32-}{dconf,lib"$_bzrname"{,3}})
-  provides=({,lib32-}"$_bzrname"{,-bzr})
+  provides=({,lib32-}"$_bzrname"{,-bzr}="${pkgver}")
   conflicts=({,lib32-}"$_bzrname")
   install=$_bzrname.install
 
@@ -94,7 +94,7 @@ package_overlay-scrollbar-bzr() {
 package_liboverlay-scrollbar3-bzr() {
   pkgdesc+=" gtk3"
   depends=('cairo' 'gtk3')
-  provides=(lib"$_bzrname"3{,-bzr})
+  provides=(lib"$_bzrname"{3,-gtk3}{,-bzr}="${pkgver}")
   conflicts=(lib"$_bzrname"3)
 
   cd "${srcdir}/$_bzrname/build-x86_64/build-gtk3/"
@@ -107,7 +107,7 @@ package_liboverlay-scrollbar3-bzr() {
 package_liboverlay-scrollbar-bzr() {
   pkgdesc+=" gtk2"
   depends=('gtk2-ubuntu')
-  provides=(lib"$_bzrname"{,-bzr})
+  provides=(lib"$_bzrname"{,-gtk2}{,-bzr}="${pkgver}")
   conflicts=(lib"$_bzrname")
 
   cd "${srcdir}/$_bzrname/build-x86_64/build-gtk2/"
@@ -120,7 +120,7 @@ package_liboverlay-scrollbar-bzr() {
 package_lib32-liboverlay-scrollbar3-bzr() {
   pkgdesc+=" gtk3 (32bit)"
   depends=(lib32-{cairo,gtk3})
-  provides=(lib32-lib"$_bzrname"3{,-bzr})
+  provides=(lib32-lib"$_bzrname"{3,-gtk3}{,-bzr}="${pkgver}")
   conflicts=(lib32-lib"$_bzrname"3)
 
   cd "${srcdir}/$_bzrname/build-i686/build-gtk3/"
@@ -135,7 +135,7 @@ package_lib32-liboverlay-scrollbar3-bzr() {
 package_lib32-liboverlay-scrollbar-bzr() {
   pkgdesc+="gtk2 (32bit)"
   depends=('lib32-gtk2-ubuntu')
-  provides=(lib32-lib"$_bzrname"{,-bzr})
+  provides=(lib32-lib"$_bzrname"{,-gtk2}{,-bzr}="${pkgver}")
   conflicts=(lib32-lib"$_bzrname")
 
   cd "${srcdir}/$_bzrname/build-i686/build-gtk2/"
