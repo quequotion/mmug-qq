@@ -67,7 +67,7 @@ build() {
   CFLAGS=${CFLAGS/-fno-stack-protector/}
   make
 
-   remove harding in preparation to run test-suite
+  # remove harding in preparation to run test-suite
   sed -i '4,6d' configparms
   popd
 
