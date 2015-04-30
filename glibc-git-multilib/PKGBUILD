@@ -36,9 +36,8 @@ pkgver() {
 }
 
 build() {
-  rm -rf "${srcdir}/${_pkgname}-build"
-  mkdir "${srcdir}/${_pkgname}-build"
-  cd "${srcdir}/${_pkgname}-build"
+  [[ -d "${srcdir}/build" ]] || mkdir "${srcdir}/build"
+  cd "${srcdir}/build"
 
   #Build native libraries
   [[ -d build-x86_64 ]] || mkdir build-x86_64
@@ -53,9 +52,9 @@ build() {
 
   "${srcdir}/${_pkgname}/configure" --prefix=/usr --lib{,exec}dir=/usr/lib \
     --with-{headers=/usr/include,bugurl=https://bugs.archlinux.org/} \
-    --disable-profile \
+    --disable-{profile,lto} \
     --enable-{obsolete-rpc,bind-now,stackguard-randomization,lock-elision} \
-    --enable-{add-ons=libidn,kernel=3.18.0,multi-arch,lto}
+    --enable-{add-ons=libidn,kernel=3.18.0,multi-arch}
 
   echo "build-programs=no" >> configparms
   make
@@ -69,12 +68,16 @@ build() {
 
   # remove harding in preparation to run test-suite
   sed -i '4,6d' configparms
+  CC=${CC/-fstack-protector-strong -fstack-protector-all -D_FORTIFY_SOURCE=2/}
+  CXX=${CXX/-fstack-protector-strong -fstack-protector-all -D_FORTIFY_SOURCE=2/}
   popd
 
-  # Hack to work around dynamic loading limit for PCSX2 profiling
+  # Fix the source tree?
   cd "${srcdir}/${_pkgname}"
+  make clean
+
+  # Hack to work around dynamic loading limit for PCSX2 profiling
   patch -Np2 < $srcdir/dtv-surplus.patch
-  cd "${srcdir}/${_pkgname}-build"
 
   #Build 32bit libraries
   [[ -d build-i686 ]] || mkdir build-i686
@@ -99,7 +102,7 @@ build() {
 
     "${srcdir}/${_pkgname}/configure" --prefix=/usr --lib{,exec}dir=/usr/lib32 \
       --with-{headers=/usr/include,bugurl=https://bugs.archlinux.org/} \
-      --disable-profile \
+      --disable-{profile,lto} \
       --enable-{obsolete-rpc,bind-now,stackguard-randomization,lock-elision} \
       --enable-{add-ons=libidn,kernel=3.18.0,multi-arch} \
       --build=i686-pc-linux-gnu
@@ -117,6 +120,9 @@ build() {
 
   # remove harding in preparation to run test-suite
   sed -i '4,6d' configparms
+  CC=${CC/-fstack-protector-strong -fstack-protector-all -D_FORTIFY_SOURCE=2/}
+  CXX=${CXX/-fstack-protector-strong -fstack-protector-all -D_FORTIFY_SOURCE=2/}
+  popd
 
 }
 
@@ -129,7 +135,7 @@ check() {
   LDFLAGS=${LDFLAGS/-m32/}
 
   echo "Check native build"
-  cd ${srcdir}/${_pkgname}-build/build-x86_64
+  cd ${srcdir}/build/build-x86_64
   make check
 
   export CC="gcc -m32"
@@ -137,7 +143,7 @@ check() {
   export LDFLAGS+=" -m32"
 
   echo "Check i686 build"
-  cd ${srcdir}/${_pkgname}-build/build-i686
+  cd ${srcdir}/build/build-i686
   make check
 }
 
@@ -145,7 +151,7 @@ package_glibc-git() {
   optdepends+=('gd')
   provides=(glibc{,-git}=${pkgver})
   conflicts=('glibc')
-  cd ${srcdir}/${_pkgname}-build/build-x86_64
+  cd ${srcdir}/build/build-x86_64
 
   install -dm755 ${pkgdir}/etc
   touch ${pkgdir}/etc/ld.so.conf
@@ -206,7 +212,7 @@ package_lib32-glibc-git() {
   pkgdesc+=" (32-bit + DTVx2)"
   provides=(lib32-glibc{,-git}=${pkgver})
   conflicts=('lib32-glibc')
-  cd ${srcdir}/glibc-build/build-i686
+  cd ${srcdir}/build/build-i686
 
   export CC="gcc -m32"
   export CXX="g++ -m32"
