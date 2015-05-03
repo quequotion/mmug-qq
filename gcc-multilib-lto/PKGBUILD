@@ -17,9 +17,9 @@ arch=('x86_64')
 license=('GPL' 'LGPL' 'FDL' 'custom')
 url="http://gcc.gnu.org"
 makedepends=('binutils>=2.25' 'libmpc' 'doxygen'
-             'lib32-glibc>=2.20' 'gcc-ada-multilib')  
+             'lib32-glibc>=2.20') # 'gcc-ada-multilib' 
 checkdepends=('dejagnu' 'inetutils')
-groups=(mmug)
+groups=(mmug-qq)
 options=('!emptydirs')
 source=(#ftp://gcc.gnu.org/pub/gcc/releases/gcc-${pkgver}/gcc-${pkgver}.tar.bz2
         ftp://gcc.gnu.org/pub/gcc/snapshots/${_snapshot}/gcc-${_snapshot}.tar.bz2
@@ -133,7 +133,7 @@ package_gcc-libs-multilib()
 {
   pkgdesc="Runtime libraries shipped by GCC for multilib"
   depends=('glibc>=2.20' "lib32-gcc-libs=$pkgver-$pkgrel")
-  provides=("gcc-libs=$pkgver-$pkgrel")
+  provides=(gcc-libs{,-multilib}="$pkgver-$pkgrel")
   conflicts=('gcc-libs')
   options=('!emptydirs' '!strip')
   install=gcc-libs.install
@@ -182,7 +182,7 @@ package_gcc-multilib()
   depends=("gcc-libs-multilib=$pkgver-$pkgrel" 'binutils>=2.25' 'libmpc')
   groups=('multilib-devel')
   options=('staticlibs')
-  provides=("gcc=$pkgver-$pkgrel")
+  provides=(gcc{,-multilib}="$pkgver-$pkgrel")
   conflicts=('gcc')
   install=gcc.install
 
@@ -285,7 +285,7 @@ package_gcc-fortran-multilib()
 {
   pkgdesc="Fortran front-end for GCC for multilib"
   depends=("gcc-multilib=$pkgver-$pkgrel")
-  provides=("gcc-fortran=$pkgver-$pkgrel")
+  provides=(gcc-fortran{,-multilib}="$pkgver-$pkgrel")
   conflicts=('gcc-fortran')
   options=('!emptydirs')
   install=gcc-fortran.install
@@ -308,7 +308,7 @@ package_gcc-objc-multilib()
 {
   pkgdesc="Objective-C front-end for GCC for multilib"
   depends=("gcc-multilib=$pkgver-$pkgrel")
-  provides=("gcc-objc=$pkgver-$pkgrel")
+  provides=(gcc-objc{,-multilib}="$pkgver-$pkgrel")
   conflicts=('gcc-objc')
 
   cd ${srcdir}/gcc-build
@@ -325,7 +325,7 @@ package_gcc-ada-multilib()
 {
   pkgdesc="Ada front-end for GCC (GNAT) for multilib"
   depends=("gcc-multilib=$pkgver-$pkgrel")
-  provides=("gcc-ada=$pkgver-$pkgrel")
+  provides=(gcc-ada{,-multilib}="$pkgver-$pkgrel")
   conflicts=('gcc-ada')
   options=('staticlibs' '!emptydirs')
   install=gcc-ada.install
@@ -361,7 +361,7 @@ package_gcc-go-multilib()
 {
   pkgdesc="Go front-end for GCC for multilib"
   depends=("gcc-multilib=$pkgver-$pkgrel")
-  provides=("gcc-go=$pkgver-$pkgrel")
+  provides=(gcc-go{,-multilib}="$pkgver-$pkgrel")
   conflicts=('gcc-go')
   options=('!emptydirs')
   install=gcc-go.install
