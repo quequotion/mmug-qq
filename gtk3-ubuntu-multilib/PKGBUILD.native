@@ -1,16 +1,17 @@
-# Maintainer: Que Quotion ( quequotion at g mail dot com )
+# Maintainer: 
 # Contributors: Det, Charles Bos, Xiao-Long Chen, Christopher Reimer, Que Quotion
 # Based on gtk3 trunk: https://projects.archlinux.org/svntogit/packages.git/tree/trunk?h=packages/gtk3
 
 pkgbase=gtk3-ubuntu-multilib
-pkgname=({lib32-,}gtk3-ubuntu-multilib)
+#pkgname=({lib32-,}gtk3-ubuntu)
+pkgname=(gtk3-ubuntu)
 ubuntuver=3.20.9
 _ubunturel=1ubuntu2
 debianver=3.22.1
 _debrel=1
 pkgver=3.22.1
 pkgrel=6
-pkgdesc="GObject-based multi-platform toolkit with Canonical patchset (multiarch)"
+pkgdesc="GObject-based multi-platform toolkit (v3) from Ubuntu"
 depends=(adwaita-icon-theme gtk-update-icon-cache shared-mime-info)
 arch=(i686 x86_64)
 url="https://launchpad.net/ubuntu/+source/gtk+3.0/"
@@ -63,55 +64,57 @@ build() {
   popd
 
   #Build 32bit libraries
-  [[ -d build-i686 ]] || mkdir build-i686
-  pushd build-i686
+  #[[ -d build-i686 ]] || mkdir build-i686
+  #pushd build-i686
 
-  export CC='gcc -m32'
-  export CXX='g++ -m32'
-  export LDFLAGS+=' -m32'
-  export PKG_CONFIG_PATH='/usr/lib32/pkgconfig'
+  #export CC='gcc -m32'
+  #export CXX='g++ -m32'
+  #export LDFLAGS+=' -m32'
+  #export PKG_CONFIG_PATH='/usr/lib32/pkgconfig'
   
-  export GTK_IM_MODULE_FILE='gtk.immodules-32'
-  CXX=/bin/false ../autogen.sh --prefix=/usr \
-      --sysconfdir=/etc \
-      --localstatedir=/var \
-      --enable-gtk2-dependency \
-      --disable-schemas-compile \
-      --enable-{x11,broadway,wayland}-backend \
-      --lib{exec,}dir=/usr/lib32 \
-      --build=i686-pc-linux-gnu 
+  #export GTK_IM_MODULE_FILE='gtk.immodules-32'
+  #CXX=/bin/false ../autogen.sh --prefix=/usr \
+  #    --sysconfdir=/etc \
+  #    --localstatedir=/var \
+  #    --enable-gtk2-dependency \
+  #    --disable-schemas-compile \
+  #    --enable-{x11,broadway,wayland}-backend \
+  #    --lib{exec,}dir=/usr/lib32 \
+  #    --build=i686-pc-linux-gnu 
 
   #https://bugzilla.gnome.org/show_bug.cgi?id=655517
-  sed -i -e 's/ -shared / -Wl,-O1,--as-needed\0/g' libtool
+  #sed -i -e 's/ -shared / -Wl,-O1,--as-needed\0/g' libtool
 
-  make
-  popd
+  #make
+  #popd
 }
 
-package_gtk3-ubuntu-multilib() {
-  depends+=(glib2 atk cairo pango colord at-spi2-atk wayland 
+#package_gtk3-ubuntu() {
+package() {
+  depends+=(atk cairo glib2 pango colord at-spi2-atk wayland 
 lib{cups,x{cursor,inerama,randr,i,composite,damage,kbcommon,11,ext}})
   makedepends=(gobject-introspection python2)
   provides=(gtk{3{,-ubuntu},-update-icon-cache}=${pkgver})
-  conflicts=(gtk{3{,-ubuntu},-update-icon-cache})
+  conflicts=('gtk{3{,-ubuntu},-update-icon-cache}')
   install=gtk3-ubuntu.install
   cd "gtk+-$pkgver/build-x86_64"
   make DESTDIR="$pkgdir" install
   install -Dm644 ../../settings.ini "$pkgdir/usr/share/gtk-3.0/settings.ini"
 }
 
-package_lib32-gtk3-ubuntu-multilib() {
-  pkgdesc+=" (32bit)"
-  depends+=(lib32-{glib2,atk,cairo,pango,colord,at-spi2-atk,wayland,lib{cups,x{cursor,inerama,randr,i,composite,damage,kbcommon,11,ext}}})
-  makedepends=(lib32-{gobject-introspection,python2} 'gcc-multilib')
-  provides=(lib32-gtk{3{,-ubuntu},-update-icon-cache}=${pkgver})
-  conflicts=(lib32-gtk{3{,-ubuntu},-update-icon-cache})
-  install=lib32-gtk3-ubuntu.install
-  cd "gtk+-$pkgver/build-i686"
-  make DESTDIR="$pkgdir" install
+#package_lib32-gtk3-ubuntu() {
+#  pkgdesc+=" (32bit)"
+#  
+#depends+=(lib32-{glib2,atk,cairo,pango,colord,at-spi2-atk,wayland,lib{cups,xcursor,xinerama,xrandr,xi,xcomposite,xdamage,xkbcommon,x11,xext}})
+#  makedepends=(lib32-{gobject-introspection,python2} 'gcc-multilib')
+#  provides=(lib32-gtk{3{,-ubuntu},-update-icon-cache}=${pkgver})
+#  conflicts=('lib32-gtk3')
+#  install=lib32-gtk3-ubuntu.install
+#  cd "gtk+-$pkgver/build-i686"
+#  make DESTDIR="$pkgdir" install
 
-  rm -rf "${pkgdir}"/{etc,usr/{share,include}} # needs bin/
+#  rm -rf "${pkgdir}"/{etc,usr/{share,include}} # needs bin/
 
-  mv "${pkgdir}"/usr/bin/gtk-query-immodules-3.0{,-32}
-  find "$pkgdir/usr/bin" -type f -not -name gtk-query-immodules-3.0-32 -delete
-}
+#  mv "${pkgdir}"/usr/bin/gtk-query-immodules-3.0{,-32}
+#  find "$pkgdir/usr/bin" -type f -not -name gtk-query-immodules-3.0-32 -delete
+#}
