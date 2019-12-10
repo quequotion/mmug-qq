@@ -74,8 +74,7 @@ build() {
       --enable-{clocale=gnu,shared,threads=posix,linker-build-id,checking=release} \
       --enable-{install-libiberty,cloog-backend=isl,gnu-unique-object,__cxa_atexit} \
       --with-{system-zlib,linker-hash-style=gnu} \
-      --disable-libunwind-exceptions \
-      --disable-libstdcxx-pch --disable-libssp \
+        --disable-lib{unwind-exceptions,stdcxx-pch,ssp} \
       --enable-multilib --disable-werror \
       --enable-lto --enable-plugin --with-plugin-ld=/usr/bin/ld.gold
   make

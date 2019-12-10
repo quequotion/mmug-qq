@@ -1,5 +1,6 @@
 pkgbase=glibc-git-multilib
-pkgname=({lib32-,}glibc-git)
+#pkgname=({lib32-,}glibc-git)
+pkgname=lib32-glibc-git
 _pkgname=glibc
 pkgver=2.21.617.gd87630e
 pkgrel=1
@@ -10,11 +11,11 @@ license=('GPL' 'LGPL')
 groups=('base')
 depends=('linux-api-headers>=3.7' 'tzdata' 'filesystem>=2013.01')
 makedepends=('gcc' 'git')
-backup=(etc/gai.conf
-        etc/locale.gen
-        etc/nscd.conf)
+#backup=(etc/gai.conf
+#        etc/locale.gen
+#        etc/nscd.conf)
 options=('!strip')
-install=glibc.install
+#install=glibc.install
 source=(git://sourceware.org/git/glibc.git
         nscd.service
         nscd.tmpfiles
@@ -39,37 +40,37 @@ build() {
   cd "${srcdir}"
 
   #Build native libraries
-  [[ -d build-x86_64 ]] || mkdir build-x86_64
-  pushd build-x86_64
+  #[[ -d build-x86_64 ]] || mkdir build-x86_64
+  #pushd build-x86_64
 
-  echo "slibdir=/usr/lib" > configparms
-  echo "sbindir=/usr/bin" >> configparms
-  echo "rootsbindir=/usr/bin" >> configparms
+  #echo "slibdir=/usr/lib" > configparms
+  #echo "sbindir=/usr/bin" >> configparms
+  #echo "rootsbindir=/usr/bin" >> configparms
 
-  CFLAGS=${CFLAGS/-fstack-protector-strong -fstack-protector-all/}
-  CPPFLAGS=${CPPFLAGS/-D_FORTIFY_SOURCE=2/}
+  #CFLAGS=${CFLAGS/-fstack-protector-strong -fstack-protector-all/}
+  #CPPFLAGS=${CPPFLAGS/-D_FORTIFY_SOURCE=2/}
 
-  "${srcdir}/${_pkgname}/configure" --prefix=/usr --lib{,exec}dir=/usr/lib \
-    --with-{headers=/usr/include,bugurl=https://bugs.archlinux.org/} \
-    --disable-profile \
-    --enable-{obsolete-rpc,bind-now,stackguard-randomization,lock-elision} \
-    --enable-{add-ons=libidn,kernel=3.18.0,multi-arch,lto}
+  #"${srcdir}/${_pkgname}/configure" --prefix=/usr --lib{,exec}dir=/usr/lib \
+  #  --with-{headers=/usr/include,bugurl=https://bugs.archlinux.org/} \
+  #  --disable-profile \
+  #  --enable-{obsolete-rpc,bind-now,stackguard-randomization,lock-elision} \
+  #  --enable-{add-ons=libidn,kernel=3.18.0,multi-arch,lto}
 
-  echo "build-programs=no" >> configparms
-  make
+  #echo "build-programs=no" >> configparms
+  #make
 
   # re-enable hardening for programs
-  sed -i "/build-programs=/s#no#yes#" configparms
-  echo "CC += -fstack-protector-strong -fstack-protector-all -D_FORTIFY_SOURCE=2" >> configparms
-  echo "CXX += -fstack-protector-strong -fstack-protector-all -D_FORTIFY_SOURCE=2" >> configparms
-  CFLAGS=${CFLAGS/-fno-stack-protector/}
-  make
+  #sed -i "/build-programs=/s#no#yes#" configparms
+  #echo "CC += -fstack-protector-strong -fstack-protector-all -D_FORTIFY_SOURCE=2" >> configparms
+  #echo "CXX += -fstack-protector-strong -fstack-protector-all -D_FORTIFY_SOURCE=2" >> configparms
+  #CFLAGS=${CFLAGS/-fno-stack-protector/}
+  #make
 
   # remove harding in preparation to run test-suite
-  sed -i '4,6d' configparms
-  CC=${CC/-fstack-protector-strong -fstack-protector-all -D_FORTIFY_SOURCE=2/}
-  CXX=${CXX/-fstack-protector-strong -fstack-protector-all -D_FORTIFY_SOURCE=2/}
-  popd
+  #sed -i '4,6d' configparms
+  #CC=${CC/-fstack-protector-strong -fstack-protector-all -D_FORTIFY_SOURCE=2/}
+  #CXX=${CXX/-fstack-protector-strong -fstack-protector-all -D_FORTIFY_SOURCE=2/}
+  #popd
 
   # Hack to work around dynamic loading limit for PCSX2 profiling
   cd "${srcdir}/${_pkgname}"
@@ -96,15 +97,15 @@ build() {
   export CXX="g++ -m32"
   export LDFLAGS+=" -m32"
 
-  CFLAGS=${CFLAGS/-fstack-protector-strong -fstack-protector-all/-fno-stack-protector}
+  CFLAGS=${CFLAGS/-fstack-protector-strong/-fno-stack-protector}
   CPPFLAGS=${CPPFLAGS/-D_FORTIFY_SOURCE=2/}
 
-    "${srcdir}/${_pkgname}/configure" --prefix=/usr --lib{,exec}dir=/usr/lib32 \
-      --with-{headers=/usr/include,bugurl=https://bugs.archlinux.org/} \
-      --disable-profile \
-      --enable-{obsolete-rpc,bind-now,stackguard-randomization,lock-elision} \
-      --enable-{add-ons=libidn,kernel=3.18.0,multi-arch,lto} \
-      --build=i686-pc-linux-gnu
+  "${srcdir}/${_pkgname}/configure" --prefix=/usr --lib{,exec}dir=/usr/lib32 \
+    --with-{headers=/usr/include,bugurl=https://bugs.archlinux.org/} \
+    --disable-profile \
+    --enable-{obsolete-rpc,bind-now,stackguard-randomization,lock-elision} \
+    --enable-{add-ons=libidn,kernel=3.18.0,multi-arch,lto} \
+    --build=i686-pc-linux-gnu
 
   # build libraries with hardening disabled
   echo "build-programs=no" >> configparms
@@ -112,15 +113,15 @@ build() {
 
   # re-enable hardening for programs
   sed -i "/build-programs=/s#no#yes#" configparms
-  echo "CC += -fstack-protector-strong -fstack-protector-all -D_FORTIFY_SOURCE=2" >> configparms
-  echo "CXX += -fstack-protector-strong -fstack-protector-all -D_FORTIFY_SOURCE=2" >> configparms
+  echo "CC += -fstack-protector-strong -D_FORTIFY_SOURCE=2" >> configparms
+  echo "CXX += -fstack-protector-strong -D_FORTIFY_SOURCE=2" >> configparms
   CFLAGS=${CFLAGS/-fno-stack-protector/}
   make
 
   # remove harding in preparation to run test-suite
   sed -i '4,6d' configparms
-  #CC=${CC/-fstack-protector-strong -fstack-protector-all -D_FORTIFY_SOURCE=2/}
-  #CXX=${CXX/-fstack-protector-strong -fstack-protector-all -D_FORTIFY_SOURCE=2/}
+  CC=${CC/-fstack-protector-strong -D_FORTIFY_SOURCE=2/}
+  CXX=${CXX/-fstack-protector-strong -D_FORTIFY_SOURCE=2/}
   popd
 
 }
@@ -129,13 +130,13 @@ check() {
   # bug to file - the linker commands need to be reordered
   LDFLAGS=${LDFLAGS/--as-needed,/}
 
-  CC=${CC/-m32/}
-  CXX=${CXX/-m32/}
-  LDFLAGS=${LDFLAGS/-m32/}
+  #CC=${CC/-m32/}
+  #CXX=${CXX/-m32/}
+  #LDFLAGS=${LDFLAGS/-m32/}
 
-  echo "Check native build"
-  cd ${srcdir}/build-x86_64
-  make check
+  #echo "Check native build"
+  #cd ${srcdir}/build-x86_64
+  #make check
 
   export CC="gcc -m32"
   export CXX="g++ -m32"
@@ -146,41 +147,41 @@ check() {
   make check
 }
 
-package_glibc-git() {
-  optdepends+=('gd')
-  provides=(glibc{,-git}=${pkgver})
-  conflicts=('glibc')
-  cd ${srcdir}/build-x86_64
+#package_glibc-git() {
+#  optdepends+=('gd')
+#  provides=(glibc{,-git}=${pkgver})
+#  conflicts=('glibc')
+#  cd ${srcdir}/build-x86_64
 
-  install -dm755 ${pkgdir}/etc
-  touch ${pkgdir}/etc/ld.so.conf
+#  install -dm755 ${pkgdir}/etc
+#  touch ${pkgdir}/etc/ld.so.conf
 
 
-  CC=${CC/-m32/}
-  CXX=${CXX/-m32/}
-  LDFLAGS=${LDFLAGS/-m32/}
+#  CC=${CC/-m32/}
+#  CXX=${CXX/-m32/}
+#  LDFLAGS=${LDFLAGS/-m32/}
 
-  make install_root=${pkgdir} install
+#  make install_root=${pkgdir} install
 
-  rm -f ${pkgdir}/etc/ld.so.{cache,conf}
+#  rm -f ${pkgdir}/etc/ld.so.{cache,conf}
 
-  install -dm755 ${pkgdir}/usr/lib/{locale,systemd/system,tmpfiles.d}
+#  install -dm755 ${pkgdir}/usr/lib/{locale,systemd/system,tmpfiles.d}
 
-  install -m644 ${srcdir}/${_pkgname}/nscd/nscd.conf ${pkgdir}/etc/nscd.conf
-  install -m644 ${srcdir}/nscd.service ${pkgdir}/usr/lib/systemd/system
-  install -m644 ${srcdir}/nscd.tmpfiles ${pkgdir}/usr/lib/tmpfiles.d/nscd.conf
+#  install -m644 ${srcdir}/${_pkgname}/nscd/nscd.conf ${pkgdir}/etc/nscd.conf
+#  install -m644 ${srcdir}/nscd.service ${pkgdir}/usr/lib/systemd/system
+#  install -m644 ${srcdir}/nscd.tmpfiles ${pkgdir}/usr/lib/tmpfiles.d/nscd.conf
 
-  install -m644 ${srcdir}/${_pkgname}/posix/gai.conf ${pkgdir}/etc/gai.conf
+#  install -m644 ${srcdir}/${_pkgname}/posix/gai.conf ${pkgdir}/etc/gai.conf
 
-  install -m755 ${srcdir}/locale-gen ${pkgdir}/usr/bin
+#  install -m755 ${srcdir}/locale-gen ${pkgdir}/usr/bin
 
   # temporary symlink
-  ln -s ../../sbin/ldconfig ${pkgdir}/usr/bin/ldconfig
+#  ln -s ../../sbin/ldconfig ${pkgdir}/usr/bin/ldconfig
 
   # create /etc/locale.gen
-  install -m644 ${srcdir}/locale.gen.txt ${pkgdir}/etc/locale.gen
-  sed -e '1,3d' -e 's|/| |g' -e 's|\\| |g' -e 's|^|#|g' \
-    ${srcdir}/glibc/localedata/SUPPORTED >> ${pkgdir}/etc/locale.gen
+#  install -m644 ${srcdir}/locale.gen.txt ${pkgdir}/etc/locale.gen
+#  sed -e '1,3d' -e 's|/| |g' -e 's|\\| |g' -e 's|^|#|g' \
+#    ${srcdir}/glibc/localedata/SUPPORTED >> ${pkgdir}/etc/locale.gen
 
   # Do not strip the following files for improved debugging support
   # ("improved" as in not breaking gdb and valgrind...):
@@ -189,24 +190,25 @@ package_glibc-git() {
   #   libpthread-${pkgver}.so
   #   libthread_db-1.0.so
 
-  cd $pkgdir
-  strip $STRIP_BINARIES sbin/{ldconfig,sln} \
-    usr/bin/{gencat,getconf,getent,iconv,locale,localedef} \
-    usr/bin/{makedb,pcprofiledump,pldd,rpcgen,sprof} \
-    usr/lib/getconf/* \
-    usr/sbin/{iconvconfig,nscd}
-  [[ $CARCH = "i686" ]] && strip $STRIP_BINARIES usr/bin/lddlibc4
+#  cd $pkgdir
+#  strip $STRIP_BINARIES sbin/{ldconfig,sln} \
+#    usr/bin/{gencat,getconf,getent,iconv,locale,localedef} \
+#    usr/bin/{makedb,pcprofiledump,pldd,rpcgen,sprof} \
+#    usr/lib/getconf/* \
+#    usr/sbin/{iconvconfig,nscd}
+#  [[ $CARCH = "i686" ]] && strip $STRIP_BINARIES usr/bin/lddlibc4
 
-  strip $STRIP_STATIC usr/lib/*.a
+#  strip $STRIP_STATIC usr/lib/*.a
 
-  strip $STRIP_SHARED usr/lib/{libanl,libBrokenLocale,libcidn,libcrypt}-*.so \
-    usr/lib/libnss_{compat,db,dns,files,hesiod,nis,nisplus}-*.so \
-    usr/lib/{libdl,libm,libnsl,libresolv,librt,libutil}-*.so \
-    usr/lib/{libmemusage,libpcprofile,libSegFault}.so \
-    usr/lib/{audit,gconv}/*.so
-}
+#  strip $STRIP_SHARED usr/lib/{libanl,libBrokenLocale,libcidn,libcrypt}-*.so \
+#    usr/lib/libnss_{compat,db,dns,files,hesiod,nis,nisplus}-*.so \
+#    usr/lib/{libdl,libm,libnsl,libresolv,librt,libutil}-*.so \
+#    usr/lib/{libmemusage,libpcprofile,libSegFault}.so \
+#    usr/lib/{audit,gconv}/*.so
+#}
 
-package_lib32-glibc-git() {
+#package_lib32-glibc-git() {
+package() {
   optdepends+=('lib32-gd')
   pkgdesc+=" (32-bit + DTVx2)"
   provides=(lib32-glibc{,-git}=${pkgver})

@@ -4,7 +4,7 @@
 _gitname='gst-plugins-base'
 pkgbase=$_gitname-git-multilib
 pkgname=({lib32-,}$_gitname-git)
-pkgver=1.5.0.1.14183.0c72d0a
+pkgver=1.5.2.1.14424.002bdbf
 pkgrel=1
 pkgdesc="GStreamer Multimedia Framework Base Plugins"
 makedepends=('pkgconfig')
@@ -52,7 +52,7 @@ build() {
 
   export CC='gcc -m32'
   export CXX='g++ -m32'
-  export LDFLAGS+=',-m32'
+  export LDFLAGS+=' -m32'
   export PKG_CONFIG_PATH='/usr/lib32/pkgconfig'
 
   ./autogen.sh --build=i686-pc-linux-gnu \

@@ -3,7 +3,7 @@
 
 pkgbase=lib32-poppler
 pkgname=('lib32-poppler' 'lib32-poppler-glib' 'lib32-poppler-qt4' 'lib32-poppler-qt5')
-pkgver=0.26.4
+pkgver=0.33.0
 pkgrel=1
 arch=(i686 x86_64)
 license=('GPL')

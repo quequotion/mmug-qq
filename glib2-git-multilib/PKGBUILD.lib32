@@ -5,7 +5,8 @@
 
 _gitname=glib2
 pkgbase=$_gitname-git-multilib
-pkgname=({lib32-,}$_gitname-git)
+#pkgname=({lib32-,}$_gitname-git)
+pkgname=lib32-glib2-git
 pkgver=2.45.4.1.g53d487e
 pkgrel=1
 pkgdesc="Common C routines used by GTK+ 2.4 and other libs"
@@ -30,7 +31,7 @@ pkgver() {
 }
 
 prepare() {
-    cp -rf "$srcdir/$_gitname" "$srcdir/$_gitname-build-x86_64"
+    #cp -rf "$srcdir/$_gitname" "$srcdir/$_gitname-build-x86_64"
     cp -rf "$srcdir/$_gitname" "$srcdir/$_gitname-build-i686"
 
     cd $_gitname/
@@ -44,33 +45,27 @@ build() {
   touch README
 
   #Build 64bit libraries
-  pushd ../$_gitname-build-x86_64
-  #[[ -d build-x86_64 ]] || mkdir build-x86_64
-  #pushd build-x86_64
+  #pushd ../$_gitname-build-x86_64
 
-  #PYTHON=/usr/bin/python2 ../autogen.sh \
-  PYTHON=/usr/bin/python2 ./autogen.sh \
-      --prefix=/usr \
-      --sysconfdir=/etc \
-      --lib{,exec}dir=/usr/lib \
-      --with-pcre=system \
-      --enable-{static,shared} \
-      --disable-{fam,gtk-doc}
+  #PYTHON=/usr/bin/python2 ./autogen.sh \
+  #    --prefix=/usr \
+  #    --sysconfdir=/etc \
+  #    --lib{,exec}dir=/usr/lib \
+  #    --with-pcre=system \
+  #    --enable-{static,shared} \
+  #    --disable-{fam,gtk-doc}
 
-  make
-  popd
+  #make
+  #popd
 
   #Build 32bit libraries
   pushd ../$_gitname-build-i686
-  #[[ -d build-i686 ]] || mkdir build-i686
-  #pushd build-i686
 
   export CFLAG='gcc -m32'
   export CXX='g++ -m32'
   export LDFLAGS+=' -m32'
   export PKG_CONFIG_PATH='/usr/lib32/pkgconfig'
 
-  #PYTHON=/usr/bin/python2.7-32 ../autogen.sh \
   PYTHON=/usr/bin/python2.7-32 ./autogen.sh \
       --build=i686-pc-linux-gnu \
       --prefix=/usr \
@@ -84,21 +79,22 @@ build() {
   popd
 }
 
-package_glib2-git() {
-  depends=(elfutils python2 pcre zlib lib{dbus,ffi})
-  makedepends+=('python2')
-  provides=($_gitname{,-git}=$pkgver)
-  conflicts=($_gitname)
-  make -C $_gitname-build-x86_64 DESTDIR="$pkgdir" install
-  #make -C $_gitname/build-x86_64 DESTDIR="$pkgdir" install
-  for i in glib2.{,c}sh; do
-    install -Dm755 $i "$pkgdir"/etc/profile.d/$i
-  done
-  find "$pkgdir"/usr/share/bash-completion/completions/ -type f -exec chmod -x '{}' \;
-  sed -i 's:^#!/usr/bin/env python$:&2:g' "$pkgdir"/usr/bin/gdbus-codegen
-}
+#package_glib2-git() {
+#  depends=(elfutils python2 pcre zlib lib{dbus,ffi})
+#  makedepends+=('python2')
+#  provides=($_gitname{,-git}=$pkgver)
+#  conflicts=($_gitname)
+#  make -C $_gitname-build-x86_64 DESTDIR="$pkgdir" install
+#  #make -C $_gitname/build-x86_64 DESTDIR="$pkgdir" install
+#  for i in glib2.{,c}sh; do
+#    install -Dm755 $i "$pkgdir"/etc/profile.d/$i
+#  done
+#  find "$pkgdir"/usr/share/bash-completion/completions/ -type f -exec chmod -x '{}' \;
+#  sed -i 's:^#!/usr/bin/env python$:&2:g' "$pkgdir"/usr/bin/gdbus-codegen
+#}
 
-package_lib32-glib2-git() {
+#package_lib32-glib2-git() {
+package() {
   pkgdesc+=" (32bit)"
   depends=(lib32-{elfutils,python2,pcre,zlib,lib{dbus,ffi}})
   makedepends+=('lib32-python2' 'gcc-multilib' )

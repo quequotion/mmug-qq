@@ -3,7 +3,7 @@
 
 pkgbase="gobject-introspection-git-multilib"
 pkgname=({lib32-,}gobject-introspection-git)
-pkgver=1.44.0.2.g92d9c38
+pkgver=1.45.3.1.g0376a20
 pkgrel=1
 pkgdesc="GObject Introspection (git version)"
 depends=('python2-mako')
@@ -66,7 +66,7 @@ build() {
 package_gobject-introspection-git() {
   depends+=("glib2-git" "python2")
   makedepends+=('cairo' 'mesa' 'flex')
-  provides=(gobject-introspection{,-git}=${pkgver})
+  provides=(gobject-introspection{,-{git,runtime}}=${pkgver})
   conflicts=(gobject-introspection{,-svn})
 
   cd "$srcdir/gobject-introspection/build-x86_64"
@@ -80,7 +80,7 @@ package_lib32-gobject-introspection-git() {
   pkgdesc+=" (32bit)"
   depends+=(lib32-{glib2-git,python2})
   makedepends+=(lib32-{cairo,mesa,flex})
-  provides=(lib32-gobject-introspection{,-git}=${pkgver})
+  provides=(lib32-gobject-introspection{,-{git,runtime}}=${pkgver})
   conflicts=(lib32-gobject-introspection{,-svn})
 
   cd "$srcdir/gobject-introspection/build-i686"

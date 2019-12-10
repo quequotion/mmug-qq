@@ -5,7 +5,7 @@
 
 pkgbase=cairo-gl-git-multilib
 pkgname=({lib32-,}cairo-gl-git)
-pkgver=1.14.2.8.g654b4a8
+pkgver=1.14.2.26.g11b6c49
 pkgrel=1
 pkgdesc="Cairo vector graphics library with GL and EGL enabled"
 makedepends=(gtk-doc git)

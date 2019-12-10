@@ -4,7 +4,7 @@
 _gitname='gst-plugins-good'
 pkgbase=$_gitname-git-multilib
 pkgname=({lib32-,}$_gitname-git)
-pkgver=1.5.0.1.14973.8cfebfe
+pkgver=1.5.2.1.15245.f682772
 pkgrel=1
 pkgdesc="GStreamer Multimedia Framework Good Plugins"
 arch=('i686' 'x86_64')
@@ -16,7 +16,7 @@ source=('git://anongit.freedesktop.org/gstreamer/gst-plugins-good'
         'common-submodule.patch')
 sha256sums=('SKIP'
             'SKIP'
-            '87f5f45b43c7cc342b7b9efbb5ff55cd6f473f56f4ea134054395924b247a554')
+            'c84f7dc2feba8195f8c5b5c5d68f0b194e6e7cf5f64096bc9b215803160888b7')
 
 pkgver() {
   cd $_gitname
@@ -53,7 +53,7 @@ build() {
 
   export CC='gcc -m32'
   export CXX='g++ -m32'
-  export LDFLAGS+=',-m32'
+  export LDFLAGS+=' -m32'
   export PKG_CONFIG_PATH='/usr/lib32/pkgconfig'
 
   export CFLAGS+=" -Wno-error"

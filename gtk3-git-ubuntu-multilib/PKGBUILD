@@ -8,7 +8,7 @@
 
 pkgbase=gtk3-git-ubuntu-multilib
 pkgname=({,lib32-}gtk3-git-ubuntu)
-pkgver=3.15.12.295.r42288.g5a643f1
+pkgver=3.17.5.1.r43196.gcb38a2e
 pkgrel=1
 pkgdesc="GObject-based multi-platform GUI toolkit (git version with Ubuntu patches from bzr)"
 arch=('i686' 'x86_64')
@@ -17,16 +17,14 @@ license=('LGPL')
 backup=('etc/gtk-3.0/settings.ini')
 options=('!libtool')
 depends=('shared-mime-info')
-makedepends=('bzr')
+makedepends=('bzr' 'pango')
 source=('bzr+lp:~ubuntu-desktop/gtk/ubuntugtk3'
         'git://git.gnome.org/gtk+'
         'repatch-071_fix-installation-of-HTML-images.patch'
-        'repatch-ubuntu_gtk_custom_menu_items.patch'
         'settings.ini')
 sha512sums=('SKIP'
             'SKIP'
             'c3dec88bc1fe45b279539087fc6d8509ecc46e5c61afbd2e4e7c91326929604f085c1f24e986059fbb905906fbbb1c04eaccbebe67ab8e67509f4d5bd386e71f'
-            '869b59277849efc0556d3af37d7914f404e14b24c53d1da3f6b3eba62dd71b742857ca0d796edcf7f4cea257de0587c9a38a395c9933cc789ccb2501012b9347'
             '3ee323c287ad4354d5521f584d06149bbe6bb3c6ed4f409e7544c9ac59892a89d7b52e4b7807e6ed7e3a3e064372dc61422153153f67acb97cc371fe1d8200f2')
 
 pkgver() {
@@ -59,6 +57,8 @@ prepare() {
          [[ "${i}" == 044_tracker_fts.patch ]] || \
          [[ "${i}" == mir-backend.patch ]] || \
          [[ "${i}" == mir-backend-unmerged.patch ]] || \
+         [[ "${i}" == restore_filechooser_typeaheadfind ]] || \
+         [[ "${i}" == 0001-backport-mir-patches-from-upstream-master.patch ]] || \
          [[ "${i}" == 0001-GtkApplication-Prevent-more-crashes-around-shutdown.patch ]]; then
       continue # Skip reduntant or impossible to repair patches
     else
@@ -81,7 +81,7 @@ build() {
                 --sysconfdir=/etc \
                 --localstatedir=/var \
                 --disable-schemas-compile \
-                --enable-{x11,broadway,wayland}-backend
+                --enable-{x11,broadway}-backend
 
   #https://bugzilla.gnome.org/show_bug.cgi?id=655517
   sed -i -e 's/ -shared / -Wl,-O1,--as-needed\0/g' libtool
@@ -102,7 +102,7 @@ build() {
                 --sysconfdir=/etc \
                 --localstatedir=/var \
                 --disable-schemas-compile \
-                --enable-{x11,broadway,wayland}-backend \
+                --enable-{x11,broadway}-backend \
                 --lib{,exec}dir=/usr/lib32
       
   #https://bugzilla.gnome.org/show_bug.cgi?id=655517

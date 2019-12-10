@@ -2,9 +2,10 @@
 # Contributor: Xiao-Long Chen <chenxiaolong@cxl.epac.to>
 _bzrname="overlay-scrollbar"
 #pkgbase="$_bzrname-bzr-multilib"
-pkgname=(lib"$_bzrname"3-bzr)
+#pkgname=("$_bzrname-bzr" {,lib32-}lib"$_bzrname"{,3}-bzr)
+pkgname=("$_bzrname-bzr" lib"$_bzrname"{,3}-bzr)
 pkgver=r391
-pkgrel=1
+pkgrel=2
 pkgdesc="Ayatana Scrollbars, pointer-triggered overlay scrollbars to save screen real-estate."
 arch=('i686' 'x86_64')
 url="https://launchpad.net/ayatana-scrollbar"
@@ -12,8 +13,8 @@ license=('LGPL')
 groups=('unity')
 makedepends=('gtk2-ubuntu' 'gtk3')
 options=('!emptydirs')
-install='overlay-scrollbar.install'
-source=('bzr+lp:overlay-scrollbar#revision=391')
+extrafiles=('overlay-scrollbar.install')
+source=('bzr+lp:overlay-scrollbar')
 sha512sums=('SKIP')
 
 pkgver() {
@@ -31,15 +32,15 @@ build() {
 
   autoreconf -vfi ../
 
-  #[[ -d build-gtk2 ]] || mkdir build-gtk2
-  #pushd build-gtk2
-  #../../configure --prefix=/usr --sysconfdir=/etc --with-gtk=2 --disable-{static,schemas-compile} --libdir=/usr/lib
-  #make
-  #popd
+  [[ -d build-gtk2 ]] || mkdir build-gtk2
+  pushd build-gtk2
+  ../../configure --prefix=/usr --sysconfdir=/etc --with-gtk=2 --disable-static
+  make
+  popd
 
   [[ -d build-gtk3 ]] || mkdir build-gtk3
   pushd build-gtk3
-  ../../configure --prefix=/usr --sysconfdir=/etc --with-gtk=3 --disable-{static,schemas-compile} --libdir=/usr/lib
+  ../../configure --prefix=/usr --sysconfdir=/etc --with-gtk=3 --disable-static
   make
   popd
 
@@ -53,19 +54,18 @@ build() {
   #export CXX='g++ -m32'
   #export LDFLAGS+=" -m32"
   #export PKG_CONFIG_PATH='/usr/lib32/pkgconfig'
-  #export GSETTINGS_DISABLE_SCHEMAS_COMPILE='TRUE'
 
   #autoreconf -vfi ../
 
   #[[ -d build-gtk2 ]] || mkdir build-gtk2
   #pushd build-gtk2
-  #../../configure --prefix=/usr --sysconfdir=/etc --with-gtk=2 --disable-{static,schemas-compile} --libdir=/usr/lib32
+  #../../configure --prefix=/usr --sysconfdir=/etc --with-gtk=2 --disable-static --libdir=/usr/lib32
   #make
   #popd
 
   #[[ -d build-gtk3 ]] || mkdir build-gtk3
   #pushd build-gtk3
-  #../../configure --prefix=/usr --sysconfdir=/etc --with-gtk=3 --disable-{static,schemas-compile} --libdir=/usr/lib32
+  #../../configure --prefix=/usr --sysconfdir=/etc --with-gtk=3 --disable-static --libdir=/usr/lib32
   #make
   #popd
 
@@ -73,24 +73,24 @@ build() {
 
 }
 
-#package_overlay-scrollbar-bzr() {
-#  pkgdesc+="Configuration and metapackage (multilib)"
-#  depends=({,lib32-}{dconf,lib"$_bzrname"{,3}})
-#  provides=({,lib32-}"$_bzrname"{,-bzr}="${pkgver}")
-#  conflicts=({,lib32-}"$_bzrname")
-#  install=$_bzrname.install
+package_overlay-scrollbar-bzr() {
+  pkgdesc+="Configuration and metapackage (multilib)"
+  depends=({,lib32-}{dconf,lib"$_bzrname"{,3}})
+  provides=({,lib32-}"$_bzrname"{,-bzr}="${pkgver}")
+  conflicts=({,lib32-}"$_bzrname")
+  install=$_bzrname.install
 
-#  cd "${srcdir}/$_bzrname/build-x86_64/build-gtk3/"
-#  make DESTDIR="${pkgdir}/" install
+  cd "${srcdir}/$_bzrname/build-x86_64/build-gtk3/"
+  make DESTDIR="${pkgdir}/" install
 
-#  rm -rvf "${pkgdir}/usr/lib/"
+  rm -rvf "${pkgdir}/usr/lib/"
 
   # Put X11 startup script in correct directory
-#  install -dm755 "${pkgdir}/etc/X11/xinit/xinitrc.d/"
-#  mv "${pkgdir}/etc/X11/Xsession.d/81overlay-scrollbar" \
-#    "${pkgdir}/etc/X11/xinit/xinitrc.d/"
-#  chmod 755 "${pkgdir}/etc/X11/xinit/xinitrc.d/81overlay-scrollbar"
-#}
+  install -dm755 "${pkgdir}/etc/X11/xinit/xinitrc.d/"
+  mv "${pkgdir}/etc/X11/Xsession.d/81overlay-scrollbar" \
+    "${pkgdir}/etc/X11/xinit/xinitrc.d/"
+  chmod 755 "${pkgdir}/etc/X11/xinit/xinitrc.d/81overlay-scrollbar"
+}
 
 package_liboverlay-scrollbar3-bzr() {
   pkgdesc+=" gtk3"
@@ -102,28 +102,28 @@ package_liboverlay-scrollbar3-bzr() {
   make DESTDIR="${pkgdir}/" install
 
   rm -rvf "${pkgdir}/etc/"
-  #rm -rvf "${pkgdir}/usr/share/glib-2.0/"
+  rm -rvf "${pkgdir}/usr/share/glib-2.0/"
 }
 
-#package_liboverlay-scrollbar-bzr() {
-#  pkgdesc+=" gtk2"
-#  depends=('gtk2-ubuntu')
-#  provides=(lib"$_bzrname"{,-gtk2}{,-bzr}="${pkgver}")
-#  conflicts=(lib"$_bzrname")
+package_liboverlay-scrollbar-bzr() {
+  pkgdesc+=" gtk2"
+  depends=('gtk2-ubuntu')
+  provides=(lib"$_bzrname"{,-gtk2}{,-bzr}="${pkgver}")
+  conflicts=(lib"$_bzrname")
 
-#  cd "${srcdir}/$_bzrname/build-x86_64/build-gtk2/"
-#  make DESTDIR="${pkgdir}/" install
+  cd "${srcdir}/$_bzrname/build-x86_64/build-gtk2/"
+  make DESTDIR="${pkgdir}/" install
 
-#  rm -rvf "${pkgdir}/etc/"
-#  rm -rvf "${pkgdir}/usr/share/glib-2.0/"
-#}
+  rm -rvf "${pkgdir}/etc/"
+  rm -rvf "${pkgdir}/usr/share/glib-2.0/"
+}
 
 #package_lib32-liboverlay-scrollbar3-bzr() {
 #  pkgdesc+=" gtk3 (32bit)"
 #  depends=(lib32-{cairo,gtk3})
 #  provides=(lib32-lib"$_bzrname"{3,-gtk3}{,-bzr}="${pkgver}")
 #  conflicts=(lib32-lib"$_bzrname"3)
-#
+
 #  cd "${srcdir}/$_bzrname/build-i686/build-gtk3/"
 #  make DESTDIR="${pkgdir}/" install
 
