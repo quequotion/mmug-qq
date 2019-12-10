@@ -1,0 +1,7 @@
+mmug-qq
+
+Massively Multilib Upstream Game
+
+Packages for building pcsx2 with gtk3, wxwidgets, and sdl2 support on a 64bit system.
+
+This repository is no longer maintained.
